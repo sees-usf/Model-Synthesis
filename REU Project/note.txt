@@ -1,0 +1,829 @@
+Origin: 0: cpu0 to cache0
+Edges:
+0_8 with edge support of 70
+0_11 with edge support of 59
+0_13 with edge support of 50
+0_17 with edge support of 70
+0_18 with edge support of 69
+0_20 with edge support of 57
+0_21 with edge support of 50
+0_25 with edge support of 70
+0_26 with edge support of 66
+0_27 with edge support of 70
+
+Origin: 1: cpu1 to cache1
+Edges:
+1_7 with edge support of 60
+1_12 with edge support of 69
+1_14 with edge support of 50
+1_16 with edge support of 56
+1_19 with edge support of 69
+1_22 with edge support of 47
+1_29 with edge support of 70
+1_32 with edge support of 66
+
+Origin: 2: cpu0 to cache0
+Edges:
+2_8 with edge support of 67
+2_11 with edge support of 59
+2_13 with edge support of 48
+2_17 with edge support of 70
+2_18 with edge support of 67
+2_20 with edge support of 57
+2_21 with edge support of 50
+2_25 with edge support of 66
+2_26 with edge support of 70
+2_27 with edge support of 70
+
+Origin: 3: cpu1 to cache1
+Edges:
+3_7 with edge support of 60
+3_12 with edge support of 68
+3_14 with edge support of 50
+3_16 with edge support of 60
+3_19 with edge support of 69
+3_22 with edge support of 50
+3_29 with edge support of 67
+3_32 with edge support of 70
+
+Origin: 4: gfx to membus
+Edges:
+4_9 with edge support of 60
+4_10 with edge support of 60
+4_15 with edge support of 59
+4_24 with edge support of 49
+4_28 with edge support of 48
+4_30 with edge support of 49
+4_31 with edge support of 48
+4_33 with edge support of 20
+4_35 with edge support of 60
+4_36 with edge support of 57
+4_37 with edge support of 56
+4_40 with edge support of 55
+4_41 with edge support of 56
+4_43 with edge support of 56
+4_44 with edge support of 20
+4_46 with edge support of 57
+4_48 with edge support of 59
+4_50 with edge support of 20
+4_52 with edge support of 56
+4_54 with edge support of 56
+4_56 with edge support of 10
+4_59 with edge support of 10
+
+Origin: 5: audio to membus
+Edges:
+5_9 with edge support of 60
+5_10 with edge support of 60
+5_15 with edge support of 60
+5_24 with edge support of 48
+5_28 with edge support of 50
+5_30 with edge support of 49
+5_31 with edge support of 47
+5_33 with edge support of 20
+5_35 with edge support of 57
+5_36 with edge support of 60
+5_37 with edge support of 56
+5_40 with edge support of 56
+5_41 with edge support of 56
+5_43 with edge support of 57
+5_44 with edge support of 20
+5_46 with edge support of 58
+5_48 with edge support of 59
+5_50 with edge support of 19
+5_52 with edge support of 57
+5_54 with edge support of 58
+5_56 with edge support of 10
+5_59 with edge support of 10
+
+Origin: 6: usb to membus
+Edges:
+6_9 with edge support of 58
+6_10 with edge support of 60
+6_15 with edge support of 59
+6_24 with edge support of 48
+6_28 with edge support of 48
+6_30 with edge support of 49
+6_31 with edge support of 47
+6_33 with edge support of 20
+6_35 with edge support of 56
+6_36 with edge support of 57
+6_37 with edge support of 60
+6_40 with edge support of 55
+6_41 with edge support of 56
+6_43 with edge support of 56
+6_44 with edge support of 19
+6_46 with edge support of 58
+6_48 with edge support of 59
+6_50 with edge support of 19
+6_52 with edge support of 56
+6_54 with edge support of 57
+6_56 with edge support of 10
+6_59 with edge support of 9
+
+Origin: 7: cache1 to cache0
+Edges:
+7_11 with edge support of 60
+7_13 with edge support of 47
+7_17 with edge support of 59
+7_18 with edge support of 59
+7_20 with edge support of 56
+7_21 with edge support of 49
+7_25 with edge support of 57
+7_26 with edge support of 58
+7_27 with edge support of 60
+
+Origin: 8: cache0 to cache1
+Edges:
+8_7 with edge support of 60
+8_12 with edge support of 160
+8_14 with edge support of 50
+8_16 with edge support of 58
+8_19 with edge support of 160
+8_22 with edge support of 49
+8_29 with edge support of 70
+8_32 with edge support of 68
+
+Origin: 9: membus to cache0
+Edges:
+9_8 with edge support of 120
+9_11 with edge support of 60
+9_17 with edge support of 120
+9_18 with edge support of 120
+9_20 with edge support of 57
+9_21 with edge support of 50
+9_25 with edge support of 69
+9_26 with edge support of 70
+9_27 with edge support of 120
+
+Origin: 10: membus to cache0
+Edges:
+10_8 with edge support of 159
+10_11 with edge support of 60
+10_17 with edge support of 238
+10_18 with edge support of 120
+10_20 with edge support of 60
+10_21 with edge support of 50
+10_25 with edge support of 69
+10_26 with edge support of 70
+10_27 with edge support of 240
+
+Origin: 11: cache0 to cache1
+Edges:
+11_7 with edge support of 59
+11_12 with edge support of 59
+11_14 with edge support of 50
+11_16 with edge support of 56
+11_19 with edge support of 59
+11_22 with edge support of 47
+11_29 with edge support of 60
+11_32 with edge support of 59
+
+Origin: 12: cache1 to cache0
+Edges:
+12_11 with edge support of 60
+12_13 with edge support of 50
+12_17 with edge support of 160
+12_18 with edge support of 120
+12_20 with edge support of 58
+12_21 with edge support of 50
+12_25 with edge support of 70
+12_26 with edge support of 70
+12_27 with edge support of 160
+
+Origin: 13: cache0 to membus
+Edges:
+13_9 with edge support of 49
+13_10 with edge support of 50
+13_15 with edge support of 50
+13_24 with edge support of 50
+13_28 with edge support of 48
+13_30 with edge support of 46
+13_31 with edge support of 48
+13_33 with edge support of 20
+13_35 with edge support of 48
+13_36 with edge support of 48
+13_37 with edge support of 49
+13_40 with edge support of 47
+13_41 with edge support of 49
+13_43 with edge support of 49
+13_44 with edge support of 20
+13_46 with edge support of 49
+13_48 with edge support of 50
+13_50 with edge support of 20
+13_52 with edge support of 49
+13_54 with edge support of 50
+13_56 with edge support of 10
+13_59 with edge support of 10
+
+Origin: 14: cache1 to membus
+Edges:
+14_9 with edge support of 49
+14_10 with edge support of 50
+14_15 with edge support of 49
+14_24 with edge support of 46
+14_28 with edge support of 50
+14_30 with edge support of 47
+14_31 with edge support of 47
+14_33 with edge support of 19
+14_35 with edge support of 48
+14_36 with edge support of 49
+14_37 with edge support of 49
+14_40 with edge support of 48
+14_41 with edge support of 49
+14_43 with edge support of 49
+14_44 with edge support of 19
+14_46 with edge support of 49
+14_48 with edge support of 50
+14_50 with edge support of 19
+14_52 with edge support of 49
+14_54 with edge support of 49
+14_56 with edge support of 9
+14_59 with edge support of 9
+
+Origin: 15: membus to mem
+Edges:
+15_23 with edge support of 80
+15_34 with edge support of 20
+
+Origin: 16: cache1 to cache0
+Edges:
+16_11 with edge support of 57
+16_13 with edge support of 49
+16_17 with edge support of 59
+16_18 with edge support of 58
+16_20 with edge support of 60
+16_21 with edge support of 50
+16_25 with edge support of 56
+16_26 with edge support of 57
+16_27 with edge support of 60
+
+Origin: 17: cache0 to cache1
+Edges:
+17_7 with edge support of 60
+17_12 with edge support of 158
+17_14 with edge support of 50
+17_16 with edge support of 59
+17_19 with edge support of 260
+17_22 with edge support of 49
+17_29 with edge support of 70
+17_32 with edge support of 69
+
+Origin: 18: cache0 to membus
+Edges:
+18_9 with edge support of 119
+18_10 with edge support of 120
+18_15 with edge support of 78
+18_24 with edge support of 49
+18_28 with edge support of 50
+18_30 with edge support of 50
+18_31 with edge support of 48
+18_33 with edge support of 20
+18_35 with edge support of 60
+18_36 with edge support of 60
+18_37 with edge support of 60
+18_40 with edge support of 59
+18_41 with edge support of 59
+18_43 with edge support of 59
+18_44 with edge support of 20
+18_46 with edge support of 69
+18_48 with edge support of 70
+18_50 with edge support of 20
+18_52 with edge support of 70
+18_54 with edge support of 69
+18_56 with edge support of 10
+18_59 with edge support of 10
+
+Origin: 19: cache1 to cache0
+Edges:
+19_11 with edge support of 60
+19_13 with edge support of 49
+19_17 with edge support of 259
+19_18 with edge support of 119
+19_20 with edge support of 59
+19_21 with edge support of 50
+19_25 with edge support of 69
+19_26 with edge support of 70
+19_27 with edge support of 238
+
+Origin: 20: cache0 to cache1
+Edges:
+20_7 with edge support of 57
+20_12 with edge support of 58
+20_14 with edge support of 50
+20_16 with edge support of 59
+20_19 with edge support of 59
+20_22 with edge support of 50
+20_29 with edge support of 57
+20_32 with edge support of 60
+
+Origin: 21: cache0 to membus
+Edges:
+21_9 with edge support of 48
+21_10 with edge support of 50
+21_15 with edge support of 50
+21_24 with edge support of 47
+21_28 with edge support of 48
+21_30 with edge support of 50
+21_31 with edge support of 47
+21_33 with edge support of 20
+21_35 with edge support of 48
+21_36 with edge support of 48
+21_37 with edge support of 50
+21_40 with edge support of 49
+21_41 with edge support of 49
+21_43 with edge support of 49
+21_44 with edge support of 19
+21_46 with edge support of 49
+21_48 with edge support of 50
+21_50 with edge support of 19
+21_52 with edge support of 49
+21_54 with edge support of 49
+21_56 with edge support of 10
+21_59 with edge support of 10
+
+Origin: 22: cache1 to membus
+Edges:
+22_9 with edge support of 49
+22_10 with edge support of 50
+22_15 with edge support of 50
+22_24 with edge support of 46
+22_28 with edge support of 47
+22_30 with edge support of 46
+22_31 with edge support of 50
+22_33 with edge support of 20
+22_35 with edge support of 48
+22_36 with edge support of 49
+22_37 with edge support of 49
+22_40 with edge support of 48
+22_41 with edge support of 48
+22_43 with edge support of 49
+22_44 with edge support of 20
+22_46 with edge support of 49
+22_48 with edge support of 50
+22_50 with edge support of 20
+22_52 with edge support of 48
+22_54 with edge support of 49
+22_56 with edge support of 10
+22_59 with edge support of 10
+
+Origin: 23: mem to membus
+Edges:
+23_9 with edge support of 78
+23_10 with edge support of 80
+23_24 with edge support of 49
+23_28 with edge support of 50
+23_30 with edge support of 50
+23_31 with edge support of 49
+23_33 with edge support of 20
+23_35 with edge support of 59
+23_36 with edge support of 60
+23_37 with edge support of 60
+23_40 with edge support of 59
+23_41 with edge support of 59
+23_43 with edge support of 59
+23_44 with edge support of 20
+23_46 with edge support of 67
+23_48 with edge support of 66
+23_50 with edge support of 19
+23_52 with edge support of 67
+23_54 with edge support of 69
+23_56 with edge support of 10
+23_59 with edge support of 10
+
+Origin: 24: membus to cache0
+Edges:
+24_8 with edge support of 49
+24_11 with edge support of 49
+24_17 with edge support of 50
+24_18 with edge support of 49
+24_20 with edge support of 50
+24_21 with edge support of 46
+24_25 with edge support of 50
+24_26 with edge support of 49
+24_27 with edge support of 50
+
+Origin: 25: cache0 to cpu0
+Edges:
+
+Origin: 26: cache0 to cpu0
+Edges:
+
+Origin: 27: cache0 to membus
+Edges:
+27_9 with edge support of 120
+27_10 with edge support of 239
+27_15 with edge support of 80
+27_24 with edge support of 49
+27_28 with edge support of 50
+27_30 with edge support of 50
+27_31 with edge support of 50
+27_33 with edge support of 20
+27_35 with edge support of 60
+27_36 with edge support of 60
+27_37 with edge support of 60
+27_40 with edge support of 60
+27_41 with edge support of 60
+27_43 with edge support of 60
+27_44 with edge support of 20
+27_46 with edge support of 70
+27_48 with edge support of 70
+27_50 with edge support of 20
+27_52 with edge support of 70
+27_54 with edge support of 69
+27_56 with edge support of 10
+27_59 with edge support of 10
+
+Origin: 28: membus to cache1
+Edges:
+28_7 with edge support of 49
+28_12 with edge support of 49
+28_14 with edge support of 49
+28_16 with edge support of 50
+28_19 with edge support of 49
+28_22 with edge support of 47
+28_29 with edge support of 50
+28_32 with edge support of 50
+
+Origin: 29: cache1 to cpu1
+Edges:
+
+Origin: 30: membus to cache0
+Edges:
+30_8 with edge support of 48
+30_11 with edge support of 49
+30_17 with edge support of 50
+30_18 with edge support of 48
+30_20 with edge support of 49
+30_21 with edge support of 49
+30_25 with edge support of 48
+30_26 with edge support of 50
+30_27 with edge support of 50
+
+Origin: 31: membus to cache1
+Edges:
+31_7 with edge support of 48
+31_12 with edge support of 49
+31_14 with edge support of 47
+31_16 with edge support of 50
+31_19 with edge support of 50
+31_22 with edge support of 49
+31_29 with edge support of 48
+31_32 with edge support of 50
+
+Origin: 32: cache1 to cpu1
+Edges:
+
+Origin: 33: membus to mem
+Edges:
+33_23 with edge support of 20
+33_34 with edge support of 20
+
+Origin: 34: mem to membus
+Edges:
+34_9 with edge support of 20
+34_10 with edge support of 20
+34_24 with edge support of 20
+34_28 with edge support of 20
+34_30 with edge support of 20
+34_31 with edge support of 20
+34_33 with edge support of 19
+34_35 with edge support of 20
+34_36 with edge support of 20
+34_37 with edge support of 20
+34_40 with edge support of 20
+34_41 with edge support of 20
+34_43 with edge support of 20
+34_44 with edge support of 18
+34_46 with edge support of 20
+34_48 with edge support of 20
+34_50 with edge support of 18
+34_52 with edge support of 20
+34_54 with edge support of 20
+34_56 with edge support of 9
+34_59 with edge support of 9
+
+Origin: 35: membus to gfx
+Edges:
+
+Origin: 36: membus to audio
+Edges:
+
+Origin: 37: membus to usb
+Edges:
+
+Origin: 38: gfx to membus
+Edges:
+38_9 with edge support of 59
+38_10 with edge support of 60
+38_15 with edge support of 59
+38_24 with edge support of 49
+38_28 with edge support of 49
+38_30 with edge support of 49
+38_31 with edge support of 48
+38_33 with edge support of 20
+38_35 with edge support of 57
+38_36 with edge support of 57
+38_37 with edge support of 57
+38_40 with edge support of 60
+38_41 with edge support of 56
+38_43 with edge support of 56
+38_44 with edge support of 20
+38_46 with edge support of 59
+38_48 with edge support of 59
+38_50 with edge support of 20
+38_52 with edge support of 59
+38_54 with edge support of 59
+38_56 with edge support of 10
+38_59 with edge support of 10
+
+Origin: 39: audio to membus
+Edges:
+39_9 with edge support of 59
+39_10 with edge support of 60
+39_15 with edge support of 60
+39_24 with edge support of 49
+39_28 with edge support of 49
+39_30 with edge support of 50
+39_31 with edge support of 49
+39_33 with edge support of 20
+39_35 with edge support of 56
+39_36 with edge support of 57
+39_37 with edge support of 56
+39_40 with edge support of 56
+39_41 with edge support of 60
+39_43 with edge support of 56
+39_44 with edge support of 20
+39_46 with edge support of 58
+39_48 with edge support of 59
+39_50 with edge support of 19
+39_52 with edge support of 57
+39_54 with edge support of 58
+39_56 with edge support of 10
+39_59 with edge support of 10
+
+Origin: 40: membus to gfx
+Edges:
+
+Origin: 41: membus to audio
+Edges:
+
+Origin: 42: uart to membus
+Edges:
+42_9 with edge support of 59
+42_10 with edge support of 60
+42_15 with edge support of 60
+42_24 with edge support of 49
+42_28 with edge support of 49
+42_30 with edge support of 48
+42_31 with edge support of 48
+42_33 with edge support of 20
+42_35 with edge support of 56
+42_36 with edge support of 56
+42_37 with edge support of 55
+42_40 with edge support of 55
+42_41 with edge support of 56
+42_43 with edge support of 60
+42_44 with edge support of 20
+42_46 with edge support of 58
+42_48 with edge support of 60
+42_50 with edge support of 20
+42_52 with edge support of 59
+42_54 with edge support of 59
+42_56 with edge support of 10
+42_59 with edge support of 10
+
+Origin: 43: membus to uart
+Edges:
+
+Origin: 44: membus to usb
+Edges:
+44_45 with edge support of 20
+44_53 with edge support of 20
+
+Origin: 45: usb to membus
+Edges:
+45_9 with edge support of 19
+45_10 with edge support of 20
+45_15 with edge support of 20
+45_24 with edge support of 20
+45_28 with edge support of 20
+45_30 with edge support of 20
+45_31 with edge support of 20
+45_33 with edge support of 19
+45_35 with edge support of 20
+45_36 with edge support of 19
+45_37 with edge support of 20
+45_40 with edge support of 20
+45_41 with edge support of 20
+45_43 with edge support of 20
+45_46 with edge support of 20
+45_48 with edge support of 20
+45_50 with edge support of 18
+45_52 with edge support of 20
+45_54 with edge support of 20
+45_56 with edge support of 10
+45_59 with edge support of 9
+
+Origin: 46: membus to uart
+Edges:
+46_47 with edge support of 70
+46_51 with edge support of 20
+
+Origin: 47: uart to membus
+Edges:
+47_9 with edge support of 68
+47_10 with edge support of 70
+47_15 with edge support of 70
+47_24 with edge support of 48
+47_28 with edge support of 50
+47_30 with edge support of 50
+47_31 with edge support of 48
+47_33 with edge support of 20
+47_35 with edge support of 58
+47_36 with edge support of 58
+47_37 with edge support of 58
+47_40 with edge support of 57
+47_41 with edge support of 58
+47_43 with edge support of 58
+47_44 with edge support of 20
+47_48 with edge support of 66
+47_50 with edge support of 20
+47_52 with edge support of 65
+47_54 with edge support of 68
+47_56 with edge support of 10
+47_59 with edge support of 10
+
+Origin: 48: membus to audio
+Edges:
+48_49 with edge support of 70
+48_58 with edge support of 9
+
+Origin: 49: audio to membus
+Edges:
+49_9 with edge support of 68
+49_10 with edge support of 70
+49_15 with edge support of 69
+49_24 with edge support of 49
+49_28 with edge support of 50
+49_30 with edge support of 49
+49_31 with edge support of 47
+49_33 with edge support of 20
+49_35 with edge support of 57
+49_36 with edge support of 58
+49_37 with edge support of 59
+49_40 with edge support of 57
+49_41 with edge support of 58
+49_43 with edge support of 58
+49_44 with edge support of 19
+49_46 with edge support of 67
+49_50 with edge support of 19
+49_52 with edge support of 66
+49_54 with edge support of 66
+49_56 with edge support of 10
+49_59 with edge support of 9
+
+Origin: 50: membus to uart
+Edges:
+50_47 with edge support of 20
+50_51 with edge support of 20
+
+Origin: 51: uart to membus
+Edges:
+51_9 with edge support of 20
+51_10 with edge support of 20
+51_15 with edge support of 20
+51_24 with edge support of 20
+51_28 with edge support of 20
+51_30 with edge support of 20
+51_31 with edge support of 20
+51_33 with edge support of 18
+51_35 with edge support of 20
+51_36 with edge support of 20
+51_37 with edge support of 20
+51_40 with edge support of 20
+51_41 with edge support of 20
+51_43 with edge support of 20
+51_44 with edge support of 18
+51_48 with edge support of 20
+51_50 with edge support of 19
+51_52 with edge support of 20
+51_54 with edge support of 20
+51_56 with edge support of 10
+51_59 with edge support of 10
+
+Origin: 52: membus to usb
+Edges:
+52_45 with edge support of 20
+52_53 with edge support of 70
+
+Origin: 53: usb to membus
+Edges:
+53_9 with edge support of 69
+53_10 with edge support of 70
+53_15 with edge support of 70
+53_24 with edge support of 48
+53_28 with edge support of 50
+53_30 with edge support of 49
+53_31 with edge support of 48
+53_33 with edge support of 20
+53_35 with edge support of 58
+53_36 with edge support of 58
+53_37 with edge support of 59
+53_40 with edge support of 57
+53_41 with edge support of 58
+53_43 with edge support of 58
+53_46 with edge support of 68
+53_48 with edge support of 66
+53_50 with edge support of 19
+53_52 with edge support of 69
+53_54 with edge support of 68
+53_56 with edge support of 10
+53_59 with edge support of 10
+
+Origin: 54: membus to gfx
+Edges:
+54_55 with edge support of 70
+54_57 with edge support of 10
+
+Origin: 55: gfx to membus
+Edges:
+55_9 with edge support of 69
+55_10 with edge support of 70
+55_15 with edge support of 69
+55_24 with edge support of 48
+55_28 with edge support of 50
+55_30 with edge support of 50
+55_31 with edge support of 48
+55_33 with edge support of 20
+55_35 with edge support of 58
+55_36 with edge support of 57
+55_37 with edge support of 59
+55_40 with edge support of 57
+55_41 with edge support of 58
+55_43 with edge support of 57
+55_44 with edge support of 20
+55_46 with edge support of 66
+55_48 with edge support of 65
+55_50 with edge support of 20
+55_52 with edge support of 65
+55_56 with edge support of 10
+55_59 with edge support of 10
+
+Origin: 56: membus to gfx
+Edges:
+56_55 with edge support of 10
+56_57 with edge support of 10
+
+Origin: 57: gfx to membus
+Edges:
+57_9 with edge support of 10
+57_10 with edge support of 10
+57_15 with edge support of 10
+57_24 with edge support of 10
+57_28 with edge support of 10
+57_30 with edge support of 10
+57_31 with edge support of 10
+57_33 with edge support of 10
+57_35 with edge support of 10
+57_36 with edge support of 10
+57_37 with edge support of 10
+57_40 with edge support of 10
+57_41 with edge support of 10
+57_43 with edge support of 10
+57_44 with edge support of 10
+57_46 with edge support of 10
+57_48 with edge support of 10
+57_50 with edge support of 10
+57_52 with edge support of 10
+57_56 with edge support of 9
+57_59 with edge support of 9
+
+Origin: 58: audio to membus
+Edges:
+58_9 with edge support of 10
+58_10 with edge support of 10
+58_15 with edge support of 10
+58_24 with edge support of 10
+58_28 with edge support of 10
+58_30 with edge support of 10
+58_31 with edge support of 10
+58_33 with edge support of 10
+58_35 with edge support of 10
+58_36 with edge support of 10
+58_37 with edge support of 10
+58_40 with edge support of 10
+58_41 with edge support of 10
+58_43 with edge support of 10
+58_44 with edge support of 10
+58_46 with edge support of 10
+58_50 with edge support of 10
+58_52 with edge support of 10
+58_54 with edge support of 10
+58_56 with edge support of 9
+58_59 with edge support of 10
+
+Origin: 59: membus to audio
+Edges:
+59_49 with edge support of 10
+59_58 with edge support of 9
