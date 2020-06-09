@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
 import java.util.Stack;
@@ -19,47 +20,18 @@ public class Main {
 
         GatewayServer gatewayServer = new GatewayServer(new Main());
         gatewayServer.start();
-        System.out.println("GatewayServer open, please open a new terminal to run a CSPSolver Python script.");
-
+        Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
         
-        String string = System.getProperty("os.name").toLowerCase();
-        
-        
-        if(string.contains("windows")){
-            try
-            { 
-                // Just one line and you are done !  
-                // We have given a command to start cmd 
-                // /K : Carries out command specified by string 
+        if(isWindows)
             Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"py CSPSolver.py\""); 
-    
-            } 
-            catch (Exception e) 
-            { 
-                System.out.println("Cannot open cmd prompt"); 
-                e.printStackTrace(); 
-            } 
-        }
-        else {
-
-            ProcessBuilder pb = new ProcessBuilder();
-            pb.command("bash", "-c", "py cspsolver.py");
-
-            try
-            { 
-                // Just one line and you are done !  
-                // We have given a command to start cmd 
-                // /K : Carries out command specified by string 
-                pb.start();
-    
-            } 
-            catch (Exception e) 
-            { 
-                System.out.println("Cannot open cmd prompt"); 
-                e.printStackTrace(); 
-            } 
-        }
-
+        else{
+            Process process = Runtime.getRuntime().exec("python3 cspsolver.py");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null)
+                System.out.println(line);
+            reader.close();
+        }         
     }
 
     //Below are a list of functions that can be called within any Python script
