@@ -1,0 +1,625 @@
+    //Only works for acyclic directed graphs
+    public void topologicalSort(){
+        Vector<Node> rootQueue = new Vector<Node>();
+
+        for(Node it: graph){
+
+            boolean isRoot = true;
+            for(Edge it2: it.getEdges()){
+
+                Node node = it2.getDestination();
+                
+                for(Edge it3 : node.getEdges()){
+
+                    if(it3.getDestination() == it){
+                        isRoot = false;
+                        break;
+                    }
+                }
+            }
+
+            if(isRoot) { 
+                if(!roots.contains(it)) 
+                    roots.add(it); 
+                rootQueue.add(it);
+            }
+        }
+
+        if(rootQueue.isEmpty()){
+            System.out.println("ERROR: No root nodes.");
+            return;
+        }
+
+        while(!rootQueue.isEmpty()){
+
+            Node currNode = rootQueue.lastElement();
+            rootQueue.removeElement(currNode);
+
+            for(Node it : graph){
+
+                if(currNode.getEdge(it) == null)
+                    continue;
+
+                if(currNode.getDepth() + 1 > it.getDepth()){
+                    it.setDepth(currNode.getDepth() + 1);
+                    rootQueue.add(it);
+                }
+            }
+        }
+
+        graph.sort(new NodeComparator());
+
+        printNodes();
+    }
+
+        //Only works for undirected graphs
+    public void reverseDeleteMST(){
+
+        EdgeComparator ec = new EdgeComparator();
+        PriorityQueue<Edge> edgePQ = new PriorityQueue<Edge>(ec);
+
+        for(Node it: graph)
+            for(Edge it2: it.getEdges())
+                edgePQ.add(it2);
+
+        while(!edgePQ.isEmpty()){
+
+            Edge edge = edgePQ.remove();
+
+            System.out.println("" + edge.getEdgeSupport());
+
+            removeEdge(edge.getSource(), edge);
+
+            if(!isConnected())
+                addEdge(edge.getSource(), edge);
+            
+        }
+    }
+
+    
+    public boolean isConnected(){
+
+        resetVisitedNodes();
+        DFS(roots.get(0));
+
+        for(Node it: graph){
+            if(!it.isVisited())
+                return false;
+        }
+
+        return true;
+    }
+
+        private void simplifyGraph(Graph copy) {
+        
+        boolean stillDeleting = true;
+
+        while(stillDeleting){
+
+            stillDeleting = false;
+            Node nodeToDelete = null;
+
+            for(Node it : copy.getNodes()){
+
+                if(it.getInDegree() == 0 || it.getOutDegree() == 0){
+                    stillDeleting = true;
+                    nodeToDelete = it;
+                    break;
+                }
+            }
+
+            if(stillDeleting)
+                copy.removeNode(nodeToDelete);
+        }
+
+    }
+
+        private ArrayList<Vector<Node>> getSCCs() throws NoSuchMethodException, SecurityException,
+            InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+
+        Stack<Node> stack = new Stack<>();
+        ArrayList<Vector<Node>> sccsOfGraph = new ArrayList<>();
+
+        resetVisitedNodes();
+
+        for(Node it : graph)
+            if(!it.isVisited())
+                fillInOrder(it, stack);
+
+        
+        Graph reversedGraph = new Graph(this);
+
+        reversedGraph = reversedGraph.getTranspose();
+        
+        resetVisitedNodes();
+        reversedGraph.resetVisitedNodes();
+
+        while(!stack.isEmpty()){
+
+            Node top = stack.pop();
+
+            if(!reversedGraph.getNode(top.toString()).isVisited()){
+                
+                Vector<Node> nodesOfScc = new Vector<>();
+                reversedGraph.SCCDFSUtil(reversedGraph.getNode(top.getSymbolIndex()), nodesOfScc);
+                sccsOfGraph.add(nodesOfScc);
+                //reversedGraph.DFS(reversedGraph.getNode(top.getSymbolIndex()));
+            }
+        }
+
+        return sccsOfGraph;
+    }
+
+    public void SCCDFSUtil(Node start, Vector<Node> list){
+
+        start.setVisited(true);
+        ArrayList<Edge> adjPositions = start.getEdges();
+        list.add(start);
+
+        Iterator<Edge> it = adjPositions.iterator();
+        while(it.hasNext()) {
+            Edge edge = it.next();
+            if(!edge.getDestination().isVisited())
+                SCCDFSUtil(edge.getDestination(),list);
+            
+        }
+
+
+    }
+
+    private Graph getTranspose() throws NoSuchMethodException, SecurityException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+
+        Graph reversedGraph = new Graph();
+        
+        //add Nodes to graph
+        for(Node it : graph){
+            Node newNode = new Node(it.getSymbolIndex(), it.getMessage(), it.getCommand());
+            newNode.setSupport(it.getSupport());
+            reversedGraph.addNode(newNode);
+        }
+        
+        //add reversed edges
+        for(Node it: graph){
+            for(Edge edge : it.getEdges()){
+
+                Edge newEdge = new Edge(reversedGraph.getNode(edge.getDestination().getSymbolIndex()), reversedGraph.getNode(edge.getSource().getSymbolIndex()));
+                newEdge.setEdgeSupport(edge.getEdgeSupport());
+                reversedGraph.addEdge(newEdge.getSource(), newEdge);
+            }
+        }
+
+        return reversedGraph;
+    }
+
+    private void fillInOrder(Node node, Stack<Node> stack) {
+
+        node.setVisited(true);
+
+        for(Edge it : node.getEdges())
+            if(!it.getDestination().isVisited())
+                fillInOrder(it.getDestination(), stack);
+        
+        stack.push(node);
+    }
+
+        private void removeCycle(List<Node> cycle , Graph scc) {
+
+        int cycleWeight = cycle.get(cycle.size()-1).getEdges().get(0).getEdgeSupport();
+
+        for(int i = 0; i < cycle.size()-1; i++)
+            if(cycle.get(i).getEdge(cycle.get(i + 1)).getEdgeSupport() < cycleWeight)
+                cycleWeight = cycle.get(i).getEdges().get(0).getEdgeSupport();
+
+        for(int i = 0; i < cycle.size(); i++){
+
+            int j = 1 + (i % cycle.size()-1);
+            Node origin = cycle.get(i);
+            if(origin.getEdge(cycle.get(j)) == null)
+                continue;
+            Edge edge = origin.getEdge(cycle.get(j));
+            Node destination = edge.getDestination();
+
+            int tempEdgeWeight = edge.getEdgeSupport();
+
+            tempEdgeWeight = tempEdgeWeight - cycleWeight;
+
+            if(tempEdgeWeight == 0){
+
+                origin.removeEdge(edge);
+                
+                if(origin.getOutDegree() == 0 && scc.getNodes().contains(origin))
+                    scc.removeNode(origin);
+                
+                if(destination.getInDegree() == 0 && scc.getNodes().contains(destination))
+                    scc.removeNode(destination);
+            }
+        }
+    }
+
+    
+    private int sumOfVisitedVertices(Node node) {
+        
+        if(node.getEdges().isEmpty())
+            return 0;
+
+        int sum = 0;
+                
+        //Reset nodes in scc to not visited
+        for(Edge edge : node.getEdges())
+            if(edge.getDestination().isVisited())
+                sum = sum + 1;   
+
+        return sum;
+
+    }
+
+     private List<List<Node>> detectAndRemoveCycle(Graph scc)
+    throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+    IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+
+        //May need to implement minimum heap to establish priority nodes
+        
+        //Create list of nodes in SCC and reset them
+        List<List<Node>> listOfCycles = new ArrayList<>();
+        
+        //Reset nodes goes here
+
+        //Begin cycle detection
+        Stack<Node> stack = new Stack<>();
+        List<Node> list = new LinkedList<>();
+
+        for(Node it : scc.getNodes())
+            list.add(it);
+
+        Iterator<Node> iter = list.iterator();
+
+        while(!scc.getNodes().isEmpty()){
+            
+            Node u = iter.next();
+            
+            if(!scc.getNodes().contains(u))
+                continue;
+
+            stack.clear();
+            
+            //Reset nodes in scc to not visited
+            for(Edge it : u.getEdges())
+                it.getDestination().setVisited(false);
+
+            stack.push(u);
+
+            boolean flag = false;
+
+            while(!flag && !stack.isEmpty()){
+
+                Node v = stack.peek();
+
+                if(sumOfVisitedVertices(v) == v.getOutDegree()){
+
+                    stack.pop();
+                    for(Edge it : v.getEdges())
+                        it.getDestination().setVisited(false);                    
+
+                }
+                else{
+
+                    Node r = null;
+
+                    for(Edge it : v.getEdges())
+                        if(!it.getDestination().isVisited())
+                            r = it.getDestination();  
+                    
+
+                    r.setVisited(true);
+                    //Search for r in stack
+                    int k = stack.indexOf(r);
+
+                    if(k == -1 && r != null)
+                        stack.push(r);
+
+                    else if(r == u){
+                        List<Node> cycle = stack.subList(k, stack.size());
+                        for(Node node : cycle)
+                            System.out.print(node.getSymbolIndex() + " ");
+                        System.out.println();
+                        listOfCycles.add(cycle);
+                        removeCycle(cycle, scc);
+                        flag = true;
+                    }
+                }
+            }
+            
+            if(!flag)
+                scc.removeNode(u);
+
+            if(!iter.hasNext()){
+                list.clear();
+                for(Node it : scc.getNodes())
+                    list.add(it);
+                iter = list.iterator();
+            }
+        }
+
+        return listOfCycles;
+    }
+
+        public void removeCycles() throws NoSuchMethodException, SecurityException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+
+        Graph simplifiedCopy = new Graph(this);
+
+        simplifiedCopy.resetVisitedNodes();
+
+        simplifyGraph(simplifiedCopy);
+
+        //Might have to look at edges of scc nodes
+        ArrayList<Vector<Node>> tempSccs = simplifiedCopy.getSCCs();
+
+        simplifiedCopy.resetVisitedNodes();
+        Vector<Graph> finalSccs = new Vector<>();
+
+        for(Vector<Node> outerIt : tempSccs){
+
+            Graph graph = new Graph();
+
+            Iterator<Node> it = outerIt.iterator();
+
+            while(it.hasNext())
+                graph.addNode(it.next());
+            
+            graph.resetVisitedNodes();
+            finalSccs.add(graph);
+        }
+
+        List<List<List<Node>>> listOfCycles = new LinkedList<>();
+
+        for(Graph it : finalSccs){
+            it.resetVisitedNodes();
+            listOfCycles.add(detectAndRemoveCycle(simplifiedCopy));
+        }
+
+        /*
+        for(Graph it : finalSccs){
+            it.printNodes();
+            it.printEdges();
+        }
+        */
+        
+    }
+
+    //Removes cycles from dependency graph
+    private void detectAndRemoveCycle() {
+
+        Queue<Node> queue = new LinkedList<>(); //Queue for BFS traversal
+        List<Edge> edgesToBeRemoved = new LinkedList<>(); //List edges to be removed
+        List<List<Node>> traversals = new LinkedList<>(); //List of traversal path
+
+        for(Node node : graph){
+
+            //If node has not been visited yet, conduct BFS traversal
+            if(!node.isVisited()){
+                List<Node> traversal = new LinkedList<>();
+                node.setVisited(true);
+                queue.add(node);
+                traversal.add(node);
+                BFSUtil(roots.get(0), queue, edgesToBeRemoved, traversal);
+                System.out.println();
+                traversals.add(traversal);
+            }
+        }
+
+        //For every traversal, check to see if the node at the end of the traversal
+        //cycles back to the beginning node of the traversal and remove that edge
+        for(List<Node> traversal : traversals){
+            Node v = traversal.get(traversal.size()-1);
+            for(Edge edge : v.getEdges())
+                if(edge.getDestination() == traversal.get(0))
+                    edgesToBeRemoved.add(edge);
+        }
+
+
+        //Remove all edges detected in the BFS traversals
+        for(Edge edge : edgesToBeRemoved)
+            removeEdge(edge.getSource(), edge);
+            
+    }
+
+    //BFS Graph traversal to detect cycles
+    public void BFSUtil(Node start, Queue<Node> queue, List<Edge> edgesToBeRemoved, List<Node> traversal) {
+
+        if(queue.isEmpty())
+            return;
+        
+        Node v = queue.poll();
+
+        System.out.print(v.getSymbolIndex() + " ");
+        traversal.add(v);
+
+        for(Edge edge : v.getEdges()){
+            if(!edge.getDestination().isVisited()){
+                edge.getDestination().setVisited(true);
+                edge.getDestination().setPrevious(v);
+                queue.add(edge.getDestination());
+            }
+            else if(edge.getDestination() == v.getPrevious()) //if edge leads to cycle, add to list for removal
+                edgesToBeRemoved.add(edge);
+        }
+
+        BFSUtil(start, queue, edgesToBeRemoved, traversal); //Recursive call
+    }
+
+    //Removes cycles from dependency graph
+    private void detectAndRemoveCycle() {
+
+        Queue<Node> queue = new LinkedList<>(); //Queue for BFS traversal
+        List<Edge> edgesToBeRemoved = new LinkedList<>(); //List edges to be removed
+        List<List<Node>> traversals = new LinkedList<>(); //List of traversal path
+
+        for(Node node : graph){
+
+            if(!node.isVisited()){
+                //If node has not been visited yet, conduct BFS traversal
+                List<Node> traversal = new LinkedList<>();
+                node.setVisited(true);
+                node.setDepth(0);
+                queue.add(node);
+                traversal.add(node);
+                BFSUtil(queue, edgesToBeRemoved, traversal);
+                System.out.println();
+                traversals.add(traversal);
+            }
+            
+        }
+
+        //For every traversal, check to see if the node at the end of the traversal
+        //cycles back to the beginning node of the traversal and remove that edge
+        for(List<Node> traversal : traversals){
+            Node v = traversal.get(traversal.size()-1);
+            for(Edge edge : v.getEdges())
+                if(edge.getDestination() == traversal.get(0))
+                    edgesToBeRemoved.add(edge);
+        }
+
+        resetVisitedNodes();
+            
+    }
+
+    //BFS Graph traversal to detect cycles
+    public void BFSUtil(Queue<Node> queue, List<Edge> edgesToBeRemoved, List<Node> traversal) {
+
+        if(queue.isEmpty())
+            return;
+        
+        Node v = queue.poll();
+
+        System.out.print(v.getSymbolIndex() + " ");
+        traversal.add(v);
+
+        for(Edge edge : v.getEdges()){
+
+            if(!edge.getDestination().isVisited()){
+                edge.getDestination().setDepth(v.getDepth()+1);
+                edge.getDestination().setVisited(true);
+                edge.getDestination().setPrevious(v);
+                queue.add(edge.getDestination());
+            }
+            else if(edge.getDestination() == v.getPrevious()) //if edge leads to cycle, add to list for removal
+                edgesToBeRemoved.add(edge);
+            else if (edge.getDestination().getEdge(v) != null && v.getEdge(edge.getDestination()) != null){
+                if(edge.getDestination().getDepth() < v.getDepth())
+                    edgesToBeRemoved.add(edge.getDestination().getEdge(v));
+                else
+                    edgesToBeRemoved.add(edge);
+            }
+
+        }
+
+        for(Edge edge : edgesToBeRemoved)
+            removeEdge(edge.getSource(), edge);
+
+        BFSUtil(queue, edgesToBeRemoved, traversal); //Recursive call
+    }
+
+       //Removes cycles from dependency graph
+    private void detectAndRemoveCycle() {
+
+        List<Edge> edgesToBeRemoved = new LinkedList<>(); //List edges to be removed
+
+        resetVisitedNodes();
+
+        for(Node node : roots){
+            System.out.println(node.getSymbolIndex());
+            DFSUtil(node, edgesToBeRemoved);
+        }
+
+        for(Edge edge : edgesToBeRemoved)
+            removeEdge(edge.getSource(), edge);
+        
+    }
+
+    //BFS Graph traversal to detect cycles
+    public void DFSUtil(Node start, List<Edge> edgesToBeRemoved) {
+
+        if(!start.isVisited()){
+
+            start.setVisited(true);
+
+            for(Edge edge : start.getEdges()){
+
+                if(!edge.getDestination().isVisited()){
+                    edge.getDestination().setPrevious(start);
+                    DFSUtil(edge.getDestination(), edgesToBeRemoved);
+                }
+                else if(
+                        (roots.contains(edge.getDestination()) && !edgesToBeRemoved.contains(edge)) 
+                        || (edge.getDestination().getEdge(start) != null && !edgesToBeRemoved.contains(edge.getDestination().getEdge(start)))
+                    ){
+                    edgesToBeRemoved.add(edge);
+                }
+                else
+                    break;
+    
+            }
+        }
+
+        start.setVisited(false);
+
+        if(start.getPrevious() != null && !start.getEdges().isEmpty()){
+            Node firstInTraversal = start.getPrevious();
+            while(firstInTraversal.getPrevious() != null){
+                firstInTraversal = firstInTraversal.getPrevious();
+
+                if(start.getEdge(firstInTraversal) != null)
+                    edgesToBeRemoved.add(start.getEdge(firstInTraversal));
+            }
+        }
+
+        start.setPrevious(null);
+
+    }
+    
+    //Removes cycles from dependency graph
+    private void detectAndRemoveCycle() {
+
+
+        resetVisitedNodes();
+
+        for(Node node : graph){
+            System.out.println(node.getSymbolIndex());
+            if(!node.isVisited())
+                DFSUtil(node);
+        }
+
+        List<Edge> edgesToBeRemoved = new LinkedList<>(); //List edges to be removed
+
+        for(Node node : graph)
+            for(Edge edge : node.getEdges())
+                if(node.getDepth() > edge.getDestination().getDepth())
+                    edgesToBeRemoved.add(edge);
+        
+        for(Edge edge : edgesToBeRemoved)
+            removeEdge(edge.getSource(), edge);
+
+        
+        
+    }
+
+    //DFS Graph traversal to detect cycles
+    public void DFSUtil(Node start) {
+
+        if(!start.isVisited()){
+
+            start.setVisited(true);
+
+            for(Edge edge : start.getEdges()){
+
+                if(!edge.getDestination().isVisited()){
+                    edge.getDestination().setDepth(start.getDepth()+1);
+                    DFSUtil(edge.getDestination());
+                }
+
+            }
+        }
+    }
