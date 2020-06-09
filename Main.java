@@ -22,9 +22,9 @@ public class Main {
         System.out.println("GatewayServer open, please open a new terminal to run a CSPSolver Python script.");
 
         
-        //String string = System.getProperty("os.name").toLowerCase();
+        String string = System.getProperty("os.name").toLowerCase();
         
-        /*
+        
         if(string.contains("windows")){
             try
             { 
@@ -40,7 +40,25 @@ public class Main {
                 e.printStackTrace(); 
             } 
         }
-        */
+        else {
+
+            ProcessBuilder pb = new ProcessBuilder();
+            pb.command("bash", "-c", "py cspsolver.py");
+
+            try
+            { 
+                // Just one line and you are done !  
+                // We have given a command to start cmd 
+                // /K : Carries out command specified by string 
+                pb.start();
+    
+            } 
+            catch (Exception e) 
+            { 
+                System.out.println("Cannot open cmd prompt"); 
+                e.printStackTrace(); 
+            } 
+        }
 
     }
 
