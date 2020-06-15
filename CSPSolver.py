@@ -27,14 +27,19 @@ class VarArraySolutionPrinterWithLimit(cp_model.CpSolverSolutionCallback):
         self.__solution_count += 1
         #self.generateGraph()
         count = 0
+        lastStoredChar = 'a'
         if str(solutionsCanPrint) == 'y' :
             print('Solution %i:' % (self.__solution_count))
         for v in self.__variables:
             if self.Value(v) == 0 :
                 continue
             count += self.Value(v)
+            if str(lastStoredChar) != str(v)[0] :
+                    print()
+                    lastStoredChar = str(v)[0]
             if str(solutionsCanPrint) == 'y' :
                 print('%s = %i' % (v, self.Value(v)), end='\n')
+                
             
             #Constraint generation for edges that have support > 0
             #Added to a list to be used as a BoolOr linear constraint
@@ -44,7 +49,8 @@ class VarArraySolutionPrinterWithLimit(cp_model.CpSolverSolutionCallback):
                 if str(i) == b:
                     constraintsToBeAdded.append(i)
                     break
-        print('Total Edge Support: %i' % count, end='\n')
+        
+        print('\nTotal Edge Support: %i' % count, end='\n')
         if str(solutionsCanPrint) == 'y' :
             print()
 
