@@ -106,13 +106,14 @@ def SearchForAllSolutionsSampleSat():
 
     dags = graph.generateDAGS()
     charID = 'a'
-    nodeVars = []
     listOfEdgeVars = []
+    listOfNodeVars = []
 
     for dag in dags:
 
         nodes = dag.getNodes()
         edgeVars = []
+        nodeVars = []
 
         #This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i
         for i, origin in enumerate(nodes) : 
@@ -168,6 +169,7 @@ def SearchForAllSolutionsSampleSat():
 
         charID = chr(ord(charID)+1)
         listOfEdgeVars.append(edgeVars)
+        listOfNodeVars.append(nodeVars)
     
     for node in graph.getNodes():
         
@@ -176,11 +178,12 @@ def SearchForAllSolutionsSampleSat():
 
         sumIntVars = 0
 
-        for nodeVar in nodeVars:
-            if node.getSymbolIndex() in str(nodeVar) :
-                if node.getSymbolIndex() != str(nodeVar)[1:] :
-                    continue
-                sumIntVars += nodeVar
+        for nodeVars in listOfNodeVars :
+            for nodeVar in nodeVars :
+                if node.getSymbolIndex() in str(nodeVar) :
+                    if node.getSymbolIndex() != str(nodeVar)[1:] :
+                        continue
+                    sumIntVars += nodeVar
         model.Add(sumIntVars == node.getSupport())
     
 

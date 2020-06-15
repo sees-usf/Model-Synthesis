@@ -25,12 +25,14 @@ public class Main {
         if(isWindows)
             Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"py CSPSolver.py\""); 
         else{
+            /*
             Process process = Runtime.getRuntime().exec("python3 cspsolver.py");
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null)
                 System.out.println(line);
             reader.close();
+            */
         }         
     }
 
@@ -48,20 +50,20 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter definition filename: ");
-        defFileName = scanner.nextLine();
-        //defFileName = "example.def";
+        //defFileName = scanner.nextLine();
+        defFileName = "example.def";
         //defFileName = "example_patterns.txt";
         
         System.out.print("Enter trace filename: ");
-        traceFileName = scanner.nextLine();
-        //traceFileName = "example_trace-1";
+        //traceFileName = scanner.nextLine();
+        traceFileName = "example_trace-1";
         //traceFileName = "single_no_interleaving_trace_1.txt";
         
         scanner.close();
         
         graph.generateGraph(defFileName);
         generateTraces(traceFileName);
-        
+ 
         /*
         for(Graph dag : graph.generateDAGS()){
             System.out.println("-----------------------------------------------");
