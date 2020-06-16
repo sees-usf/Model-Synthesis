@@ -47,14 +47,14 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter definition filename: ");
-        //defFileName = scanner.nextLine();
+        defFileName = scanner.nextLine();
         //defFileName = "example.def";
-        defFileName = "example_patterns.txt";
+        //defFileName = "example_patterns.txt";
         
         System.out.print("Enter trace filename: ");
-        //traceFileName = scanner.nextLine();
+        traceFileName = scanner.nextLine();
         //traceFileName = "example_trace-1";
-        traceFileName = "single_no_interleaving_trace_1.txt";
+        //traceFileName = "single_no_interleaving_trace_1.txt";
         
         scanner.close();
         
