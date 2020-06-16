@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
@@ -13,11 +12,13 @@ public class Graph {
     private ArrayList<Node> graph; //All nodes in graph
     private ArrayList<Node> roots; //All root nodes
     private ArrayList<Node> termNodes; //All terminal nodes
+    private ArrayList<Edge> edges;
 
     public Graph() {
         graph = new ArrayList<>();
         roots = new ArrayList<>();
         termNodes = new ArrayList<>();
+        edges = new ArrayList<>();
     }
 
     //Copy constructor
@@ -27,6 +28,7 @@ public class Graph {
         this.graph = new ArrayList<>();
         this.roots = new ArrayList<>();
         this.termNodes = new ArrayList<>();
+        this.edges = new ArrayList<>();
 
         for (Node it : graph.getNodes()) {
 
@@ -34,11 +36,11 @@ public class Graph {
             copyNode.setSupport(it.getSupport());
 
             for (Node it2 : graph.getRoots())
-                if (it == it2)
+                if (it.equals(it2))
                     this.roots.add(copyNode);
             
             for(Node it2 : graph.getTerminalNodes())
-                if(it == it2)
+                if(it.equals(it2))
                     this.termNodes.add(copyNode);
 
             this.graph.add(copyNode);
@@ -47,11 +49,12 @@ public class Graph {
 
         this.generateEdges();
 
+        /*
         for(Node it : this.graph){
-
             for(Edge it2 : it.getEdges())
                 it2.setEdgeSupport(graph.getNode(it.getSymbolIndex()).getEdge(it2.getId()).getEdgeSupport());
         }
+        */
     }
 
     public ArrayList<Node> getRoots() {
@@ -157,49 +160,66 @@ public class Graph {
                     continue;
 
                 if(message.getValue().equals(it2.getMessage().getKey())){
-                    it.addEdge(new Edge(it, it2));
+                    Edge edge = new Edge(it, it2);
+                    it.addEdge(edge);
+                    edges.add(edge);
                 }
             }
         }
     }
 
     //Removes cycles from dependency graph
-    private void detectAndRemoveCycle() {
+    private void detectAndRemoveCycle() throws NoSuchMethodException, SecurityException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
+        ArrayList<Node> recStack = new ArrayList<>();
         resetVisitedNodes();
-        Queue<Node> queue = new LinkedList<>(); //Queue for BFS traversal
-        List<Edge> edgesToBeRemoved = new LinkedList<>(); //List edges to be removed
-        List<List<Node>> traversals = new LinkedList<>(); //List of traversal path
+        Graph copy = new Graph(this);
 
-        for(Node node : graph){
+        for(Node node : graph)
+            DFSUtil(copy.getNode(node.getSymbolIndex()), recStack);
 
-            //If node has not been visited yet, conduct BFS traversal
-            if(!node.isVisited() && !roots.contains(node)){
-                List<Node> traversal = new LinkedList<>();
-                node.setVisited(true);
-                queue.add(node);
-                BFSUtil(node, queue, edgesToBeRemoved, traversal);
-                traversals.add(traversal);
+    }
+
+    public void DFSUtil(Node node, ArrayList<Node> recStack){
+
+        if(!node.isVisited()){
+
+            node.setVisited(true);
+            recStack.add(node);
+
+            for(Edge edge : node.getEdges()){
+
+                Node destination = edge.getDestination();
+
+                if(!destination.isVisited())
+                {
+                    if(getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()) == null)
+                        continue;
+                                
+                    DFSUtil(destination, recStack);
+                }
+                else if(recStack.contains(destination))
+                    removeEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex());
+                                
             }
         }
 
-        for(Edge edge : edgesToBeRemoved)
-            removeEdge(edge.getSource(), edge);
-
+        recStack.remove(node);
     }
 
     public ArrayList<Graph> generateDAGS() throws NoSuchMethodException, SecurityException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
         ArrayList<Graph> dags = new ArrayList<>();
-        Queue<Node> queue = new LinkedList<>();
+        Queue<Node> traversal = new LinkedList<>();
+        //ArrayList<Queue<Node>> traversals = new ArrayList<>();
 
         for(Node root : roots){
-            
             resetVisitedNodes();
             Graph dag = new Graph();
-            queue.add(root);
-            DAGUtil(dag, queue);
+            traversal.add(root);
+            DAGUtil(dag, traversal);
             dags.add(dag);
         }
 
@@ -237,31 +257,6 @@ public class Graph {
         DAGUtil(dag, queue);
 
     }
-
-    // BFS Graph traversal to detect cycles
-    public void BFSUtil(Node start, Queue<Node> queue, List<Edge> edgesToBeRemoved, List<Node> traversal) {
-
-        if(queue.isEmpty())
-            return;
-        
-        Node v = queue.poll();
-
-        traversal.add(v);
-
-        for(Edge edge : v.getEdges()){
-            if(!edge.getDestination().isVisited()){
-                edge.getDestination().setVisited(true);
-                edge.getDestination().setPrevious(v);
-                queue.add(edge.getDestination());
-            }
-            else if(edge.getDestination() == v.getPrevious() || traversal.get(0) == edge.getDestination()) //|| queue.contains(edge.getDestination())) //if edge leads to cycle, add to list for removal
-                edgesToBeRemoved.add(edge);
-
-        }
-
-        BFSUtil(start, queue, edgesToBeRemoved, traversal); //Recursive call
-    }
-
 
     public boolean hasNode(Node u) {
         return graph.contains(u);
@@ -375,7 +370,9 @@ public class Graph {
             return;
         }
 
-        origin.removeEdge(destination);
+        Edge edge = origin.getEdge(destination);
+        edges.remove(edge);
+        origin.removeEdge(edge);
 
     }
 
@@ -385,7 +382,9 @@ public class Graph {
             if(it.getSymbolIndex().equals(origin)) {
                 for(Node it2 : graph){
                     if(it2.getSymbolIndex().equals(destination)){
-                        it.removeEdge(it2);
+                        Edge edge = it.getEdge(it2);
+                        edges.remove(edge);
+                        it.removeEdge(edge);
                         return;
                     }
                 }
@@ -413,7 +412,13 @@ public class Graph {
     }
 
     public void removeEdge(Node origin, Edge edge){
+        edges.remove(edge);
         origin.removeEdge(edge);
+    }
+
+    public void printGraph(){
+        printNodes();
+        printEdges();
     }
 
     public void printEdges() {

@@ -44,5 +44,20 @@ public class Edge {
     public void setEdgeSupport(int support) {
         this.support = support;
     }
+
+    public boolean equals(Object obj) {
+
+        if(this == obj)
+            return true;
+        if(obj == null)
+            return false;
+        if(getClass() != obj.getClass())
+            return false;
+        
+        Edge other = (Edge) obj;
+        
+        return id.equals(other.getId());
+    
+    }
     
 }

@@ -24,32 +24,42 @@ class VarArraySolutionPrinterWithLimit(cp_model.CpSolverSolutionCallback):
     #Keep the self.generateGraph() commented out for now because it does display
     #the visuals correctly
     def on_solution_callback(self):
+
         self.__solution_count += 1
         #self.generateGraph()
         count = 0
         lastStoredChar = 'a'
+
         if str(solutionsCanPrint) == 'y' :
             print('Solution %i:' % (self.__solution_count))
-        for v in self.__variables:
+
+        constraintsToBeAdded = []
+        for v in self.__variables :
+
             if self.Value(v) == 0 :
                 continue
+
             count += self.Value(v)
+
             if str(lastStoredChar) != str(v)[0] :
-                    print()
-                    lastStoredChar = str(v)[0]
-            if str(solutionsCanPrint) == 'y' :
-                print('%s = %i' % (v, self.Value(v)), end='\n')
-                
+                print()
+                lastStoredChar = str(v)[0]
+                listOfConstraintsToBeAdded.append(constraintsToBeAdded)
+                constraintsToBeAdded = []
+               
+            #if str(solutionsCanPrint) == 'y' :
+            print('%s = %i' % (v, self.Value(v)), end='\n')
             
             #Constraint generation for edges that have support > 0
             #Added to a list to be used as a BoolOr linear constraint
             #to help avoid finding redundant solutions
-            b = str(v).replace('x', 'b', -1)
+            b = 'b' + str(v)
             for i in boolVars:
                 if str(i) == b:
                     constraintsToBeAdded.append(i)
                     break
         
+        listOfConstraintsToBeAdded.append(constraintsToBeAdded)
         print('\nTotal Edge Support: %i' % count, end='\n')
         if str(solutionsCanPrint) == 'y' :
             print()
@@ -191,8 +201,10 @@ def SearchForAllSolutionsSampleSat():
                         continue
                     sumIntVars += nodeVar
         model.Add(sumIntVars == node.getSupport())
+        print()
+        print(str(sumIntVars) + ' == ' + str(node.getSupport()))
     
-
+    print()
     finalEdges = []
 
     #Convert 2D array of constraints to 1D for CSPSolver
@@ -213,8 +225,12 @@ def SearchForAllSolutionsSampleSat():
         currCount += 1
         if currCount == int(limit) :
             break
-        model.AddBoolOr(constraintsToBeAdded)
-        constraintsToBeAdded.clear()
+        for constraintsToBeAdded in listOfConstraintsToBeAdded :
+            model.AddBoolOr(constraintsToBeAdded)
+        print('List of Constraints generated after Solution %i:' % currCount)
+        print(listOfConstraintsToBeAdded)
+        print()
+        listOfConstraintsToBeAdded.clear()
         solutionPrinter = VarArraySolutionPrinterWithLimit(finalEdges, currCount)
         status = solver.SearchForAllSolutions(model, solutionPrinter)
         #print(currCount)
@@ -259,13 +275,14 @@ print()
 
 count = 1
 boolVars = []
-constraintsToBeAdded = []
+listOfConstraintsToBeAdded = []
 
 #Run each trace through the CSP solver until there are no more left in stack
 while bool(gateway.entry_point.hasTraces()) :
     print('Analyzing Trace ' + str(count) + ' Solutions\n')
     gateway.entry_point.annotateGraph()
     graph = gateway.entry_point.getGraph()
+    graph.printGraph();
     nodes = graph.getNodes()
     SearchForAllSolutionsSampleSat()
     graph.resetGraphSupport()
@@ -275,8 +292,9 @@ while bool(gateway.entry_point.hasTraces()) :
     
 print()
 print('All traces have been analyzed. Please re-run Main.java to perform experiments again.')
+
 #pdf.close()
-plt.show()
+#plt.show()
 #multipage('test')           
 
 
