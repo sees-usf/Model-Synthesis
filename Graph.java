@@ -142,12 +142,10 @@ public class Graph {
         file.close();
 
         generateEdges();
-        detectAndRemoveCycle();
-
     }
 
     //Generates edges for the dependency graph
-    private void generateEdges() {
+    public void generateEdges() {
         for(Node it: graph){
 
             if(termNodes.contains(it))
@@ -169,7 +167,7 @@ public class Graph {
     }
 
     //Removes cycles from dependency graph
-    private void detectAndRemoveCycle() throws NoSuchMethodException, SecurityException, InstantiationException,
+    public void detectAndRemoveCycle() throws NoSuchMethodException, SecurityException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
         ArrayList<Node> recStack = new ArrayList<>();
@@ -220,6 +218,8 @@ public class Graph {
             Graph dag = new Graph();
             traversal.add(root);
             DAGUtil(dag, traversal);
+            dag.generateEdges();
+            dag.detectAndRemoveCycle();
             dags.add(dag);
         }
 
@@ -235,6 +235,10 @@ public class Graph {
         
         Node v = queue.poll();
         Node copy = new Node(v);
+        v.setSupport(0);
+        v.setInDegree(0);
+        v.setOutDegree(0);
+        copy.clearEdges();
 
         if(roots.contains(v)){
             v.setVisited(true);
@@ -245,8 +249,13 @@ public class Graph {
         for(Edge edge : v.getEdges()){
             if(!edge.getDestination().isVisited()){
                 Node u = edge.getDestination();
+                Node copyNode2 = new Node(u);
+                copyNode2.setSupport(0);
+                copyNode2.setInDegree(0);
+                copyNode2.setOutDegree(0);
+                copyNode2.clearEdges();
+                dag.addNode(copyNode2);
                 u.setVisited(true);
-                dag.addNode(new Node(u));
                 queue.add(u);
             }
         }

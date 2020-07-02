@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -13,6 +14,7 @@ public class Main {
     private Graph graph = null;
     private Stack<String> traces = null;
     private String traceFileName, defFileName;
+    private ArrayList<Graph> dags;
 
     public static void main(String[] args)
             throws IOException, NoSuchMethodException, SecurityException, InstantiationException,
@@ -54,12 +56,28 @@ public class Main {
         System.out.print("Enter trace filename: ");
         traceFileName = scanner.nextLine();
         //traceFileName = "example_trace-1";
-        //traceFileName = "single_no_interleaving_trace_1.txt";
+        //traceFileName = "trace1.txt";
         
         scanner.close();
         
         graph.generateGraph(defFileName);
         generateTraces(traceFileName);
+
+        /*
+        PatternDetector pd = new PatternDetector(traces.peek(), graph);
+        pd.beginAnnotation();
+        graph.printGraph();
+        */
+
+        /*
+        ArrayList<Graph> dags = graph.generateDAGS();
+
+        for(Graph dag : dags){
+            pd = new PatternDetector(traces.peek(), dag);
+            pd.beginDAGAnnotation();
+            dag.printGraph();
+        }
+        */
 
             
     }
@@ -83,6 +101,10 @@ public class Main {
         return true;
     }
 
+    public void popTrace(){
+        traces.pop();
+    }
+
     //Prepares traces
     public void generateTraces(String filename) throws IOException {
         BufferedReader fileReader = new BufferedReader(new FileReader(filename));
@@ -103,7 +125,22 @@ public class Main {
 
     //Pops a trace from the stack and annotates the graph passed
     public void annotateGraph() throws IOException {
-        PatternDetector pd = new PatternDetector(traces.pop(), graph);
+        PatternDetector pd = new PatternDetector(traces.peek(), graph);
         pd.beginAnnotation();
+    }
+
+    public ArrayList<Graph> getAnnotatedDAGS() throws NoSuchMethodException, SecurityException, InstantiationException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+
+        dags = graph.generateDAGS();
+
+        for(Graph dag : dags){
+            PatternDetector pd = new PatternDetector(traces.peek(), dag);
+            pd.beginDAGAnnotation();
+            dag.printGraph();
+        }
+
+        return dags;
+
     }
 }

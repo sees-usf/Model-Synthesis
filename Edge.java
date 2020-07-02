@@ -21,7 +21,6 @@ public class Edge {
         
         this.source = edge.getSource();
         this.destination = edge.getDestination();
-
         this.support = Integer.valueOf(edge.getEdgeSupport());
     }
 
