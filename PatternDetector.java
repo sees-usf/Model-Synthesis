@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.StringTokenizer;
 
 public class PatternDetector {
@@ -8,7 +7,7 @@ public class PatternDetector {
 
 
     //Tokenizes string input, generates trace for graph annotation
-    public PatternDetector(String originalTrace, Graph graph) throws IOException {
+    public PatternDetector(String originalTrace, Graph graph) {
 
         this.graph = graph;
         
@@ -22,24 +21,56 @@ public class PatternDetector {
             if(token.equals("-2"))
                 break;
             
-            if(!token.equals("-1")) //Increments node support by one if a node is detected
-                graph.getNode(token).setSupport(graph.getNode(token).getSupport() + 1);
+            if(graph.getNode(token) == null || token.equals("-1")) //Increments node support by one if a node is detected
+                continue;
+            
+            graph.getNode(token).setSupport(graph.getNode(token).getSupport() + 1);
 
             trace += token + " ";
 
         }
     }
 
+    public void beginDAGAnnotation(){
+
+        for(Node it : graph.getNodes()) 
+            if(!it.getEdges().isEmpty())   
+                for(Edge it2: it.getEdges())
+                    annotateDAGEdge(it2);  
+
+    }
+
+    public void annotateDAGEdge(Edge edge){
+
+        int instances = 0; //Keeps track of active instances of source nodes detected
+        StringTokenizer tokenizer = new StringTokenizer(trace);
+        String symbolIndex = edge.getSource().getSymbolIndex();
+        Node root = graph.getRoots().get(0); //Source node ID
+
+        while(tokenizer.hasMoreTokens()) {
+
+            String token = tokenizer.nextToken(" ");
+
+            if(!token.equals("-1")){
+                if(token.equals(root.getSymbolIndex())) //Create instance if token is equal to source ID
+                    instances++;
+                else if (edge.getId().equals(symbolIndex + "_" + token) && instances != 0){ //If destination is detected, increment edge support and decrement one instance
+                    edge.setEdgeSupport(edge.getEdgeSupport()+1);
+                    instances--;
+                }
+            }
+        }
+
+    }
+
     //Annotate every edge in graph
     public void beginAnnotation() {
 
-        for(Node it : graph.getNodes()) { 
-            if(!it.getEdges().isEmpty()){    
-                for(Edge it2: it.getEdges()){
+        for(Node it : graph.getNodes()) 
+            if(!it.getEdges().isEmpty())   
+                for(Edge it2: it.getEdges())
                     annotateEdge(it2);   
-               }
-            }
-        }
+                   
     }
 
     //Edge annotation
