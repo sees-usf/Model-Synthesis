@@ -136,15 +136,16 @@ def SearchForAllSolutionsSampleSat():
 
     for dag in dags:
 
+        dag.printGraph()
+
         nodes = dag.getNodes()
         edgeVars = []
         nodeVars = []
 
         #This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i
         for i, origin in enumerate(nodes) : 
-            #maxSupport = graph.getNode(origin.getSymbolIndex()).getSupport()
-            #nodeIntVar = model.NewIntVar(0 , maxSupport, charID + str(origin.getSymbolIndex()))
-            nodeIntVar = model.NewIntVar(0 , origin.getSupport(), charID + str(origin.getSymbolIndex()))
+            maxSupport = graph.getNode(origin.getSymbolIndex()).getSupport()
+            nodeIntVar = model.NewIntVar(0 , maxSupport, charID + str(origin.getSymbolIndex()))
             nodeVars.append(nodeIntVar)
             edges = origin.getEdges()
             col = []

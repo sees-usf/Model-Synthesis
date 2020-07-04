@@ -42,30 +42,25 @@ public class PatternDetector {
 
     public void annotateDAGEdge(Edge edge){
 
-        int rootInstances = 0, sourceInstances = 0 ; //Keeps track of active instances of source nodes detected
+        int instances = 0; //Keeps track of active instances of source nodes detected
         StringTokenizer tokenizer = new StringTokenizer(trace);
-        String sourceSymbolIndex = edge.getSource().getSymbolIndex();
-        String rootSymbolIndex = graph.getRoots().get(0).getSymbolIndex(); //Source node ID
+        String symbolIndex = edge.getSource().getSymbolIndex();
+        Node root = graph.getRoots().get(0); //Source node ID
 
         while(tokenizer.hasMoreTokens()) {
 
             String token = tokenizer.nextToken(" ");
 
             if(!token.equals("-1")){
-                if(token.equals(rootSymbolIndex)){ //Create instance if token is equal to source ID
-                    rootInstances++;
-                    if(rootSymbolIndex.equals(sourceSymbolIndex))
-                        sourceInstances++;
-                }
-                else if(token.equals(sourceSymbolIndex))
-                    sourceInstances++;
-                else if (edge.getId().equals(sourceSymbolIndex + "_" + token) && rootInstances > 0 && sourceInstances > 0){ //If destination is detected, increment edge support and decrement one instance
+                if(token.equals(root.getSymbolIndex())) //Create instance if token is equal to source ID
+                    instances++;
+                else if (edge.getId().equals(symbolIndex + "_" + token) && instances != 0){ //If destination is detected, increment edge support and decrement one instance
                     edge.setEdgeSupport(edge.getEdgeSupport()+1);
-                    rootInstances--;
-                    sourceInstances--;
+                    instances--;
                 }
             }
         }
+
     }
 
     //Annotate every edge in graph
