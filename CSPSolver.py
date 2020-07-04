@@ -129,14 +129,11 @@ def SearchForAllSolutionsSampleSat():
 
     model = cp_model.CpModel()
 
-    #dags = graph.generateDAGS()
     charID = 'a'
     listOfEdgeVars = []
     listOfNodeVars = []
 
     for dag in dags:
-
-        dag.printGraph()
 
         nodes = dag.getNodes()
         edgeVars = []
@@ -144,8 +141,9 @@ def SearchForAllSolutionsSampleSat():
 
         #This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i
         for i, origin in enumerate(nodes) : 
-            maxSupport = graph.getNode(origin.getSymbolIndex()).getSupport()
-            nodeIntVar = model.NewIntVar(0 , maxSupport, charID + str(origin.getSymbolIndex()))
+            #maxSupport = graph.getNode(origin.getSymbolIndex()).getSupport()
+            #nodeIntVar = model.NewIntVar(0 , maxSupport, charID + str(origin.getSymbolIndex()))
+            nodeIntVar = model.NewIntVar(0 , origin.getSupport(), charID + str(origin.getSymbolIndex()))
             nodeVars.append(nodeIntVar)
             edges = origin.getEdges()
             col = []
@@ -202,8 +200,7 @@ def SearchForAllSolutionsSampleSat():
     
     #print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
     for node in graph.getNodes():
-        print(node.getSymbolIndex())
-        print(node.getSupport())
+        
         if graph.getRoots().contains(node):
             continue
 
@@ -216,8 +213,8 @@ def SearchForAllSolutionsSampleSat():
                         continue
                     sumIntVars += nodeVar
         model.Add(sumIntVars == node.getSupport())
-        print()
-        print(str(sumIntVars) + ' == ' + str(node.getSupport()))
+        #print()
+        #print(str(sumIntVars) + ' == ' + str(node.getSupport()))
     
     #print()
     finalEdges = []
@@ -247,7 +244,7 @@ def SearchForAllSolutionsSampleSat():
     #lastStoredChar = 'a'
     #dagSolutions = []
 
-    print(solutions)
+    #print(solutions)
 
     '''
     for solution in solutions:

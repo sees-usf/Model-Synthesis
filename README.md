@@ -22,9 +22,6 @@ Within the Main.java file, in the Main() function, there are two different defin
 "example_patterns.txt" and "single_no_interleaving.txt" contain a much larger example, solutions will continously print for
 a very long time unless a limit is specified by the user.
 
-Currently, the smaller example is the default. If you'd like to run the larger example, uncomment lines 61 and 64 in Main.java and comment out
-the other example filenames.
-
 The solutions will be displayed in the Terminal, if specified. There will be no text file or .pdf generated.
 
 Upon completion of the CSPSolver, to re-run the experiment close all terminals and re-run Main.java and repeat the above instructions.
