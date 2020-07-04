@@ -12,7 +12,7 @@ public class Graph {
     private ArrayList<Node> graph; //All nodes in graph
     private ArrayList<Node> roots; //All root nodes
     private ArrayList<Node> termNodes; //All terminal nodes
-    private ArrayList<Edge> edges;
+    private ArrayList<Edge> edges; 
 
     public Graph() {
         graph = new ArrayList<>();
@@ -235,9 +235,9 @@ public class Graph {
         
         Node v = queue.poll();
         Node copy = new Node(v);
-        v.setSupport(0);
-        v.setInDegree(0);
-        v.setOutDegree(0);
+        copy.setSupport(0);
+        copy.setInDegree(0);
+        copy.setOutDegree(0);
         copy.clearEdges();
 
         if(roots.contains(v)){

@@ -116,10 +116,9 @@ public class Main {
             if(trace.equals("\n") || trace.equals(""))
                 continue;
             
-            traces.add(trace);
-            
+            traces.add(trace);   
         }
-
+        
         fileReader.close();
     }
 

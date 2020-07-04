@@ -151,8 +151,9 @@ def SearchForAllSolutionsSampleSat():
 
             if edges.size() != 0 :
                 for j, edge in enumerate(edges):
-                    edge = edges.get(j)
-                    edgeSupport = graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()).getEdgeSupport()
+                    #edge = edges.get(j)
+                    #edgeSupport = graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()).getEdgeSupport()
+                    edgeSupport = edge.getEdgeSupport()
                     intId = charID + str(edge.getId())
                     boolId = 'b' + intId
                     edgeIntVar = model.NewIntVar(0, edgeSupport, intId)
@@ -186,7 +187,8 @@ def SearchForAllSolutionsSampleSat():
 
                 for k, edge in enumerate(edges) :
                     if edgeID == edge.getId() :
-                        edgeSupport = graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()).getEdgeSupport()
+                        #edgeSupport = graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()).getEdgeSupport()
+                        edgeSupport = edge.getEdgeSupport()
                         if edgeSupport != 0 :
                             sumIntVars += edgeVars[j][k] #The sum of all incoming edges to the node at j
             
@@ -199,7 +201,8 @@ def SearchForAllSolutionsSampleSat():
     
     #print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
     for node in graph.getNodes():
-        
+        print(node.getSymbolIndex())
+        print(node.getSupport())
         if graph.getRoots().contains(node):
             continue
 
@@ -212,8 +215,8 @@ def SearchForAllSolutionsSampleSat():
                         continue
                     sumIntVars += nodeVar
         model.Add(sumIntVars == node.getSupport())
-        #print()
-        #print(str(sumIntVars) + ' == ' + str(node.getSupport()))
+        print()
+        print(str(sumIntVars) + ' == ' + str(node.getSupport()))
     
     #print()
     finalEdges = []
