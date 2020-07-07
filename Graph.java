@@ -280,12 +280,16 @@ public class Graph {
     }
 
 
-    private boolean isRoot(Node node) {
+    public boolean isRoot(Node node) {
         for(Node root: roots)
             if(root == node)
                 return true;
 
         return false;
+    }
+
+    public ArrayList<Edge> getEdges(){
+        return edges;
     }
 
     public void addNode(Node node) {

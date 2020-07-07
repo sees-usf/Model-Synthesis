@@ -50,12 +50,12 @@ public class Main {
 
         System.out.print("Enter definition filename: ");
         defFileName = scanner.nextLine();
-        //defFileName = "example.def";
+        defFileName = "example.def";
         //defFileName = "example_patterns.txt";
         
         System.out.print("Enter trace filename: ");
         traceFileName = scanner.nextLine();
-        //traceFileName = "example_trace-1";
+        traceFileName = "example_trace-1";
         //traceFileName = "trace1.txt";
         
         scanner.close();
@@ -118,7 +118,7 @@ public class Main {
             
             traces.add(trace);   
         }
-        
+
         fileReader.close();
     }
 

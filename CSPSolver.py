@@ -201,7 +201,7 @@ def SearchForAllSolutionsSampleSat():
     #print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
     for node in graph.getNodes():
         
-        if graph.getRoots().contains(node):
+        if graph.isRoot(node):
             continue
 
         sumIntVars = 0
@@ -216,6 +216,8 @@ def SearchForAllSolutionsSampleSat():
         #print()
         #print(str(sumIntVars) + ' == ' + str(node.getSupport()))
     
+   
+    
     #print()
     finalEdges = []
 
@@ -226,9 +228,33 @@ def SearchForAllSolutionsSampleSat():
             for j in range(len(edgeVars[i])) :
                 finalEdges.append(edgeVars[i][j])
 
+    '''
+    print('Sum edge vars begins')
+    for edge in graph.getEdges():
+
+        if graph.isRoot(edge.getSource()):
+            continue
+        
+        sumEdgeVars = 0
+
+        for edgeVar in finalEdges:
+            if edge.getId() in str(edgeVar) :
+                if edge.getId() != str(edgeVar)[1:] :
+                    continue
+                sumEdgeVars += edgeVar
+
+        if not sumEdgeVars:
+            continue
+        
+        model.Add(sumEdgeVars == edge.getEdgeSupport())
+        #print()
+        #print(str(sumEdgeVars) + ' == ' + str(edge.getEdgeSupport()))
+    '''
+
     solver = cp_model.CpSolver()
     solutionPrinter = VarArraySolutionPrinterWithLimit(finalEdges)
     status = solver.SearchForAllSolutions(model, solutionPrinter)
+
 
     #Call solver until status is infeasible, every iteration adds constraints
     #based on the edges contained in the prior solution that had supports > 0
