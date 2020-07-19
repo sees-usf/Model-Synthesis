@@ -46,10 +46,13 @@ public class PatternDetector {
 
         for(Edge edge: dag.getEdges())
             annotateDAGEdge(edge);  
+        
+        dag.resetVisitedNodes();
 
     }
 
     //Need to account for different roots, which edge pertains which root. Some dags have same edges, but different roots
+    //Still needs work, remember DAGS do not have cyclic edges removed
     public void annotateDAGEdge(Edge edge){
         
         Queue<String> rootQueue = new LinkedList<String>();
@@ -77,10 +80,16 @@ public class PatternDetector {
                 if(root.equals(rootSymbolIndex))
                 {
                     edge.setEdgeSupport(edge.getEdgeSupport() + 1);
-                    edge.getDestination().setSupport(edge.getDestination().getSupport() + 1);
+                    if(!edge.getDestination().isVisited())
+                        edge.getDestination().setSupport(edge.getDestination().getSupport() + 1);
                 }
+
+                sourceInstances--;
             }   
         }
+
+        if(!edge.getDestination().isVisited())
+            edge.getDestination().setVisited(true);
     }
 
     //Annotate every edge in graph
