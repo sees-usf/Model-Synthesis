@@ -235,11 +235,7 @@ public class Graph {
             return;
         
         Node v = queue.poll();
-        Node copy = new Node(v);
-        copy.setSupport(0);
-        copy.setInDegree(0);
-        copy.setOutDegree(0);
-        copy.clearEdges();
+        Node copy = new Node(v.getSymbolIndex(), v.getMessage(), v.getCommand());
 
         if(roots.contains(v)){
             v.setVisited(true);
@@ -250,11 +246,7 @@ public class Graph {
         for(Edge edge : v.getEdges()){
             if(!edge.getDestination().isVisited()){
                 Node u = edge.getDestination();
-                Node copyNode2 = new Node(u);
-                copyNode2.setSupport(0);
-                copyNode2.setInDegree(0);
-                copyNode2.setOutDegree(0);
-                copyNode2.clearEdges();
+                Node copyNode2 = new Node(u.getSymbolIndex(), u.getMessage(), u.getCommand());
                 dag.addNode(copyNode2);
                 u.setVisited(true);
                 queue.add(u);
@@ -286,6 +278,14 @@ public class Graph {
             if(root == node)
                 return true;
 
+        return false;
+    }
+
+    public boolean isRoot(String node) {
+        for(Node root: roots)
+            if(root.getSymbolIndex().equals(node))
+                return true;
+        
         return false;
     }
 

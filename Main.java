@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -22,8 +21,8 @@ public class Main {
 
         GatewayServer gatewayServer = new GatewayServer(new Main());
         gatewayServer.start();
-        Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-
+        //Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+/*
         if (isWindows)
             Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"py CSPSolver.py\"");
         else {
@@ -34,6 +33,7 @@ public class Main {
                 System.out.println(line);
             reader.close();
         }
+        */
     }
     //Below are a list of functions that can be called within any Python script
     //that connects to the GatewayServer of this process
@@ -63,23 +63,12 @@ public class Main {
         graph.generateGraph(defFileName);
         generateTraces(traceFileName);
 
-        /*
         PatternDetector pd = new PatternDetector(traces.peek(), graph);
         pd.beginAnnotation();
         graph.printGraph();
-        */
 
-        /*
-        ArrayList<Graph> dags = graph.generateDAGS();
+        getAnnotatedDAGS();
 
-        for(Graph dag : dags){
-            pd = new PatternDetector(traces.peek(), dag);
-            pd.beginDAGAnnotation();
-            dag.printGraph();
-        }
-        */
-
-            
     }
 
     public String getTraceFileName(){
@@ -134,7 +123,7 @@ public class Main {
         dags = graph.generateDAGS();
 
         for(Graph dag : dags){
-            PatternDetector pd = new PatternDetector(traces.peek(), dag);
+            PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
             pd.beginDAGAnnotation();
             dag.printGraph();
         }
