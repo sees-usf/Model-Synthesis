@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -21,10 +22,11 @@ public class Main {
 
         GatewayServer gatewayServer = new GatewayServer(new Main());
         gatewayServer.start();
-        //Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
-/*
+        Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+
         if (isWindows)
-            Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"py CSPSolver.py\"");
+            //Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"py CSPSolver.py\"");
+            Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"python Z3Solver.py\"");
         else {
             Process process = Runtime.getRuntime().exec("python3 cspsolver.py");
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -33,7 +35,7 @@ public class Main {
                 System.out.println(line);
             reader.close();
         }
-        */
+        
     }
     //Below are a list of functions that can be called within any Python script
     //that connects to the GatewayServer of this process
@@ -62,12 +64,6 @@ public class Main {
         
         graph.generateGraph(defFileName);
         generateTraces(traceFileName);
-
-        PatternDetector pd = new PatternDetector(traces.peek(), graph);
-        pd.beginAnnotation();
-        graph.printGraph();
-
-        getAnnotatedDAGS();
 
     }
 
