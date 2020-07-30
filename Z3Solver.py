@@ -73,7 +73,7 @@ def SearchForAllSolutionsSampleSat():
                         if edgeSupport != 0 :
                             sumIntVars += edgeVars[j][k] #The sum of all incoming edges to the node at j
                             hasSum = True
-                        print(sumIntVars)
+                        #print(sumIntVars)
             if hasSum:
                 s.add(nodeVars[i] == sumIntVars)
 
@@ -95,7 +95,7 @@ def SearchForAllSolutionsSampleSat():
                     if node.getSymbolIndex() != str(nodeVar)[1:] :
                         continue
                     sumIntVars += nodeVar
-            print(sumIntVars)
+            #print(sumIntVars)
         s.add(sumIntVars == node.getSupport())
     
     finalEdges = []
@@ -104,7 +104,7 @@ def SearchForAllSolutionsSampleSat():
 
     for edgeVars in listOfEdgeVars :
         for i in range(len(edgeVars)) :
-            print(edgeVars[i])
+            #print(edgeVars[i])
             for j in range(len(edgeVars[i])) :
                 finalEdges.append(edgeVars[i][j])
     
@@ -112,16 +112,24 @@ def SearchForAllSolutionsSampleSat():
     s.check()
     old_m = s.model()
 
-    print([str(x) + " = " + str(old_m[x]) for x in finalEdges])
-    s.add(Or([ x != old_m[x] for x in finalEdges ]))
+    
+    constantEdgeVars = finalEdges.copy()
 
     #print("Beginning solution printing")
     while s.check() == sat:
         m = s.model()
         print([str(x) + " = " + str(m[x]) for x in finalEdges])
         print("----")
+
+        for edge in constantEdgeVars:
+            if str(old_m[edge]) != str(m[edge]):
+                constantEdgeVars.remove(edge)
+        
+        if not constantEdgeVars:
+            break
+
         for i, dagEdges in enumerate(listOfEdgeVars):
-            s.add(Or([ And(old_m[x] == m[x], x != m[x]) for x in dagEdges[i] ]))
+            s.add(Or([ And(old_m[x] == m[x], x != m[x]) for x in constantEdgeVars ]))
 
 #Connects to GatewayServer running in Main.java
 gateway = JavaGateway()
