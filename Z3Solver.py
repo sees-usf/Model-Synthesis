@@ -81,26 +81,26 @@ def SearchForAllSolutionsSampleSat():
         listOfEdgeVars.append(edgeVars)
         listOfNodeVars.append(nodeVars)
     
-    #print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
-    for node in graph.getNodes():
+    # print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
+    # for node in graph.getNodes():
         
-        if graph.isRoot(node):
-            continue
+    #     if graph.isRoot(node):
+    #         continue
 
-        sumIntVars = 0
+    #     sumIntVars = 0
 
-        for nodeVars in listOfNodeVars :
-            for nodeVar in nodeVars :
-                if node.getSymbolIndex() in str(nodeVar) :
-                    if node.getSymbolIndex() != str(nodeVar)[1:] :
-                        continue
-                    sumIntVars += nodeVar
-            #print(sumIntVars)
-        s.add(sumIntVars == node.getSupport())
+    #     for nodeVars in listOfNodeVars :
+    #         for nodeVar in nodeVars :
+    #             if node.getSymbolIndex() in str(nodeVar) :
+    #                 if node.getSymbolIndex() != str(nodeVar)[1:] :
+    #                     continue
+    #                 sumIntVars += nodeVar
+    #         #print(sumIntVars)
+    #     s.add(sumIntVars == node.getSupport())
     
     finalEdges = []
 
-    #print("Convert 2D array of constraints to 1D for Z3Solver")
+    print("Convert 2D array of constraints to 1D for Z3Solver")
 
     for edgeVars in listOfEdgeVars :
         for i in range(len(edgeVars)) :
@@ -108,19 +108,19 @@ def SearchForAllSolutionsSampleSat():
             for j in range(len(edgeVars[i])) :
                 finalEdges.append(edgeVars[i][j])
     
-    #print("Check the model")
+    print("Check the model")
     s.check()
     old_m = s.model()
-
     
     constantEdgeVars = finalEdges.copy()
-
-    #print("Beginning solution printing")
+    count = 0
+    print("Beginning solution printing")
     while s.check() == sat:
+        count += 1
         m = s.model()
         print([str(x) + " = " + str(m[x]) for x in finalEdges])
         print("----")
-
+        
         for edge in constantEdgeVars:
             if str(old_m[edge]) != str(m[edge]):
                 constantEdgeVars.remove(edge)
@@ -131,6 +131,7 @@ def SearchForAllSolutionsSampleSat():
         for i, dagEdges in enumerate(listOfEdgeVars):
             s.add(Or([ And(old_m[x] == m[x], x != m[x]) for x in constantEdgeVars ]))
 
+    print("Total solutions: ",count)
 #Connects to GatewayServer running in Main.java
 gateway = JavaGateway()
 
