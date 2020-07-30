@@ -27,7 +27,7 @@ def SearchForAllSolutionsSampleSat():
         edgeVars = []
         nodeVars = []
 
-        #This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i
+        #print("This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i")
         for i, origin in enumerate(nodes) : 
             nodeIntVar = Int(charID + str(origin.getSymbolIndex()))
             s.add(nodeIntVar == origin.getSupport()) if graph.isRoot(origin) else s.add(nodeIntVar <= origin.getSupport(), 0 <= nodeIntVar)
@@ -51,7 +51,7 @@ def SearchForAllSolutionsSampleSat():
                     sumIntVars += edgeVars[i][j]
                 s.add(nodeVars[i] == sumIntVars)
         
-        #This loop prepares constraints for every node i that has incoming edges
+        #print("This loop prepares constraints for every node i that has incoming edges")
         for i, destination in enumerate(nodes) :
             sumIntVars = 0;
             hasSum = False;
@@ -69,11 +69,11 @@ def SearchForAllSolutionsSampleSat():
 
                 for k, edge in enumerate(edges) :
                     if edgeID == edge.getId() :
-                        #edgeSupport = graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()).getEdgeSupport()
                         edgeSupport = edge.getEdgeSupport()
                         if edgeSupport != 0 :
                             sumIntVars += edgeVars[j][k] #The sum of all incoming edges to the node at j
                             hasSum = True
+                        print(sumIntVars)
             if hasSum:
                 s.add(nodeVars[i] == sumIntVars)
 
@@ -95,27 +95,33 @@ def SearchForAllSolutionsSampleSat():
                     if node.getSymbolIndex() != str(nodeVar)[1:] :
                         continue
                     sumIntVars += nodeVar
+            print(sumIntVars)
         s.add(sumIntVars == node.getSupport())
     
     finalEdges = []
 
-    #Convert 2D array of constraints to 1D for CSPSolver
+    #print("Convert 2D array of constraints to 1D for Z3Solver")
 
     for edgeVars in listOfEdgeVars :
         for i in range(len(edgeVars)) :
+            print(edgeVars[i])
             for j in range(len(edgeVars[i])) :
                 finalEdges.append(edgeVars[i][j])
- 
+    
+    #print("Check the model")
     s.check()
     old_m = s.model()
 
-    s.add(Or([x != old_m[x] for x in finalEdges]))
+    print([str(x) + " = " + str(old_m[x]) for x in finalEdges])
+    s.add(Or([ x != old_m[x] for x in finalEdges ]))
 
+    #print("Beginning solution printing")
     while s.check() == sat:
         m = s.model()
         print([str(x) + " = " + str(m[x]) for x in finalEdges])
         print("----")
-        s.add(Or([ And(old_m[x] == m[x], x != m[x]) for x in finalEdges ]))
+        for i, dagEdges in enumerate(listOfEdgeVars):
+            s.add(Or([ And(old_m[x] == m[x], x != m[x]) for x in dagEdges[i] ]))
 
 #Connects to GatewayServer running in Main.java
 gateway = JavaGateway()
