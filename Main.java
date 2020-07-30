@@ -121,14 +121,14 @@ public class Main {
         for(Graph dag : dags){
             PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
             pd.beginDAGAnnotation();
-            if(dag.getRoots().get(0).getSymbolIndex().equals("2")){
-                dag.printGraph();
-                Graph temp = dag;
-                dags.clear();
-                dags.add(temp);
-                System.out.println(dag.getTerminalNodes());
-                break;
-            }
+            // if(dag.getRoots().get(0).getSymbolIndex().equals("2")){
+            //     dag.printGraph();
+            //     Graph temp = dag;
+            //     dags.clear();
+            //     dags.add(temp);
+            //     System.out.println(dag.getTerminalNodes());
+            //     break;
+            // }
         }
 
         return dags;

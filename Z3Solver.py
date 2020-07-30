@@ -27,7 +27,7 @@ def SearchForAllSolutionsSampleSat():
         edgeVars = []
         nodeVars = []
 
-        #print("This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i")
+        print("This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i")
         for i, origin in enumerate(nodes) : 
             nodeIntVar = Int(charID + str(origin.getSymbolIndex()))
             s.add(nodeIntVar == origin.getSupport()) if graph.isRoot(origin) else s.add(nodeIntVar <= origin.getSupport(), 0 <= nodeIntVar)
@@ -51,7 +51,7 @@ def SearchForAllSolutionsSampleSat():
                     sumIntVars += edgeVars[i][j]
                 s.add(nodeVars[i] == sumIntVars)
         
-        #print("This loop prepares constraints for every node i that has incoming edges")
+        print("This loop prepares constraints for every node i that has incoming edges")
         for i, destination in enumerate(nodes) :
             sumIntVars = 0;
             hasSum = False;
