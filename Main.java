@@ -116,13 +116,19 @@ public class Main {
     public ArrayList<Graph> getAnnotatedDAGS() throws NoSuchMethodException, SecurityException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
-        dags = graph.generateDAGS();
+        // dags = graph.generateDAGS();
 
-        for(Graph dag : dags){
-            PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
-            pd.beginDAGAnnotation();
-            dag.printGraph();
-        }
+        // for(Graph dag : dags){
+        //     PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
+        //     pd.beginDAGAnnotation();
+        //     dag.printGraph();
+        // }
+
+        // return dags;
+
+        dags = new ArrayList<Graph>();
+        //graph.detectAndRemoveCycle();
+        dags.add(graph);
 
         return dags;
 

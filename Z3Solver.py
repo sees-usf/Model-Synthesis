@@ -46,9 +46,10 @@ def SearchForAllSolutionsSampleSat():
             edgeVars.append(col)
             
             sumIntVars = 0
-            if len(edgeVars[i]) != 0 :
+            if edgeVars[i]:
                 for j in range(len(edgeVars[i])) :
                     sumIntVars += edgeVars[i][j]
+                #print(sumIntVars, nodeVars[i])
                 s.add(nodeVars[i] == sumIntVars)
         
         #print("This loop prepares constraints for every node i that has incoming edges")
@@ -73,30 +74,30 @@ def SearchForAllSolutionsSampleSat():
                         if edgeSupport != 0 :
                             sumIntVars += edgeVars[j][k] #The sum of all incoming edges to the node at j
                             hasSum = True
-                        #print(sumIntVars)
             if hasSum:
+                #print(sumIntVars, nodeVars[i])
                 s.add(nodeVars[i] == sumIntVars)
 
         charID = chr(ord(charID)+1)
         listOfEdgeVars.append(edgeVars)
         listOfNodeVars.append(nodeVars)
     
-    #print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
-    for node in graph.getNodes():
+    # #print('Additional constraints created for DAGs, identical nodes across DAGs must have supports that sum up to the total node support of original graph\'s node')
+    # for node in graph.getNodes():
         
-        if graph.isRoot(node):
-            continue
+    #     if graph.isRoot(node):
+    #         continue
 
-        sumIntVars = 0
+    #     sumIntVars = 0
 
-        for nodeVars in listOfNodeVars :
-            for nodeVar in nodeVars :
-                if node.getSymbolIndex() in str(nodeVar) :
-                    if node.getSymbolIndex() != str(nodeVar)[1:] :
-                        continue
-                    sumIntVars += nodeVar
-            #print(sumIntVars)
-        s.add(sumIntVars == node.getSupport())
+    #     for nodeVars in listOfNodeVars :
+    #         for nodeVar in nodeVars :
+    #             if node.getSymbolIndex() in str(nodeVar) :
+    #                 if node.getSymbolIndex() != str(nodeVar)[1:] :
+    #                     continue
+    #                 sumIntVars += nodeVar
+    #         print(sumIntVars, node.getSymbolIndex())
+    #     s.add(sumIntVars == node.getSupport())
     
     finalEdges = []
 
@@ -111,15 +112,22 @@ def SearchForAllSolutionsSampleSat():
     #print("Check the model")
     s.check()
     old_m = s.model()
-
-    
+   
     constantEdgeVars = finalEdges.copy()
-
+    count = 0
     #print("Beginning solution printing")
+    f = open("results.txt", "w")
+
     while s.check() == sat:
         m = s.model()
-        print([str(x) + " = " + str(m[x]) for x in finalEdges])
-        print("----")
+        #print([str(x) + " = " + str(m[x]) for x in finalEdges])
+        for x in finalEdges:
+            print(str(x) + " = " + str(m[x]), file=f)
+            #f.write(str(x) + " = " + str(m[x]), end="\n")
+        print("----", file=f)
+        #f.write("----")
+
+        count += 1
 
         for edge in constantEdgeVars:
             if str(old_m[edge]) != str(m[edge]):
@@ -131,6 +139,8 @@ def SearchForAllSolutionsSampleSat():
         for i, dagEdges in enumerate(listOfEdgeVars):
             s.add(Or([ And(old_m[x] == m[x], x != m[x]) for x in constantEdgeVars ]))
 
+    print("Total Solutions: ", count)
+    f.close()
 #Connects to GatewayServer running in Main.java
 gateway = JavaGateway()
 
@@ -154,7 +164,7 @@ while bool(gateway.entry_point.hasTraces()) :
     nodes = graph.getNodes()
     dags = gateway.entry_point.getAnnotatedDAGS()
     SearchForAllSolutionsSampleSat()
-    graph.resetGraphSupport()
+    #graph.resetGraphSupport()
     print()
     print('End of Trace ' + str(count) + ' Solutions\n')
     count += 1
