@@ -108,7 +108,9 @@ def SearchForAllSolutionsSampleSat():
  
     s.check()
     old_m = s.model()
-
+    print([str(x) + " = " + str(m[x]) for x in finalEdges])
+    print("----")
+    
     s.add(Or([x != old_m[x] for x in finalEdges]))
 
     while s.check() == sat:
