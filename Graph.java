@@ -220,7 +220,7 @@ public class Graph {
             DAGUtil(dag, traversal);
             dag.generateEdges();
             dag.detectAndRemoveCycle();
-            dag.getRoots().get(0).setSupport(root.getSupport());
+            //dag.getRoots().get(0).setSupport(root.getSupport());
             dags.add(dag);
         }
 

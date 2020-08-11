@@ -37,15 +37,18 @@ public class PatternDetector {
             if(token.equals("-2"))
                 break;
             
-            if(dag.getNode(token) == null || token.equals("-1")) //Increments node support by one if a node is detected
+            if(dag.getNode(token) == null || token.equals("-1")) 
                 continue;
+
+            //temp
+            dag.getNode(token).setSupport(dag.getNode(token).getSupport() + 1);
             
             trace += token + " ";
 
         }
 
         for(Edge edge: dag.getEdges())
-            annotateDAGEdge(edge);  
+            annotateDAGEdge(edge);
         
         dag.resetVisitedNodes();
 
@@ -80,8 +83,8 @@ public class PatternDetector {
                 if(root.equals(rootSymbolIndex))
                 {
                     edge.setEdgeSupport(edge.getEdgeSupport() + 1);
-                    if(!edge.getDestination().isVisited())
-                        edge.getDestination().setSupport(edge.getDestination().getSupport() + 1);
+                    //if(!edge.getDestination().isVisited())
+                    //    edge.getDestination().setSupport(edge.getDestination().getSupport() + 1);
                 }
 
                 sourceInstances--;

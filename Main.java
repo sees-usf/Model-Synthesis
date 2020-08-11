@@ -22,19 +22,18 @@ public class Main {
 
         GatewayServer gatewayServer = new GatewayServer(new Main());
         gatewayServer.start();
-        Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+        //Boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
-        if (isWindows)
-            //Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"py CSPSolver.py\"");
-            Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"python Z3Solver.py\"");
-        else {
-            Process process = Runtime.getRuntime().exec("python3 cspsolver.py");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null)
-                System.out.println(line);
-            reader.close();
-        }
+        // if (isWindows)
+        //     Runtime.getRuntime().exec("cmd /c start cmd.exe /K \"python Z3Solver.py\"");
+        // else {
+        //     Process process = Runtime.getRuntime().exec("python3 cspsolver.py");
+        //     BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        //     String line;
+        //     while ((line = reader.readLine()) != null)
+        //         System.out.println(line);
+        //     reader.close();
+        // }
         
     }
     //Below are a list of functions that can be called within any Python script
@@ -52,12 +51,12 @@ public class Main {
 
         System.out.print("Enter definition filename: ");
         defFileName = scanner.nextLine();
-        //defFileName = "example.def";
+        defFileName = "example.def";
         //defFileName = "example_patterns.txt";
         
         System.out.print("Enter trace filename: ");
         traceFileName = scanner.nextLine();
-        //traceFileName = "example_trace-1";
+        traceFileName = "example_trace-1";
         //traceFileName = "trace1.txt";
         
         scanner.close();
@@ -116,21 +115,29 @@ public class Main {
     public ArrayList<Graph> getAnnotatedDAGS() throws NoSuchMethodException, SecurityException, InstantiationException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
-        // dags = graph.generateDAGS();
-
-        // for(Graph dag : dags){
-        //     PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
-        //     pd.beginDAGAnnotation();
-        //     dag.printGraph();
-        // }
-
-        // return dags;
-
+        //dags = graph.generateDAGS();
         dags = new ArrayList<Graph>();
-        //graph.detectAndRemoveCycle();
-        dags.add(graph);
+        int count = 0;
+
+        for(Graph dag : graph.generateDAGS()){
+            if(count == 2)
+                break;
+            PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
+            pd.beginDAGAnnotation();
+            dag.printGraph();
+            dags.add(dag);
+            count++;
+        }
+
+        graph.printGraph();
 
         return dags;
+
+        // dags = new ArrayList<Graph>();
+        // graph.detectAndRemoveCycle();
+        // dags.add(graph);
+
+        // return dags;
 
     }
 }
