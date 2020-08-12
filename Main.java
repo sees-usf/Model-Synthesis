@@ -52,17 +52,18 @@ public class Main {
         System.out.print("Enter definition filename: ");
         defFileName = scanner.nextLine();
         defFileName = "example.def";
-        //defFileName = "example_patterns.txt";
+        defFileName = "example_patterns.txt";
         
         System.out.print("Enter trace filename: ");
         traceFileName = scanner.nextLine();
         traceFileName = "example_trace-1";
-        //traceFileName = "trace1.txt";
+        traceFileName = "trace1.txt";
         
         scanner.close();
         
         graph.generateGraph(defFileName);
         generateTraces(traceFileName);
+        graph.detectAndRemoveCycle();
 
     }
 
@@ -132,12 +133,6 @@ public class Main {
         graph.printGraph();
 
         return dags;
-
-        // dags = new ArrayList<Graph>();
-        // graph.detectAndRemoveCycle();
-        // dags.add(graph);
-
-        // return dags;
 
     }
 }

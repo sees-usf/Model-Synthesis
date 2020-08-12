@@ -40,7 +40,7 @@ public class PatternDetector {
             if(dag.getNode(token) == null || token.equals("-1")) 
                 continue;
 
-            //temp
+            //temporary, this is the original way we calculated node supports
             dag.getNode(token).setSupport(dag.getNode(token).getSupport() + 1);
             
             trace += token + " ";

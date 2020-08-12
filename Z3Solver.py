@@ -129,7 +129,10 @@ def SearchForAllSolutionsSampleSat():
                 finalEdges.append(edgeVars[i][j])
     
     print("Check the model")
+    
+    print(s.to_smt2())
     print(s.check())
+      
     old_m = s.model()
    
     constantEdgeVars = finalEdges.copy()
@@ -179,12 +182,11 @@ while bool(gateway.entry_point.hasTraces()) :
     print('Analyzing Trace ' + str(count) + ' Solutions\n')
     gateway.entry_point.annotateGraph()
     graph = gateway.entry_point.getGraph()
-    graph.printGraph();
     nodes = graph.getNodes()
     dags = gateway.entry_point.getAnnotatedDAGS()
-    graph.detectAndRemoveCycle()
+    #graph.detectAndRemoveCycle()
     SearchForAllSolutionsSampleSat()
-    #graph.resetGraphSupport()
+    graph.resetGraphSupport()
     print()
     print('End of Trace ' + str(count) + ' Solutions\n')
     count += 1
@@ -193,9 +195,7 @@ while bool(gateway.entry_point.hasTraces()) :
 print()
 print('All traces have been analyzed. Please re-run Main.java to perform experiments again.')
 
-#pdf.close()
-#plt.show()
-#multipage('test')           
+       
 
 
 
