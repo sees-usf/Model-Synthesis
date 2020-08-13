@@ -63,7 +63,7 @@ public class Main {
         
         graph.generateGraph(defFileName);
         generateTraces(traceFileName);
-        graph.detectAndRemoveCycle();
+        //graph.detectAndRemoveCycle();
 
     }
 
@@ -118,19 +118,20 @@ public class Main {
 
         //dags = graph.generateDAGS();
         dags = new ArrayList<Graph>();
-        int count = 0;
 
         for(Graph dag : graph.generateDAGS()){
-            if(count == 2)
-                break;
-            PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
-            pd.beginDAGAnnotation();
+           
+            //PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
+            //pd.beginDAGAnnotation();
+            for(Edge edge : dag.getEdges())
+                if(graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()) != null)
+                    edge.setEdgeSupport(graph.getEdge(edge.getSource().getSymbolIndex(), edge.getDestination().getSymbolIndex()).getEdgeSupport());
+            for(Node node : dag.getNodes())
+                if(graph.getNode(node.getSymbolIndex()) != null)
+                    node.setSupport(graph.getNode(node.getSymbolIndex()).getSupport());
             dag.printGraph();
             dags.add(dag);
-            count++;
         }
-
-        graph.printGraph();
 
         return dags;
 

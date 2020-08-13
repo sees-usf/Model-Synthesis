@@ -15,11 +15,13 @@ from z3 import *
 def SearchForAllSolutionsSampleSat():
     # Creates the model.
 
+    set_param(proof=True)
     s = Solver()
 
     charID = 'a'
     listOfEdgeVars = []
     listOfNodeVars = []
+    listOfBools = []
 
     print("Generate DAG vars and constraints")
     for dag in dags:
@@ -30,9 +32,11 @@ def SearchForAllSolutionsSampleSat():
 
         #print("This loop prepares node variables, edge variables, and also all constraints related to the outgoing edges of each node i")
         for i, origin in enumerate(nodes) : 
-            nodeIntVar = Int(charID + str(origin.getSymbolIndex()))
-            s.add(nodeIntVar == origin.getSupport()) if graph.isRoot(origin) else s.add(nodeIntVar <= origin.getSupport(), 0 <= nodeIntVar)
+            nodeId = charID + str(origin.getSymbolIndex())
+            nodeIntVar = Int(nodeId)
+            s.assert_and_track(nodeIntVar == origin.getSupport(), 'b' + nodeId) if graph.isRoot(origin) else s.assert_and_track(And(nodeIntVar <= origin.getSupport(), 0 <= nodeIntVar), 'b' + nodeId)
             nodeVars.append(nodeIntVar)
+            listOfBools.append('b' + nodeId)
             edges = origin.getEdges()
             col = []
 
@@ -41,17 +45,21 @@ def SearchForAllSolutionsSampleSat():
                     edgeSupport = edge.getEdgeSupport()
                     edgeId = charID + str(edge.getId())
                     edgeIntVar = Int(edgeId)
-                    s.add(edgeIntVar <= edgeSupport, 0 <= edgeIntVar)
+                    s.assert_and_track(And(edgeIntVar <= edgeSupport, 0 <= edgeIntVar), 'b' + edgeId)
+                    listOfBools.append('b' + edgeId)
                     col.append(edgeIntVar)
 
             edgeVars.append(col)
             
+            #Prepares constraints for every node i that has outgoing edges
             sumIntVars = 0
             if edgeVars[i]:
                 for j in range(len(edgeVars[i])) :
                     sumIntVars += edgeVars[i][j]
                 #print(sumIntVars, nodeVars[i])
-                s.add(nodeVars[i] == sumIntVars)
+                s.assert_and_track(nodeVars[i] == sumIntVars, 'out' + str(nodeVars[i]))
+                listOfBools.append('out' + str(nodeVars[i]))
+
         
         #print("This loop prepares constraints for every node i that has incoming edges")
         for i, destination in enumerate(nodes) :
@@ -77,7 +85,8 @@ def SearchForAllSolutionsSampleSat():
                             hasSum = True
             if hasSum:
                 #print(sumIntVars, nodeVars[i])
-                s.add(nodeVars[i] == sumIntVars)
+                s.assert_and_track(nodeVars[i] == sumIntVars, 'in' + str(nodeVars[i]))
+                listOfBools.append('in' + str(nodeVars[i]))
 
         charID = chr(ord(charID)+1)
         listOfEdgeVars.append(edgeVars)
@@ -99,8 +108,9 @@ def SearchForAllSolutionsSampleSat():
                     sumIntVars += nodeVar
             #print(sumIntVars, node.getSymbolIndex())
         if str(sumIntVars) != "0":
-            s.add(sumIntVars == node.getSupport())
-    
+            s.assert_and_track(sumIntVars == node.getSupport(), 'node' + node.getSymbolIndex())
+            listOfBools.append('node' + node.getSymbolIndex()) 
+
     print('Additional constraints created for DAGs, identical edges across DAGs must have supports that sum up to the total edge support of original graph\'s edge')
     #may need to add additional check related to edges not found in dags? shouldnt be there though
     for edge in graph.getEdges() :
@@ -116,8 +126,9 @@ def SearchForAllSolutionsSampleSat():
                         sumIntVars += edgeVar
                         
         if str(sumIntVars) != "0":
-            s.add(sumIntVars <= edge.getEdgeSupport(), sumIntVars >= 0)
-    
+            s.assert_and_track(And(sumIntVars <= edge.getEdgeSupport(), sumIntVars >= 0), 'edge' + edge.getId())
+            listOfBools.append('edge' + edge.getId())
+
     finalEdges = []
 
     #print("Convert 2D array of constraints to 1D for Z3Solver")
@@ -131,14 +142,15 @@ def SearchForAllSolutionsSampleSat():
     print("Check the model")
     
     print(s.check())
-      
-    old_m = s.model()
-   
-    constantEdgeVars = finalEdges.copy()
-    count = 0
+
+    if s.check() == unsat:
+        print(s.unsat_core())
 
     #print("Beginning solution printing")
     f = open("results.txt", "w")
+    count = 0
+    constantEdgeVars = finalEdges.copy()
+    old_m = s.model()
 
     while s.check() == sat:
         m = s.model()
