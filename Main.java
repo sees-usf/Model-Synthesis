@@ -53,12 +53,12 @@ public class Main {
         System.out.print("Enter definition filename: ");
         defFileName = scanner.nextLine();
         //defFileName = "example.def";
-        //defFileName = "example_patterns.txt";
+        defFileName = "example_patterns.txt";
         
         System.out.print("Enter trace filename: ");
         traceFileName = scanner.nextLine();
         //traceFileName = "example_trace-1";
-        //traceFileName = "trace1.txt";
+        traceFileName = "trace1.txt";
         
         scanner.close();
         
@@ -121,14 +121,14 @@ public class Main {
         for(Graph dag : dags){
             PatternDetector pd = new PatternDetector(traces.peek(), dag, graph);
             pd.beginDAGAnnotation();
-            // if(dag.getRoots().get(0).getSymbolIndex().equals("2")){
-            //     dag.printGraph();
-            //     Graph temp = dag;
-            //     dags.clear();
-            //     dags.add(temp);
-            //     System.out.println(dag.getTerminalNodes());
-            //     break;
-            // }
+            if(dag.getRoots().get(0).getSymbolIndex().equals("0")){
+                dag.printGraph();
+                Graph temp = dag;
+                dags.clear();
+                dags.add(temp);
+                System.out.println(dag.getTerminalNodes());
+                break;
+            }
         }
 
         return dags;

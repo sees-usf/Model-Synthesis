@@ -111,8 +111,6 @@ def SearchForAllSolutionsSampleSat():
     print("Check the model")
     s.check()
     old_m = s.model()
-    print([str(x) + " = " + str(m[x]) for x in finalEdges])
-    print("----")
     
     constantEdgeVars = finalEdges.copy()
     count = 0
