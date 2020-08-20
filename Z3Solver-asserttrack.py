@@ -147,7 +147,7 @@ def SearchForAllSolutionsSampleSat():
         print(s.unsat_core())
 
     #print("Beginning solution printing")
-    f = open("results.txt", "w")
+    f = open("results-assert.txt", "w")
     count = 0
     constantEdgeVars = finalEdges.copy()
     old_m = s.model()

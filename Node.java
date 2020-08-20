@@ -20,7 +20,6 @@ public class Node {
         // totalSupport = 0;
         this.depth = 0;
         this.isVisited = false;
-        this.depth = 0;
         this.inDegree = 0; //Number of edges incoming
         this.outDegree = 0; //Number of edges outgoing
         this.previous = null;
