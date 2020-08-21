@@ -11,6 +11,7 @@
 # Press the green button in the gutter to run the script.
 from src.annotator.annotator import GraphAnnotator
 from src.graph.graph import Graph
+from src.solver.z3solver import Z3Solver
 
 
 def prepare_traces(filename):
@@ -27,14 +28,13 @@ if __name__ == '__main__':
                    'Project\\SeqMining-Python\\src\\main\\example.def'  # str(input())
     print('Please enter trace filename: ')
     trace_filename = 'C:\\Users\\abdel\\OneDrive\\Documents\\GitHub\\REU ' \
-                     'Project\\SeqMining-Python\\src\\main\\trace1.txt'  # str(input())
+                     'Project\\SeqMining-Python\\src\\main\\example_trace-1'  # str(input())
 
     graph.generate_graph(def_filename)
 
     traces = prepare_traces(trace_filename)
     annotator = GraphAnnotator(traces[0], graph)
     annotator.annotate()
-    graph.print_graph()
 
     dags = graph.generate_dags()
 
@@ -42,9 +42,10 @@ if __name__ == '__main__':
         annotator = GraphAnnotator(traces[0], dag)
         annotator.annotate()
         dag.remove_cycles()
-        dag.print_graph()
+
+    graph.remove_cycles()
+    z3 = Z3Solver(graph, dags)
+
+    z3.generate_split_solutions()
 
 
-
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
