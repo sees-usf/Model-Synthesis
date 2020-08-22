@@ -25,11 +25,11 @@ if __name__ == '__main__':
     graph = Graph()
     print('Please enter node definition filename: ')
     # def_filename = 'C:\\Users\\abdel\\OneDrive\\Documents\\GitHub\\REU ' \
-    #               'Project\\SeqMining-Python\\src\\main\\example.def'  # str(input())
+    #               'Project\\SeqMining-Python\\src\\main\\medium_ex.txt'  # str(input())
     def_filename = str(input())
     print('Please enter trace filename: ')
     # trace_filename = 'C:\\Users\\abdel\\OneDrive\\Documents\\GitHub\\REU ' \
-    #                 'Project\\SeqMining-Python\\src\\main\\example_trace-1'  # str(input())
+    #                 'Project\\SeqMining-Python\\src\\main\\small_trace.txt'  # str(input())
     trace_filename = str(input())
     graph.generate_graph(def_filename)
 
