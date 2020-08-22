@@ -1,4 +1,3 @@
-from collections import defaultdict
 from copy import deepcopy
 
 from z3 import *
@@ -180,7 +179,14 @@ class Z3Solver:
             self.solver.add(
                 Or([And(old_m[edge_var] == m[edge_var], edge_var != m[edge_var]) for edge_var in edge_vars.values()]))
 
-        for solution in self.solutions:
+        for i, solution in enumerate(self.solutions):
+            print()
+            print('Solution ' + str(i+1))
+            print()
+            char_id = 'a'
             for edge_var in solution_edge_vars.values():
+                if char_id != str(edge_var)[0]:
+                    char_id = str(edge_var)[0]
+                    print()
                 if str(solution[edge_var]) != '0':
-                    print(str(edge_var) + ' = ' + str(solution[edge_var]))
+                    print(str(edge_var) + ' with edge support of ' + str(solution[edge_var]))

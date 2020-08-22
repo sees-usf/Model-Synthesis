@@ -24,10 +24,10 @@ def prepare_traces(filename):
 if __name__ == '__main__':
     graph = Graph()
 
-    print('Please enter node definition filename: ')
+    print('Please enter message definition filename: ')
     def_filename = str(input())
-
-    print('Please enter trace filename: ')
+    print()
+    print('Please enter execution trace filename: ')
     trace_filename = str(input())
 
     graph.generate_graph(def_filename)

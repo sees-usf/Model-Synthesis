@@ -1,0 +1,85 @@
+# Sequential Pattern Mining using Data Mining Techniques
+
+**Project Objective:**
+
+To develop methods and algorithms for mining message flow specifications using execution traces of SoC designs.
+
+**Project Description:** 
+
+This repository reflects the ongoing development of the specification mining algorithm we are working on. We aim for mining a satisfactory number of rules from execution traces which will capture valid sequence of execution for any trigger. There have been many endeavors to determine correct specifications for reactive systems but none of them obliterated the need for further work in this domain. The current advancement in data mining algorithms has also got tremendous interest from specification mining researchers. Many researchers these days are working on the existing data mining algorithms to make them good alternatives to determine an efficient and reliable set of specifications for reactive systems. We also set a goal to utilize state of the art DM techniques to mine specifications in a bigger scale.   
+
+*On-going, more updates will come soon*
+
+**Required Installation:** 
+
+* The program requires the installation of the Microsoft Z3 Solver, the 
+NLTK toolset, and Multiple Dispatch. 
+
+```
+pip install z3-solver
+pip install nltk
+pip install multipledispatch
+```
+* The code base is written in Python 3.
+The project is developed using the Jetbrains PyCharm 2020 IDE.
+
+**User Manual:** 
+
+* *Work currently in progress, this section will be updated as more features are added to the program*
+
+* The run script for this program is named "main.py" simply execute this script
+to start the program.
+
+```
+python main.py
+```
+
+* Place message definition text files in the directory called "definitions", and place
+execution trace files in the directory called "traces". There are example files in each directory
+for reference on how they should be formatted.
+
+* Once the program is running, you will prompted to enter the relevant file names.
+Here is an example of how to enter the filenames:
+
+```
+Please enter node definition filename:
+./definitions/medium_def.txt
+
+Please enter trace filename:
+./traces/medium_trace.txt
+
+```
+* The solver will then begin to process the information and its output will
+be a UML diagram of individually mined sequences generated from the solutions
+given from the Z3 solver. Currently, the output is a text representation of edges
+found that satisfy the constraints encoded. This will be updated very soon.
+
+```
+Solution 1
+
+a38_10 with edge support of 30
+a10_17 with edge support of 10
+a10_27 with edge support of 20
+a15_23 with edge support of 20
+a17_19 with edge support of 10
+a27_15 with edge support of 20
+a27_41 with edge support of 10
+a23_40 with edge support of 2
+a23_41 with edge support of 18
+a19_27 with edge support of 10
+
+b39_10 with edge support of 30
+b10_17 with edge support of 30
+b17_19 with edge support of 30
+b27_40 with edge support of 28
+b27_41 with edge support of 2
+b19_27 with edge support of 30
+
+Solution 2
+
+...
+
+```
+
+* The program then terminates, to re-run the program simply restart from the first step
+of the user manual.
