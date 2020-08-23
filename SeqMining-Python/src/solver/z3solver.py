@@ -38,13 +38,11 @@ class Z3Solver:
         self.node_variables_2D_dict[graphID] = node_vars
 
     def create_vars_and_outgoing_edge_constraints(self, graph, graphID, nodes, edge_vars, node_vars):
-        # print("This loop prepares node variables, edge variables, and also all constraints related to the outgoing
-        # edges of each node i")
         for origin in nodes.values():
             nodeID = graphID + str(origin)
             node_int_var = Int(nodeID)
             self.solver.add(node_int_var == origin.get_support()) if graph.is_root(origin) else self.solver.add(
-                node_int_var <= origin.get_support(), 0 <= node_int_var)
+                node_int_var <= origin.get_support(), node_int_var >= 0)
             node_vars[nodeID] = node_int_var
             edges = origin.get_edges().values()
 
@@ -54,7 +52,7 @@ class Z3Solver:
                     edge_support = edge.get_edge_support()
                     edgeID = graphID + str(edge)
                     edge_int_var = Int(edgeID)
-                    self.solver.add(edge_int_var <= edge_support, 0 <= edge_int_var)
+                    self.solver.add(edge_int_var <= edge_support, edge_int_var >= 0)
                     node_edge_vars[edgeID] = edge_int_var
 
                 sum_int_vars = None
@@ -64,13 +62,11 @@ class Z3Solver:
                         sum_int_vars = edge_var
                     else:
                         sum_int_vars += edge_var
-                # print(sum_int_vars, node_vars[i])
 
                 self.solver.add(node_vars[nodeID] == sum_int_vars)
                 edge_vars[nodeID] = node_edge_vars
 
     def create_incoming_edge_constraints(self, graphID, nodes, edge_vars, node_vars):
-        # print("This loop prepares constraints for every node i that has incoming edges")
         for destination in nodes.values():
             sum_int_vars = None
             destinationID = graphID + str(destination)
@@ -97,6 +93,7 @@ class Z3Solver:
                 self.solver.add(node_vars[destinationID] == sum_int_vars)
 
     def create_unified_constraints(self):
+        pass
         self.create_unified_node_constraints()
         self.create_unified_edge_constraints()
 
@@ -125,6 +122,9 @@ class Z3Solver:
 
             sum_int_vars = None
 
+            if self.graph.is_root(edge.get_origin()):
+                continue
+
             for dag_key in self.edge_variables_3D_dict:
                 nodeID = dag_key + str(edge.get_origin())
 
@@ -149,8 +149,8 @@ class Z3Solver:
         if self.solver.check() == unsat:
             print('The constraints encoded are not satisfiable')
             print()
-            for x in self.solver.assertions():
-                print(x)
+            # for x in self.solver.assertions():
+            #    print(repr(x))
             return
 
         edge_vars = {}
@@ -181,7 +181,7 @@ class Z3Solver:
 
         for i, solution in enumerate(self.solutions):
             print()
-            print('Solution ' + str(i+1))
+            print('Solution ' + str(i + 1))
             print()
             char_id = 'a'
             for edge_var in solution_edge_vars.values():
