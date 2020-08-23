@@ -9,6 +9,19 @@ class SolutionGenerator:
         self.plantuml = PlantUML()
         self.sequences = []
 
+    def generate_solutions(self):
+        self.extract_sequences()
+        self.generate_plantuml_pngs()
+        self.generate_solution_file()
 
+    def extract_sequences(self):
+        pass
 
+    def generate_plantuml_pngs(self):
+        pass
+
+    def generate_solution_file(self):
+        pass
+    
+    
 
