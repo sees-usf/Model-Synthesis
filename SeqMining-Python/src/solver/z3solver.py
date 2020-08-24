@@ -1,4 +1,4 @@
-from copy import deepcopy
+import copy
 
 from z3 import *
 
@@ -23,7 +23,7 @@ class Z3Solver:
         self.solve()
 
     def generate_monolithic_solutions(self):
-        self.create_vars_and_edge_constraints(self.graph, '')
+        self.create_vars_and_edge_constraints(self.graph, 'x')
         self.solve()
 
     def create_vars_and_edge_constraints(self, graph, graphID):
@@ -122,8 +122,8 @@ class Z3Solver:
 
             sum_int_vars = None
 
-            if self.graph.is_root(edge.get_origin()):
-                continue
+            # if self.graph.is_root(edge.get_origin()):
+            #     continue
 
             for dag_key in self.edge_variables_3D_dict:
                 nodeID = dag_key + str(edge.get_origin())
@@ -160,7 +160,7 @@ class Z3Solver:
                 for edge_var_key in self.edge_variables_3D_dict[dag_key][node_key]:
                     edge_vars[edge_var_key] = self.edge_variables_3D_dict[dag_key][node_key][edge_var_key]
 
-        solution_edge_vars = deepcopy(edge_vars)
+        solution_edge_vars = copy.copy(edge_vars)
 
         old_m = self.solver.model()
 
@@ -172,12 +172,17 @@ class Z3Solver:
             m = self.solver.model()
             self.solutions.append(m)
 
+            # self.solver.add(
+            #     Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in edge_vars.values()]))
+
             for edge_var in edge_vars.values():
                 if old_m[edge_var] is m[edge_var]:
                     edge_vars.pop(str(edge_var), None)
 
             self.solver.add(
-                Or([And(old_m[edge_var] == m[edge_var], edge_var != m[edge_var]) for edge_var in edge_vars.values()]))
+                Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in edge_vars.values()]))
+
+        print(len(self.solver.assertions()))
 
         for i, solution in enumerate(self.solutions):
             print()

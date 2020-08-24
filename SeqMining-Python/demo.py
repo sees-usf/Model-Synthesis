@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     annotator = GraphAnnotator(traces[0], graph)
     annotator.annotate()
-    # graph.print_graph()
+    graph.print_graph()
 
     dags = graph.generate_dags()
 
