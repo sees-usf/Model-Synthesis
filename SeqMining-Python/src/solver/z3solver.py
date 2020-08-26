@@ -93,7 +93,6 @@ class Z3Solver:
                 self.solver.add(node_vars[destinationID] == sum_int_vars)
 
     def create_unified_constraints(self):
-        pass
         self.create_unified_node_constraints()
         self.create_unified_edge_constraints()
 
@@ -141,7 +140,7 @@ class Z3Solver:
                 else:
                     sum_int_vars += self.edge_variables_3D_dict[dag_key][nodeID][edgeID]
 
-            if sum_int_vars is not None:
+            if sum_int_vars is not None and str(sum_int_vars).__contains__('+'):
                 self.solver.add(sum_int_vars <= edge.get_edge_support(), sum_int_vars >= 0)
 
     def solve(self):
@@ -175,23 +174,24 @@ class Z3Solver:
             # self.solver.add(
             #     Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in edge_vars.values()]))
 
-            for edge_var in edge_vars.values():
-                if old_m[edge_var] is m[edge_var]:
+            for edge_var in solution_edge_vars.values():
+                if old_m[edge_var] is not m[edge_var]:
                     edge_vars.pop(str(edge_var), None)
 
             self.solver.add(
                 Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in edge_vars.values()]))
 
-        print(len(self.solver.assertions()))
+        # for i, solution in enumerate(self.solutions):
+        #     print()
+        #     print('Solution ' + str(i + 1))
+        #     print()
+        #     char_id = 'a'
+        #     for edge_var in solution_edge_vars.values():
+        #         if char_id != str(edge_var)[0]:
+        #             char_id = str(edge_var)[0]
+        #             print()
+        #         if str(solution[edge_var]) != '0':
+        #             print(str(edge_var) + ' with edge support of ' + str(solution[edge_var]))
 
-        for i, solution in enumerate(self.solutions):
-            print()
-            print('Solution ' + str(i + 1))
-            print()
-            char_id = 'a'
-            for edge_var in solution_edge_vars.values():
-                if char_id != str(edge_var)[0]:
-                    char_id = str(edge_var)[0]
-                    print()
-                if str(solution[edge_var]) != '0':
-                    print(str(edge_var) + ' with edge support of ' + str(solution[edge_var]))
+    def get_solutions(self):
+        return self.solutions

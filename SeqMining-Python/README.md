@@ -13,13 +13,13 @@ This repository reflects the ongoing development of the specification mining alg
 **Required Installation:** 
 
 * The program requires the installation of the Microsoft Z3 Solver, the 
-NLTK toolset, PlantUML, and Multiple Dispatch. 
+NLTK toolset, PlantWeb, and Multiple Dispatch. 
 
 ```
 pip install z3-solver
 pip install nltk
 pip install multipledispatch
-pip install plantuml
+pip install plantweb
 ```
 * The code base is written in Python 3.
 The project is developed using the Jetbrains PyCharm 2020 IDE.

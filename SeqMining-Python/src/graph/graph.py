@@ -144,6 +144,9 @@ class Graph:
     def add_terminal_node(self, node):
         self.terminal_nodes[str(node)] = node
 
+    def is_terminal_node(self, node):
+        return node in self.terminal_nodes.values() or str(node) in self.terminal_nodes
+
     def get_terminal_nodes(self):
         return self.terminal_nodes
 

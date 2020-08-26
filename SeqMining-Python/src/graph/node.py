@@ -16,6 +16,9 @@ class Node:
         self.out_degree = 0
         self.previous = None
 
+    def __str__(self):
+        return self.symbol_index
+
     def get_symbol_index(self):
         return self.symbol_index
 
@@ -23,7 +26,7 @@ class Node:
         return self.message
 
     def get_command(self):
-        return self.message
+        return self.command
 
     def get_edges(self):
         return self.edges

@@ -1,5 +1,8 @@
+import os
+
 from src.annotator.annotator import GraphAnnotator
 from src.graph.graph import Graph
+from src.sequence_printer.sequence_printer import SequencePrinter
 from src.solver.z3solver import Z3Solver
 
 
@@ -11,7 +14,8 @@ def prepare_traces(filename):
 
 
 if __name__ == '__main__':
-
+    print('Sequence Mining Tool by USF')
+    print()
     print('Which message definition example would you like to run?')
     print()
     print('1. Small example')
@@ -41,7 +45,6 @@ if __name__ == '__main__':
 
     annotator = GraphAnnotator(traces[0], graph)
     annotator.annotate()
-    graph.print_graph()
 
     dags = graph.generate_dags()
 
@@ -71,3 +74,10 @@ if __name__ == '__main__':
     else:
         print('Run the script again and enter the correct option for the constraint encoding strategy.')
         exit()
+    print()
+    solution_dir_name = input('Enter a directory name for the set of solutions that will be generated: ')
+    print()
+    abs_path = os.path.dirname(os.path.abspath(__file__))
+    printer = SequencePrinter(z3.get_solutions(), abs_path, solution_dir_name, graph)
+    printer.generate_solutions()
+    print('Sequences have been successfully mined and converted to PlantUML diagrams.')
