@@ -166,8 +166,13 @@ class Graph:
         edge.get_origin().remove_edge(edge)
         self.edges.pop(str(edge), None)
 
+    @dispatch(object, object)
     def get_edge(self, origin, destination):
         return self.edges[str(origin) + '_' + str(destination)]
+
+    @dispatch(object)
+    def get_edge(self, edge):
+        return self.edges[str(edge)]
 
     def get_edges(self):
         return self.edges

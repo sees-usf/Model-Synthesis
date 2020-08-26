@@ -14,7 +14,7 @@ def prepare_traces(filename):
 
 
 if __name__ == '__main__':
-    print('Sequence Mining Tool by USF')
+    print('Sequence Mining Tool Demo by USF')
     print()
     print('Which message definition example would you like to run?')
     print()
@@ -65,6 +65,9 @@ if __name__ == '__main__':
     print('Enter your choice (1-2): ')
     strategy_choice = str(input())
     print()
+    solution_dir_name = input('Enter a directory name where the set of solutions that will be generated and saved: ')
+    print()
+    print()
     print('Mining message flows...')
     print()
     if strategy_choice == '1':
@@ -74,9 +77,7 @@ if __name__ == '__main__':
     else:
         print('Run the script again and enter the correct option for the constraint encoding strategy.')
         exit()
-    print()
-    solution_dir_name = input('Enter a directory name for the set of solutions that will be generated: ')
-    print()
+    print('Generating solutions and sequence diagrams...')
     abs_path = os.path.dirname(os.path.abspath(__file__))
     printer = SequencePrinter(z3.get_solutions(), abs_path, solution_dir_name, graph)
     printer.generate_solutions()
