@@ -1,15 +1,13 @@
-Ground Truth Patterns
-
-38, 40
-39, 41
-
+#
+38 : gfx:membus:uprd
+39 : audio:membus:uprd
+#
 10 : membus:cache0:rdreq
 15 : membus:mem:rd
 17 : cache0:cache1:rdreq
 19 : cache1:cache0:rdres
 23 : mem:membus:rd
 27 : cache0:membus:rdres
-38 : gfx:membus:uprd
-39 : audio:membus:uprd
 40 : membus:gfx:uprd
 41 : membus:audio:uprd
+#

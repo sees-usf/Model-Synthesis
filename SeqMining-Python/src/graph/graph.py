@@ -16,38 +16,31 @@ class Graph:
         f = open(filename, 'r')
 
         root_node_strings = []
-        terminal_node_strings = []
 
         f1 = f.readlines()
-
+        is_root_definitions = False
         for line in f1:
-
-            if line.__contains__("Ground") or line.__eq__("\n") or line.__eq__(""):
-                continue
 
             tokens = regexp_tokenize(line, pattern=r'\s|[,:]', gaps=True)
 
-            if line.__contains__(','):
-                if not root_node_strings.__contains__(tokens[0]):
-                    root_node_strings.append(tokens[0])
+            if tokens[0] == '#':
+                is_root_definitions = not is_root_definitions
+                continue
 
-                if not terminal_node_strings.__contains__(tokens[-1]):
-                    terminal_node_strings.append(tokens[-1])
+            if is_root_definitions:
+                root_node_strings.append(tokens[0])
 
-            elif line.__contains__(':'):
-                symbol_index = tokens[0]
-                origin = tokens[1]
-                destination = tokens[2]
-                command = tokens[3]
-                message = (origin, destination)
+            symbol_index = tokens[0]
+            origin = tokens[1]
+            destination = tokens[2]
+            command = tokens[3]
+            message = (origin, destination)
 
-                if not self.has_node(symbol_index):
-                    node = Node(symbol_index, message, command)
-                    self.add_node(node)
-                    if symbol_index in root_node_strings:
-                        self.add_root(node)
-                    elif symbol_index in terminal_node_strings:
-                        self.add_terminal_node(node)
+            if not self.has_node(symbol_index):
+                node = Node(symbol_index, message, command)
+                self.add_node(node)
+                if symbol_index in root_node_strings:
+                    self.add_root(node)
 
         f.close()
         self.generate_edges()
@@ -69,6 +62,9 @@ class Graph:
                     edge = Edge(origin, destination)
                     origin.add_edge(edge)
                     self.add_edge(edge)
+
+            if not origin.get_edges():
+                self.add_terminal_node(origin)
 
     def generate_dags(self):
         dags = []
