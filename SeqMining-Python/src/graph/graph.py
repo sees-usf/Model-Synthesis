@@ -200,6 +200,10 @@ class Graph:
         for node in self.nodes.values():
             self.remove_cycles_util(graph_copy.get_node(str(node)), visited_nodes)
 
+        for node in self.nodes.values():
+            if not node.get_edges() and self.terminal_nodes.values().__contains__(node):
+                self.add_terminal_node(node)
+
     def remove_cycles_util(self, node, visited_nodes):
         if not node.is_visited():
 
