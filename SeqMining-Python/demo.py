@@ -22,13 +22,15 @@ if __name__ == '__main__':
     print('2. Medium example')
     print('3. Large example')
     print()
-    print('Enter your choice (1-3): ')
-    example_choice = str(input())
+
+    example_choice = input('Enter your choice (1-3): ')
 
     print()
     print('Generating graph...')
     print()
+
     graph = Graph()
+
     traces = None
     if example_choice == '1':
         graph.generate_graph('./definitions/small_def.txt')
@@ -62,14 +64,15 @@ if __name__ == '__main__':
     print('1. Monolithic graph strategy')
     print('2. Split graph strategy')
     print()
-    print('Enter your choice (1-2): ')
-    strategy_choice = str(input())
+
+    strategy_choice = input('Enter your choice (1-2): ')
     print()
     solution_dir_name = input('Enter a directory name where the set of solutions that will be generated and saved: ')
-    print()
+
     print()
     print('Mining message flows...')
     print()
+
     if strategy_choice == '1':
         z3.generate_monolithic_solutions()
     elif strategy_choice == '2':
@@ -77,8 +80,13 @@ if __name__ == '__main__':
     else:
         print('Run the script again and enter the correct option for the constraint encoding strategy.')
         exit()
+
     print('Generating solutions and sequence diagrams...')
+
     abs_path = os.path.dirname(os.path.abspath(__file__))
     printer = SequencePrinter(z3.get_solutions(), abs_path, solution_dir_name, graph)
     printer.generate_solutions()
+
+    print()
     print('Sequences have been successfully mined and converted to PlantUML diagrams.')
+    print()

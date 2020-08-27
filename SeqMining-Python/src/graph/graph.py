@@ -89,7 +89,6 @@ class Graph:
         copy_node = deepcopy(node)
         copy_node.set_support(0)
 
-        # Possible issue in visited applied to root only
         if self.is_root(node):
             node.set_visited()
             dag.add_root(copy_node)
@@ -115,7 +114,6 @@ class Graph:
     def get_node(self, symbol_index):
         return self.nodes[symbol_index]
 
-    # may need to add another overload function
     def remove_node(self, node):
         self.nodes.pop(str(node), None)
 
@@ -157,7 +155,6 @@ class Graph:
         destination = self.nodes[destination_str]
         self.add_edge(Edge(origin, destination))
 
-    # might need additional overloaded function
     def remove_edge(self, edge):
         edge.get_origin().remove_edge(edge)
         self.edges.pop(str(edge), None)
@@ -197,7 +194,7 @@ class Graph:
             self.remove_cycles_util(graph_copy.get_node(str(node)), visited_nodes)
 
         for node in self.nodes.values():
-            if not node.get_edges() and self.terminal_nodes.values().__contains__(node):
+            if not node.get_edges() and not self.terminal_nodes.__contains__(node):
                 self.add_terminal_node(node)
 
     def remove_cycles_util(self, node, visited_nodes):
@@ -207,18 +204,12 @@ class Graph:
             visited_nodes.append(node)
 
             for edge in node.get_edges().values():
-
                 destination = edge.get_destination()
-
                 if not destination.is_visited():
-
                     if self.get_edge(edge.get_origin(), edge.get_destination()) is None:
                         continue
-
                     self.remove_cycles_util(destination, visited_nodes)
-
                 elif destination in visited_nodes:
-
                     self.remove_edge(self.get_edge(edge.get_origin(), edge.get_destination()))
 
         if node in visited_nodes:
