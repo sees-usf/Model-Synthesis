@@ -80,9 +80,11 @@ class SequencePrinter:
 
     def generate_plantuml_pngs(self):
         for i, sequences in enumerate(self.list_of_flows):
+            last_sequence_id = 0
             for j, sequence in enumerate(sequences):
                 for k, flow in enumerate(sequence):
-                    CONTENT = self.generate_plantuml_syntax(flow, i + 1, (k + 1))
+                    last_sequence_id += 1
+                    CONTENT = self.generate_plantuml_syntax(flow, i + 1, last_sequence_id)
                     output = render(
                         CONTENT,
                         engine='plantuml',
@@ -92,9 +94,9 @@ class SequencePrinter:
                         }
                     )
 
-                    sol_path = os.path.join(self.abs_path, self.directory_name, 'Solution ' + str(i + 1), 'DAG ' + str(j + 1))
+                    sol_path = os.path.join(self.abs_path, self.directory_name, 'Solution ' + str(i + 1))
                     os.makedirs(sol_path, exist_ok=True)
-                    seq_path = os.path.join(sol_path, 'Sequence ' + str((k + 1)) + '.svg')
+                    seq_path = os.path.join(sol_path, 'Sequence ' + str(last_sequence_id) + '.svg')
                     f = open(seq_path, 'wb')
                     f.write(output[0])
                     f.close()

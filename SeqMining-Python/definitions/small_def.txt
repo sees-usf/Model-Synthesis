@@ -1,11 +1,9 @@
-Ground Truth Patterns
-
-1, 2
-3, 4
-
-1 : cpu0:cache0:test
-2 : cache0:mem:test
-3 : cpu1:cache0:test
-4 : cache0:mem:test
-5 : cache0:membus:test
-6 : membus:cache0:test
+#
+1 : cpu0:cache:rd_req
+3 : cpu1:cache:rd_req
+#
+2 : cache:cpu0:rd_resp
+4 : cache:cpu1:rd_resp
+5 : cache:mem:rd_req
+6 : mem:cache:rd_resp
+#
