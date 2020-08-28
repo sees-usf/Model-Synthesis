@@ -7,3 +7,4 @@ SeqMining-Python/src/__pycache__/__init__.cpython-38.pyc
 SeqMining-Python/src/__pycache__/__init__.cpython-38.pyc
 SeqMining-Python/src/graph/__pycache__/graph.cpython-38.pyc
 SeqMining-Python/src/graph/__pycache__/node.cpython-38.pyc
+*.pyc
