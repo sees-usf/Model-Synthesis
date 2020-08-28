@@ -6,7 +6,7 @@ class GraphAnnotator:
     def __init__(self, original_trace, graph):
         self.graph = graph
         self.original_trace = original_trace
-        self.trace = ''
+        self.trace_tokens = []
 
     def annotate(self):
         tokens = regexp_tokenize(self.original_trace, pattern=r'\s|[,:]', gaps=True)
@@ -20,7 +20,7 @@ class GraphAnnotator:
 
             node = self.graph.get_node(token)
             node.set_support(node.get_support() + 1)
-            self.trace += token + " "
+            self.trace_tokens.append(token)
 
         for node in self.graph.get_nodes().values():
             if node.get_edges().values():
@@ -29,10 +29,9 @@ class GraphAnnotator:
 
     def annotate_edge(self, edge):
         instances = 0
-        tokens = regexp_tokenize(self.trace, pattern=r'\s|[,:]', gaps=True)
         source_symbol_index = edge.get_origin().get_symbol_index()
 
-        for token in tokens:
+        for token in self.trace_tokens:
             if not token == '-1':
                 if source_symbol_index == token:
                     instances += 1

@@ -11,10 +11,11 @@ class Z3Solver:
         self.edge_variables_3D_dict = {}
         self.node_variables_2D_dict = {}
         self.solutions = []
+        self.is_monolithic = None
 
     def generate_split_solutions(self):
         dagID = 'a'
-
+        self.is_monolithic = False
         for dag in self.dags:
             self.create_vars_and_edge_constraints(dag, dagID)
             dagID = chr(ord(dagID) + 1)
@@ -23,6 +24,7 @@ class Z3Solver:
         self.solve()
 
     def generate_monolithic_solutions(self):
+        self.is_monolithic = True
         self.create_vars_and_edge_constraints(self.graph, 'x')
         self.solve()
 
@@ -37,12 +39,15 @@ class Z3Solver:
         self.edge_variables_3D_dict[graphID] = edge_vars
         self.node_variables_2D_dict[graphID] = node_vars
 
+    # Possibly need to make this function for monolithic, this is the dag version
     def create_vars_and_outgoing_edge_constraints(self, graph, graphID, nodes, edge_vars, node_vars):
         for origin in nodes.values():
             nodeID = graphID + str(origin)
             node_int_var = Int(nodeID)
-            self.solver.add(node_int_var == origin.get_support()) if graph.is_root(origin) else self.solver.add(
-                node_int_var <= origin.get_support(), node_int_var >= 0)
+
+            self.solver.add(node_int_var == origin.get_support()) if graph.is_root(origin) or self.is_monolithic \
+                else self.solver.add(node_int_var <= origin.get_support(), node_int_var >= 0)
+
             node_vars[nodeID] = node_int_var
             edges = origin.get_edges().values()
 
@@ -141,10 +146,9 @@ class Z3Solver:
                     sum_int_vars += self.edge_variables_3D_dict[dag_key][nodeID][edgeID]
 
             if sum_int_vars is not None and str(sum_int_vars).__contains__('+'):
-                self.solver.add(sum_int_vars <= edge.get_edge_support(), sum_int_vars >= 0)
+                self.solver.add(sum_int_vars <= edge.get_edge_support(), 0 <= sum_int_vars)
 
     def solve(self):
-
         if self.solver.check() == unsat:
             print('The constraints encoded are not satisfiable')
             print()
@@ -161,25 +165,63 @@ class Z3Solver:
 
         solution_edge_vars = copy.copy(edge_vars)
 
-        old_m = self.solver.model()
-
-        self.solutions.append(old_m)
-
-        self.solver.add(Or([edge_var != old_m[edge_var] for edge_var in edge_vars.values()]))
+        # old_m = self.solver.model()
+        # self.solutions.append(old_m)
+        #
+        # self.solver.add(Or(
+        #     [old_m[edge_var] != edge_var for edge_var in edge_vars.values()]))
 
         while self.solver.check() == sat:
             m = self.solver.model()
             self.solutions.append(m)
 
+            # self.solver.add(Or(
+            #     [And(old_m[edge_var] == m[edge_var], edge_var > 0) for edge_var in edge_vars.values()]))
+
+            # for edge_var in solution_edge_vars.values():
+            #     if old_m[edge_var] is not m[edge_var]:
+            #         print(edge_var, old_m[edge_var], m[edge_var])
+            #         edge_vars.pop(str(edge_var), None)
+
+            # for edge_var in solution_edge_vars.values():
+            #     if old_m[edge_var] is m[edge_var]:
+            #         print(edge_var, old_m[edge_var], m[edge_var])
+            #         edge_vars.pop(str(edge_var), None)
+
+            #
+            # if not edge_vars:
+            #     break
+
+            # self.solver.add(
+            #     Or(And([If(old_m[edge_var] == m[edge_var], edge_var != old_m[edge_var], edge_var == 0) for edge_var in
+            #             edge_vars.values()])))
+
             # self.solver.add(
             #     Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in edge_vars.values()]))
 
-            for edge_var in solution_edge_vars.values():
-                if old_m[edge_var] is not m[edge_var]:
-                    edge_vars.pop(str(edge_var), None)
+            # self.solver.add(
+            #     And([If(m[edge_var] == 0, edge_var > 0, edge_var != m[edge_var]) for edge_var in edge_vars.values()]))
 
-            self.solver.add(
-                Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in edge_vars.values()]))
+            for dag_key in self.edge_variables_3D_dict:
+                filtered_edge_vars = list(filter(lambda x: str(x)[0] == dag_key, edge_vars.values()))
+                self.solver.add(
+                     Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in filtered_edge_vars]))
+
+            # for dag_key in self.edge_variables_3D_dict:
+            #     filtered_edge_vars = list(filter(lambda x: str(x)[0] == dag_key, edge_vars.values()))
+            #     self.solver.add(
+            #         Or([And(edge_var != m[edge_var]) for edge_var in filtered_edge_vars]))
+
+            # for dag_key in self.edge_variables_3D_dict:
+            #     filtered_edge_vars = list(filter(lambda x: str(x)[0] == dag_key, edge_vars.values()))
+            #     self.solver.add(
+            #         Or([And(edge_var != m[edge_var], m[edge_var] == 0) if m[edge_var] is not 0
+            #         else And(edge_var != m[edge_var], m[edge_var] == 0) for edge_var in filtered_edge_vars]))
+
+            # for dag_key in self.edge_variables_3D_dict:
+            #     filtered_edge_vars = list(filter(lambda x: str(x)[0] == dag_key, edge_vars.values()))
+            #     self.solver.add(Or([And(old_m[edge_var] == m[edge_var], edge_var != m[edge_var])
+            #                         for edge_var in filtered_edge_vars]))
 
         # for i, solution in enumerate(self.solutions):
         #     print()

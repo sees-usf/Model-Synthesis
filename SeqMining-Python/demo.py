@@ -56,7 +56,6 @@ if __name__ == '__main__':
         dag.remove_cycles()
 
     graph.remove_cycles()
-
     z3 = Z3Solver(graph, dags)
 
     print('Please indicate the constraint encoding strategy you\'d like to use: ')
@@ -67,7 +66,9 @@ if __name__ == '__main__':
 
     strategy_choice = input('Enter your choice (1-2): ')
     print()
-    solution_dir_name = input('Enter a directory name where the set of solutions that will be generated and saved: ')
+    print("Solutions will be generated and printed to a sub-directory in the \"solutions\" directory.")
+    print()
+    solution_dir_name = input('Enter a name for this sub-directory: ')
 
     print()
     print('Mining message flows...')
@@ -79,6 +80,9 @@ if __name__ == '__main__':
         z3.generate_split_solutions()
     else:
         print('Run the script again and enter the correct option for the constraint encoding strategy.')
+        exit()
+
+    if not z3.get_solutions():
         exit()
 
     print('Generating solutions and sequence diagrams...')
