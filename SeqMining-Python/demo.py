@@ -68,7 +68,7 @@ if __name__ == '__main__':
     print()
     print("Solutions will be generated and printed to a sub-directory in the \"solutions\" directory.")
     print()
-    solution_dir_name = input('Enter a name for this sub-directory: ')
+    solution_dir_name = None#input('Enter a name for this sub-directory: ')
 
     print()
     print('Mining message flows...')
