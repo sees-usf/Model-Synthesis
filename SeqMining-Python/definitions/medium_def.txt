@@ -1,13 +1,13 @@
 #
-38 : gfx:membus:uprd
-39 : audio:membus:uprd
+38 : gfx:membus:uprd_req
+39 : audio:membus:uprd_req
 #
-10 : membus:cache0:rdreq
-15 : membus:mem:rd
-17 : cache0:cache1:rdreq
-19 : cache1:cache0:rdres
-23 : mem:membus:rd
-27 : cache0:membus:rdres
-40 : membus:gfx:uprd
-41 : membus:audio:uprd
+10 : membus:cache0:rd_req
+15 : membus:mem:rd_req
+17 : cache0:cache1:rd_req
+19 : cache1:cache0:rd_resp
+23 : mem:membus:rd_resp
+27 : cache0:membus:rd_resp
+40 : membus:gfx:uprd_resp
+41 : membus:audio:uprd_resp
 #
