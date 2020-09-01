@@ -220,9 +220,18 @@ class Z3Solver:
 
             for dag_key in self.edge_variables_3D_dict:
                 filtered_edge_vars = list(filter(lambda x: str(x)[0] == dag_key, edge_vars.values()))
-                self.solver.add(
-                    Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in filtered_edge_vars]))
+                #self.solver.add(
+                #    Or([And(m[edge_var] > 0, edge_var == 0) for edge_var in filtered_edge_vars]))
 
+                new_constr = False
+                for edge_var in filtered_edge_vars:
+                    new_constr = Or(new_constr, And(m[edge_var] > 0, edge_var == 0))
+                constr = simplify(new_constr)
+                print(new_constr)
+                print('-------------')
+                print(constr)
+                self.solver.add(constr)
+                
             # for dag_key in self.edge_variables_3D_dict:
             #     filtered_edge_vars = list(filter(lambda x: str(x)[0] == dag_key, edge_vars.values()))
             #     self.solver.add(
