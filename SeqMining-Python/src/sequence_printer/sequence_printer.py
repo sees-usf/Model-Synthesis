@@ -1,3 +1,4 @@
+import time
 import os
 
 from plantweb.render import render
@@ -6,8 +7,8 @@ from plantweb.render import render
 class SequencePrinter:
     def __init__(self, solutions, abs_path, directory_name, graph):
         self.solutions = self.prepare_solutions(solutions)
-        self.abs_path = abs_path + '\\solutions\\'
-        self.directory_name = directory_name
+        self.abs_path = 'solutions '+ time.asctime( time.localtime(time.time()) )#abs_path + '\\solutions\\'
+        #self.directory_name = directory_name
         self.graph = graph
         self.list_of_sequences = []
         self.list_of_flows = []
@@ -94,7 +95,8 @@ class SequencePrinter:
                         }
                     )
 
-                    sol_path = os.path.join(self.abs_path, self.directory_name, 'Solution ' + str(i + 1))
+                    #sol_path = os.path.join(self.abs_path, self.directory_name, 'Solution ' + str(i + 1))
+                    sol_path = os.path.join(self.abs_path, 'Solution ' + str(i + 1))
                     os.makedirs(sol_path, exist_ok=True)
                     seq_path = os.path.join(sol_path, 'Sequence ' + str(last_sequence_id) + '.svg')
                     f = open(seq_path, 'wb')
@@ -103,7 +105,8 @@ class SequencePrinter:
 
     def generate_solution_files(self):
         for i, solution in enumerate(self.solutions):
-            sol_path = os.path.join(self.abs_path, self.directory_name, 'Solution ' + str(i + 1))
+            #sol_path = os.path.join(self.abs_path, self.directory_name, 'Solution ' + str(i + 1))
+            sol_path = os.path.join(self.abs_path, 'Solution ' + str(i + 1))
             os.makedirs(sol_path, exist_ok=True)
             sol_file_path = os.path.join(sol_path, 'Solution ' + str(i + 1) + '.txt')
             f = open(sol_file_path, 'w')
