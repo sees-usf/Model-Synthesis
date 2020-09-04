@@ -21,7 +21,7 @@ class GraphAnnotator:
             node = self.graph.get_node(token)
             node.set_support(node.get_support() + 1)
             self.trace_tokens.append(token)
-
+            
         for node in self.graph.get_nodes().values():
             if node.get_edges().values():
                 for edge in node.get_edges().values():
@@ -38,3 +38,4 @@ class GraphAnnotator:
                 elif str(edge) == source_symbol_index + '_' + token and instances > 0:
                     edge.set_edge_support(edge.get_edge_support() + 1)
                     instances -= 1
+                    
