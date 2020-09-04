@@ -14,6 +14,8 @@ def prepare_traces(filename):
 
 
 if __name__ == '__main__':
+    max_pat_len = int(input("Maximum pattern length for mining: "))
+
     print('Sequence Mining Tool Demo by USF')
     print()
     print('Which message definition example would you like to run?')
@@ -30,7 +32,7 @@ if __name__ == '__main__':
     print()
 
     graph = Graph()
-
+    graph.set_max_height(max_pat_len)
     traces = None
     if example_choice == '1':
         graph.generate_graph('./definitions/small_def.txt')
@@ -45,9 +47,10 @@ if __name__ == '__main__':
         print('Run the script again and enter the correct option to run a message definition example.')
         exit()
 
+    
     annotator = GraphAnnotator(traces[0], graph)
     annotator.annotate()
-
+     
     dags = graph.generate_dags()
 
     for dag in dags:
@@ -55,7 +58,7 @@ if __name__ == '__main__':
         annotator.annotate()
         dag.remove_cycles()
 
-    graph.remove_cycles()
+    #graph.remove_cycles()
     z3 = Z3Solver(graph, dags)
 
     print('Please indicate the constraint encoding strategy you\'d like to use: ')
@@ -75,13 +78,24 @@ if __name__ == '__main__':
     print()
 
     if strategy_choice == '1':
+        #graph.remove_cycles()
+        #z3 = Z3Solver(graph, None)
         z3.generate_monolithic_solutions()
     elif strategy_choice == '2':
+        # dags = graph.generate_dags()
+        # for dag in dags:
+        #     annotator = GraphAnnotator(traces[0], dag)
+        #     annotator.annotate()
+        #     dag.remove_cycles()
+        # 
+        # graph.remove_cycles()
+        # z3 = Z3Solver(graph, dags)
         z3.generate_split_solutions()
     else:
         print('Run the script again and enter the correct option for the constraint encoding strategy.')
         exit()
 
+    print('before printing solutions')
     if not z3.get_solutions():
         exit()
 
