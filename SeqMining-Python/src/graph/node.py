@@ -9,6 +9,7 @@ class Node:
         self.message = message
         self.command = command
         self.edges = {}
+        self.succ_nodes = []
         self.support = 0
         self.depth = 0
         self.visited = False
@@ -24,6 +25,12 @@ class Node:
 
     def get_message(self):
         return self.message
+    
+    def get_source(self):
+        return self.message[0]
+    
+    def get_destination(self):
+        return self.message[1]
 
     def get_command(self):
         return self.command
@@ -31,6 +38,13 @@ class Node:
     def get_edges(self):
         return self.edges
 
+    def get_succ_nodes(self):
+        return self.succ_nodes
+        # indices = []
+        # for succ in self.succ_nodes:
+        #     indices.append(succ.get_symbol_index())
+        # return indices
+    
     def get_support(self):
         return self.support
 
@@ -92,6 +106,9 @@ class Node:
 
     def add_edge(self, edge):
         self.edges[str(edge)] = edge
+
+    def add_succ(self, dest):
+        self.succ_nodes.append(dest)
 
     @dispatch(Edge)
     def remove_edge(self, edge):
