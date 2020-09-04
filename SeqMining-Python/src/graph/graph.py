@@ -1,3 +1,4 @@
+import copy
 from multipledispatch import dispatch
 from nltk.tokenize import regexp_tokenize
 from copy import deepcopy
@@ -11,8 +12,12 @@ class Graph:
         self.roots = {}
         self.terminal_nodes = {}
         self.edges = {}
+        self.max_height = 0
+        self.DEBUG = False
+
 
     def generate_graph(self, filename):
+        print("Generating causality graph for", filename)
         f = open(filename, 'r')
 
         root_node_strings = []
@@ -44,7 +49,26 @@ class Graph:
 
         f.close()
         self.generate_edges()
-
+        
+        # temp code for generating DAG-CG for each root node
+        # for n in self.nodes.keys():
+        #     idx=[]
+        #     succ =  self.get_node(n).get_succ_nodes()
+        #     for sn in succ:
+        #         idx.append(sn.get_symbol_index())
+        #     print(n, '-->', idx)
+        # print(self.roots)
+        # print("******************")
+        # f = open("cg.cg", "w+")
+        # for root in self.roots:
+        #     print('Generating CG rooted at ', root, ' with length ', self.max_height)        
+        #     mono_cg = self.generate_cg(self.nodes[root])
+        #     f.write(self.print_cg(mono_cg))
+        #     f.write("#\n")
+        #     #exit()  
+        # f.close()
+        
+        
     def generate_edges(self):
         for origin in self.nodes.values():
             if origin in self.terminal_nodes:
@@ -61,11 +85,95 @@ class Graph:
                 if origin_message[1] == destination_message[0]:
                     edge = Edge(origin, destination)
                     origin.add_edge(edge)
+                    origin.add_succ(destination)
                     self.add_edge(edge)
 
             if not origin.get_edges():
                 self.add_terminal_node(origin)
+                
+      
+    # @Author: Zheng
+    # @Function: check if an element in a list in terms of index
+    def checkList(self, li, el):
+        for target in li:
+            if el.get_symbol_index() == target.get_symbol_index():
+                return True
+        return False
+    
+    # Author: Zheng
+    # Function: generate a tree for 'root' node such that no cycle exists in any path from the root, and
+    #           every path is up to length of 'heigth'
+    def generate_cg(self, root_node):
+        mono_cg = {}
+        path_node = []
+        path_succ = []
 
+        root_node_copy = copy.copy(root_node)
+        root_node_copy_succ = copy.copy(root_node.get_succ_nodes())
+        path_node.append(root_node_copy)
+        path_succ.append(root_node_copy_succ)
+        mono_cg[root_node_copy] = []
+            
+        path_index=[]
+        path_index.append(root_node.get_symbol_index())
+            
+        while len(path_node) != 0:
+            head_node = path_node[-1]
+            head_succ_nodes = path_succ[-1]
+            if len(head_succ_nodes) == 0:
+                path_node.pop(-1)
+                path_succ.pop(-1)
+                path_index.pop(-1)
+                continue
+                
+            nxt_node = copy.copy(head_succ_nodes.pop(-1))
+            if self.checkList(path_node, nxt_node) == False:#nxt_node not in path_node:
+                # if len(path_node) == height-1:
+                #     path_index.append(nxt_node.get_symbol_index())
+                #     print(path_index)
+                #     path_index.pop(-1)
+                    
+                if len(path_node) < self.max_height-1:
+                    path_node.append(nxt_node)
+                    path_succ.append(copy.copy(self.nodes[nxt_node.get_symbol_index()].get_succ_nodes()))
+                    path_index.append(nxt_node.get_symbol_index())
+                #if nxt_node not in mono_cg:
+                mono_cg[nxt_node] = []
+                nxt_node.set_depth(head_node.get_depth()+1)
+                mono_cg[head_node].append(nxt_node)
+            #     
+            #     
+            # else:
+            #     print(' cycle found from ', nxt_node)
+            #     print(path_index)
+   
+        # print(root_node_copy)
+        # path = [root_node_copy.get_symbol_index()]
+        # self.print_path(mono_cg, root_node_copy, path, 1)
+        return mono_cg
+        
+        
+    def print_cg(self, cg):
+        cg_str = ""
+        for node in cg.keys():
+            cg_str += node.get_symbol_index() + "@" + str(node.get_depth()) + " : "
+            succ_list = cg[node]
+            for succ in succ_list:
+                cg_str += succ.get_symbol_index() + "@" + str(succ.get_depth()) + " "
+            cg_str += "\n"
+        return cg_str
+        
+    # Author; Zheng
+    # Function: print to stdout all paths in 'cg' starting from 'root_node'
+    def print_path(self, cg, root_node, path, level):
+        #print('level ', level, "  ", len(cg[root_node]))        
+        for node in cg[root_node]:
+            path.append(node.get_symbol_index())
+            print(path)
+            self.print_path(cg, node, path, level+1)
+            path.pop(-1)
+
+    
     def generate_dags(self):
         dags = []
         traversal_queue = []
@@ -167,6 +275,9 @@ class Graph:
     def get_edge(self, edge):
         return self.edges[str(edge)]
 
+    def get_max_height(self):
+        return self.max_height
+    
     def get_edges(self):
         return self.edges
 
@@ -245,3 +356,7 @@ class Graph:
     def print_graph(self):
         self.print_nodes()
         self.print_edges()
+
+
+    def set_max_height(self, height):
+        self.max_height = height
