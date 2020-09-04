@@ -67,6 +67,9 @@ class SequencePrinter:
         if self.graph.is_terminal_node(destination):
             return
 
+        if len(flows) > 0 and len(flows[-1]) >= self.graph.get_max_height():
+            return
+
         count = 0
         for next_edge in destination.get_edges().values():
             if sequence.__contains__(str(next_edge)):
@@ -78,6 +81,8 @@ class SequencePrinter:
                 else:
                     flows[-1].append(next_edge.get_destination().get_symbol_index())
                 self.flow_extract_util(sequence, next_edge, flows)
+                
+            
 
     def generate_plantuml_pngs(self):
         for i, sequences in enumerate(self.list_of_flows):
