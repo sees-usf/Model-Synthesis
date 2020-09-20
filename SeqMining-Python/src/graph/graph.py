@@ -1,10 +1,17 @@
+from enum import Enum
 import copy
 from multipledispatch import dispatch
 from nltk.tokenize import regexp_tokenize
 from copy import deepcopy
 from src.graph.edge import Edge
 from src.graph.node import Node
+from src.logging import *
 
+class SecType(Enum):
+    IDLE=0
+    START = 1
+    MIDDLE = 2
+    TERMINAL = 3
 
 class Graph:
     def __init__(self):
@@ -12,28 +19,45 @@ class Graph:
         self.roots = {}
         self.terminal_nodes = {}
         self.edges = {}
+        self.ignore_list = []
         self.max_height = 0
         self.DEBUG = False
 
 
     def generate_graph(self, filename):
-        print("Generating causality graph for", filename)
-        f = open(filename, 'r')
+        try:
+            f = open(filename, 'r')
+        except IOError as e:
+            print("Couldn't open file (%s)." % e)
+        # f = open(filename, 'r')
 
         root_node_strings = []
 
         f1 = f.readlines()
         is_root_definitions = False
+        parse_state = SecType.IDLE
         for line in f1:
-
             tokens = regexp_tokenize(line, pattern=r'\s|[,:]', gaps=True)
-
+            if not tokens: # token list is empty
+                continue 
             if tokens[0] == '#':
-                is_root_definitions = not is_root_definitions
+                # is_root_definitions = not is_root_definitions
+                # continue
+
+                if parse_state == SecType.IDLE:
+                    parse_state = SecType.START
+                    log('start section \n', DEBUG)
+                elif parse_state == SecType.START:
+                    parse_state = SecType.MIDDLE
+                    log('middle section \n', DEBUG)
+                elif parse_state == SecType.MIDDLE:
+                    parse_state = SecType.TERMINAL
+                    log('end section \n', DEBUG)
+                # elif parse_state == SecType.TERMINAL:
                 continue
 
-            if is_root_definitions:
-                root_node_strings.append(tokens[0])
+            # if is_root_definitions:
+            #     root_node_strings.append(tokens[0])
 
             symbol_index = tokens[0]
             origin = tokens[1]
@@ -44,8 +68,13 @@ class Graph:
             if not self.has_node(symbol_index):
                 node = Node(symbol_index, message, command)
                 self.add_node(node)
-                if symbol_index in root_node_strings:
+                # if symbol_index in root_node_strings:
+                if parse_state == SecType.START:
                     self.add_root(node)
+                    log('Add root node '+str(symbol_index)+'\n', DEBUG)
+                elif parse_state == SecType.TERMINAL:
+                    self.add_terminal(node)
+                    log('Add terminal node '+str(symbol_index)+'\n', DEBUG)
 
         f.close()
         self.generate_edges()
@@ -70,28 +99,44 @@ class Graph:
         
         
     def generate_edges(self):
-        for origin in self.nodes.values():
-            if origin in self.terminal_nodes:
+        for node_src in self.nodes.values():
+            if self.is_terminal(node_src):
                 continue
 
-            origin_message = origin.get_message()
+            src_message = node_src.get_message()
 
-            for destination in self.nodes.values():
-                if origin == destination or self.is_root(destination):
+            for node_dest in self.nodes.values():
+                if node_src == node_dest or self.is_root(node_dest):
                     continue
 
-                destination_message = destination.get_message()
+                dest_message = node_dest.get_message()
 
-                if origin_message[1] == destination_message[0]:
-                    edge = Edge(origin, destination)
-                    origin.add_edge(edge)
-                    origin.add_succ(destination)
+                if src_message[1] == dest_message[0]:
+                    edge = Edge(node_src, node_dest)
+                    node_src.add_edge(edge)
+                    node_src.add_succ(node_dest)
                     self.add_edge(edge)
 
-            if not origin.get_edges():
-                self.add_terminal_node(origin)
+            if not node_src.get_edges():
+                self.add_terminal_node(node_src)
+                log('Add new terminal node '+str(node_src.get_index())+'\n', DEBUG)
                 
-      
+
+    # @Author: Hao Zheng
+    # @Function: input a list of sequences that should be excluded from mined patterns
+    def read_ignore(self, ignore_filename):
+        try:
+            ignore_f = open(ignore_filename, 'r')
+        except IOError as e:
+            print("Couldn't open file (%s)." % e)
+            return
+
+        lines = ignore_f.readlines()
+        for line in lines:
+            self.ignore_list.append(line.split())
+
+        print(self.ignore_list)
+
     # @Author: Zheng
     # @Function: check if an element in a list in terms of index
     def checkList(self, li, el):
@@ -243,8 +288,14 @@ class Graph:
     def get_roots(self):
         return self.roots
 
+    def add_terminal(self, node):
+        self.terminal_nodes[str(node)] = node
+
     def add_terminal_node(self, node):
         self.terminal_nodes[str(node)] = node
+
+    def is_terminal(self, node):
+        return node in self.terminal_nodes.values() or str(node) in self.terminal_nodes
 
     def is_terminal_node(self, node):
         return node in self.terminal_nodes.values() or str(node) in self.terminal_nodes
