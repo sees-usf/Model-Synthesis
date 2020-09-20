@@ -1,5 +1,5 @@
 import copy
-
+from src.logging import *
 from z3 import *
 
 
@@ -35,10 +35,10 @@ class Z3Solver:
         edge_vars = {}
         node_vars = {}
 
-        print(" node --> edge constraints ========") if self.DEBUG else None
+        log('node --> edge constraints ======== \n', DEBUG)
         self.create_vars_and_outgoing_edge_constraints(graph, graphID, nodes, edge_vars, node_vars)
-        print(" edge --> node constraints ========") if self.DEBUG else None
-        #self.create_incoming_edge_constraints(graphID, nodes, edge_vars, node_vars)
+        log('edge --> node constraints ======== \n', DEBUG)
+        self.create_incoming_edge_constraints(graphID, nodes, edge_vars, node_vars)
 
         self.edge_variables_3D_dict[graphID] = edge_vars
         self.node_variables_2D_dict[graphID] = node_vars
@@ -51,10 +51,10 @@ class Z3Solver:
 
             if graph.is_root(origin) or self.is_monolithic:
                 self.solver.add(node_int_var == origin.get_support())
-                print("Debug >> ", node_int_var, " == ", origin.get_support()) if self.DEBUG else None
+                log(str(node_int_var) + " == " + str(origin.get_support())+'\n', 'debug')
             else:
                 self.solver.add(node_int_var <= origin.get_support(), node_int_var >= 0)
-                print("Debug >> 0 <= ", node_int_var, " <= ", origin.get_support()) if self.DEBUG else None
+                log("0 <= " + str(node_int_var) + " <= " + str(origin.get_support)+'\n', 'debug')
 
             node_vars[nodeID] = node_int_var
             edges = origin.get_edges().values()
@@ -79,13 +79,19 @@ class Z3Solver:
                         sum_int_vars += edge_var
                         s = s + ' + ' + str(edge_var) if self.DEBUG else None
 
-                self.solver.add(node_vars[nodeID] == sum_int_vars)
-                print(node_vars[nodeID], " == ", s) if self.DEBUG else None
                 edge_vars[nodeID] = node_edge_vars
+                # self.solver.add(node_vars[nodeID] == sum_int_vars)
+                # print(node_vars[nodeID], " == ", s) if self.DEBUG else None
+
+                # Manual test of using terminal messages to resolve UNSAT situation                
+                # if nodeID=="x25" or nodeID=="x26" or nodeID=="x29" or nodeID=="x32" or nodeID=="x35" or nodeID=="x36" or nodeID=="x37" or nodeID=="x40" or nodeID=="x41" or nodeID=="x43":
+                if self.graph.is_terminal(origin):
+                    log('skip terminal nodes ' + str(nodeID)+'\n', DEBUG)
+                else:
+                    self.solver.add(node_vars[nodeID] == sum_int_vars)
+                    print(node_vars[nodeID], " == ", s) if self.DEBUG else None
         
-        # if self.solver.check() == unsat:
-        #     print("*** UNSAT ***")
-        #     exit()
+    
 
     def create_incoming_edge_constraints(self, graphID, nodes, edge_vars, node_vars):
         for destination in nodes.values():
@@ -182,10 +188,7 @@ class Z3Solver:
     def solve(self):
         sol_count = 0
         if self.solver.check() == unsat:
-            print()
             print('The constraints encoded are not satisfiable.')
-            print("Number of solutions found: ", sol_count)
-            print()
             # for x in self.solver.assertions():
             #    print(repr(x))
             return
@@ -210,7 +213,8 @@ class Z3Solver:
             if sol_count > self.max_sol:
                 break
             m = self.solver.model()
-            self.solutions.append(m)
+            #self.solutions.append(m)
+            self.add_solution(m)
             print(m) if self.DEBUG==True else None
 
             # self.solver.add(Or(
@@ -280,13 +284,26 @@ class Z3Solver:
         #         if char_id != str(edge_var)[0]:
         #             char_id = str(edge_var)[0]
         #             print()
-        #         if str(solution[edge_var]) != '0':
+        #          str(solution[edge_var]) != '0':
         #             print(str(edge_var) + ' with edge support of ' + str(solution[edge_var]))
-
-        print()
-        print("Number of solutions found: ", sol_count)
-        print()
         # END
+
+    def add_solution(self, solution):
+        red = True
+        for old_m in self.solutions:
+            for var in solution:
+                if (solution[var].as_long() == 0 and old_m[var].as_long() >0) or (solution[var].as_long() > 0 and old_m[var].as_long()==0):
+                    red = False
+                    break
+            if red == False:
+                break
+
+        if not len(self.solutions) or red == False:
+            self.solutions.append(solution)
+        else:
+            print('Found a redundant solution...')
+            #exit()
+
 
     def get_solutions(self):
         return self.solutions
