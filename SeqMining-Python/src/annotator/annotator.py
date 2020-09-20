@@ -1,4 +1,5 @@
 from nltk.tokenize import regexp_tokenize
+from src.logging import *
 
 
 class GraphAnnotator:
@@ -26,6 +27,9 @@ class GraphAnnotator:
             if node.get_edges().values():
                 for edge in node.get_edges().values():
                     self.annotate_edge(edge)
+
+        # for node in self.graph.terminal_nodes.values():
+        #     log('node '+str(node.get_index()) + ' ' + str(node.get_support()) + '\n', DEBUG)
 
     def annotate_edge(self, edge):
         instances = 0
