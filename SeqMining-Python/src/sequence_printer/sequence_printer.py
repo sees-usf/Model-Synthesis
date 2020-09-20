@@ -1,6 +1,7 @@
 import time
 import os
 
+from src.logging import *
 from plantweb.render import render
 
 
@@ -12,14 +13,88 @@ class SequencePrinter:
         self.graph = graph
         self.list_of_sequences = []
         self.list_of_flows = []
+        self.max_height = graph.get_max_height()
+        self.DEBUG = False
+        self.INFO = True
 
     def generate_solutions(self):
+        self.extract_all_flows()
+        return
         self.divide_solution_sequences()
         self.generate_plantuml_pngs()
         self.generate_solution_files()
 
+    def extract_all_flows(self):
+        sol_index = 1
+        for solution in self.solutions:
+            flow_list = self.extract_flows(solution)
+            print("outputting solution ", sol_index) if self.DEBUG else None
+            self.flows_2_plantuml(flow_list, sol_index)
+            sol_index += 1
+
+
+    def extract_flows(self, solution):
+        all_flows = []
+        edges = {}
+        nodes = self.graph.get_nodes()
+
+        for (edge_var, value) in solution:
+            edge_var_str = str(edge_var)
+            new_edge_var = edge_var_str[1:len(edge_var_str)]
+            sep_index = new_edge_var.find('_')
+            edge_src = new_edge_var[0:sep_index]
+            edge_dest = new_edge_var[sep_index+1:len(new_edge_var)]
+            src_node = nodes[edge_src]
+            dest_node = nodes[edge_dest] 
+
+            if src_node in edges:
+                edges[src_node].append(dest_node)
+            else:
+                edges[src_node] = [dest_node]
+        
+        roots = self.graph.get_roots()
+
+        flow_list = []
+        for root in roots.values():
+            flow = [root]
+            flow_list.append(flow)
+        
+        flow_list = self.get_flows(edges, flow_list, 1)
+        return flow_list
+
+
+    def get_flows(self, edges, flow_list, depth):
+        if depth == self.max_height:
+            return flow_list
+
+        new_flow_list = []
+        go_deeper = False
+        for flow in flow_list:
+            last_node = flow[-1]
+            
+            if last_node not in edges:
+                new_flow_list.append(flow)
+                continue
+            go_deeper = True
+                        
+            succ_list = edges[last_node]
+            for node in succ_list:
+                if node in flow:
+                    continue
+                flow_copy = flow.copy()
+                flow_copy.append(node)
+                new_flow_list.append(flow_copy)
+
+        if go_deeper == True:  
+            return self.get_flows(edges, new_flow_list, depth+1)
+        else:
+            return new_flow_list
+        
+
     def divide_solution_sequences(self):
         for solution in self.solutions:
+            self.extract_pattern(solution)
+
             sequences = []
             sequence = []
             graph_id = str(solution[0][0])[0]
@@ -36,7 +111,7 @@ class SequencePrinter:
             if sequence:
                 sequences.append(sequence)
             self.list_of_sequences.append(sequences)
-
+            
         self.extract_flows_from_sequences()
 
     def extract_flows_from_sequences(self):
@@ -57,17 +132,20 @@ class SequencePrinter:
                 break
 
         flows = [[starting_edge.get_origin().get_symbol_index(), starting_edge.get_destination().get_symbol_index()]]
-        self.flow_extract_util(sequence, starting_edge, flows)
+        self.flow_extract_util(sequence, starting_edge, flows, 1)
 
         return flows
 
-    def flow_extract_util(self, sequence, edge, flows):
+    def flow_extract_util(self, sequence, edge, flows, depth):
         destination = edge.get_destination()
 
         if self.graph.is_terminal_node(destination):
             return
 
         if len(flows) > 0 and len(flows[-1]) >= self.graph.get_max_height():
+            return
+
+        if depth == self.max_height:
             return
 
         count = 0
@@ -80,7 +158,7 @@ class SequencePrinter:
                     flows.append(flow)
                 else:
                     flows[-1].append(next_edge.get_destination().get_symbol_index())
-                self.flow_extract_util(sequence, next_edge, flows)
+                self.flow_extract_util(sequence, next_edge, flows, depth+1)
                 
             
 
@@ -146,3 +224,43 @@ class SequencePrinter:
             plantuml_syntax += source_msg + '->' + destination_msg + ' : ' + self.graph.get_node(node).get_command() + '\n'
 
         return plantuml_syntax
+
+
+    # @Author: Hao Zheng
+    def flows_2_plantuml(self, flow_list, sol_index):
+        seq_id = 1
+        for flow in flow_list:
+            CONTENT = self.generate_plantuml(flow, sol_index, seq_id)
+            # output = render(
+            #     CONTENT,
+            #     engine='plantuml',
+            #     format='png',
+            #     cacheopts={
+            #         'use_cache': False
+            #     }
+            # )
+
+            sol_path = os.path.join(self.abs_path, 'Solution-' + str(sol_index))
+            os.makedirs(sol_path, exist_ok=True)
+            # seq_path = os.path.join(sol_path, 'Sequence-' + str(seq_id) + '.png')
+            seq_path = os.path.join(sol_path, 'Sequence-' + str(seq_id) + '.txt')
+            f = open(seq_path, 'w')
+            # f.write(output[0])
+            f.write(CONTENT)
+            f.close()
+            seq_id += 1
+
+        log('Generated ' + str(seq_id) + ' flow sequences for solutioin '+ str(sol_index) + '\n',  'info') 
+
+
+    # @Author: Hao Zheng
+    def generate_plantuml(self, flow, sol_index, seq_id):
+        plantuml_syntax = '''title Solution ''' + str(sol_index) + ''' - Sequence ''' + str(seq_id) + '''\n'''
+        for node in flow:
+            message = node.get_message()
+            source_msg = message[0]
+            destination_msg = message[1]
+            plantuml_syntax += source_msg + '->' + destination_msg + ' : ' + node.get_command() + '\n'
+
+        return plantuml_syntax
+
