@@ -23,6 +23,9 @@ class Node:
     def get_symbol_index(self):
         return self.symbol_index
 
+    def get_index(self):
+        return self.symbol_index
+
     def get_message(self):
         return self.message
     
