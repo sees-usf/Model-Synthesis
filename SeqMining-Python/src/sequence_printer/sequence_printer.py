@@ -28,8 +28,8 @@ class SequencePrinter:
         sol_index = 1
         for solution in self.solutions:
             flow_list = self.extract_flows(solution)
-            print("outputting solution ", sol_index) if self.DEBUG else None
-            self.flows_2_plantuml(flow_list, sol_index)
+            log("outputting solution " + str(sol_index), DEBUG)
+            self.flows_2_plantuml(flow_list, solution, sol_index)
             sol_index += 1
 
 
@@ -53,17 +53,18 @@ class SequencePrinter:
                 edges[src_node] = [dest_node]
         
         roots = self.graph.get_roots()
+        terminals = self.graph.get_terminal_nodes()
 
         flow_list = []
         for root in roots.values():
             flow = [root]
             flow_list.append(flow)
         
-        flow_list = self.get_flows(edges, flow_list, 1)
+        flow_list = self.get_flows(edges, flow_list, terminals, 1)
         return flow_list
 
 
-    def get_flows(self, edges, flow_list, depth):
+    def get_flows(self, edges, flow_list, terminals, depth):
         if depth == self.max_height:
             return flow_list
 
@@ -72,6 +73,10 @@ class SequencePrinter:
         for flow in flow_list:
             last_node = flow[-1]
             
+            if last_node in terminals:
+                new_flow_list.append(flow)
+                continue
+
             if last_node not in edges:
                 new_flow_list.append(flow)
                 continue
@@ -79,14 +84,18 @@ class SequencePrinter:
                         
             succ_list = edges[last_node]
             for node in succ_list:
-                if node in flow:
+                if node in flow:  # no duplication messages in a flow
                     continue
+                # do not include a flow that does not end with a terminal
+                elif (node not in terminals) and (depth+1 == self.max_height):
+                    continue
+
                 flow_copy = flow.copy()
                 flow_copy.append(node)
                 new_flow_list.append(flow_copy)
 
         if go_deeper == True:  
-            return self.get_flows(edges, new_flow_list, depth+1)
+            return self.get_flows(edges, new_flow_list, terminals, depth+1)
         else:
             return new_flow_list
         
@@ -227,30 +236,51 @@ class SequencePrinter:
 
 
     # @Author: Hao Zheng
-    def flows_2_plantuml(self, flow_list, sol_index):
+    def flows_2_plantuml(self, flow_list, solution, sol_index):
         seq_id = 1
+        sol_path = os.path.join(self.abs_path, 'Solution-' + str(sol_index))
+        os.makedirs(sol_path, exist_ok=True)
+        
+        # write solution to the solution directory
+        sol_file = os.path.join(sol_path, 'sol.txt')
+        f = open(sol_file, 'w')
+        f.write(str(solution))
+        f.close()
+            
+        # write each sequence into a separate file
         for flow in flow_list:
-            CONTENT = self.generate_plantuml(flow, sol_index, seq_id)
-            # output = render(
-            #     CONTENT,
-            #     engine='plantuml',
-            #     format='png',
-            #     cacheopts={
-            #         'use_cache': False
-            #     }
-            # )
+            flow_index_seq = []
+            for node in flow:
+                flow_index_seq.append(node.get_index())
 
-            sol_path = os.path.join(self.abs_path, 'Solution-' + str(sol_index))
-            os.makedirs(sol_path, exist_ok=True)
+            # check validity of flow_seq wrt to filter lists.
+            exclude = False
+            include = True
+            for ex_seq in self.graph.get_exclude_list():
+                if set(ex_seq).issubset(set(flow_index_seq)):
+                    exclude = True
+                    break 
+            for in_seq in self.graph.get_include_list():
+                if ((in_seq[0] in flow_index_seq) and (in_seq[1] not in flow_index_seq)) or ((in_seq[0] not in flow_index_seq) and (in_seq[1] in flow_index_seq)):
+                    include = False
+                    break 
+            if exclude or not include: continue
+
+            flow_len = len(flow)
+            first_index = flow[0].get_index()
+            last_index = flow[-1].get_index()
+            seq_name = str(first_index)+'_'+str(last_index)+'_'+str(flow_len)
+
+            CONTENT = self.generate_plantuml(flow, sol_index, seq_id)
             # seq_path = os.path.join(sol_path, 'Sequence-' + str(seq_id) + '.png')
-            seq_path = os.path.join(sol_path, 'Sequence-' + str(seq_id) + '.txt')
+            seq_path = os.path.join(sol_path, 'Sequence-' + seq_name + '.txt')
             f = open(seq_path, 'w')
             # f.write(output[0])
             f.write(CONTENT)
             f.close()
             seq_id += 1
 
-        log('Generated ' + str(seq_id) + ' flow sequences for solutioin '+ str(sol_index) + '\n',  'info') 
+        log('\t solutioin '+ str(sol_index) + ': ' + str(seq_id) + ' flow sequences generated\n', INFO) 
 
 
     # @Author: Hao Zheng
@@ -260,7 +290,8 @@ class SequencePrinter:
             message = node.get_message()
             source_msg = message[0]
             destination_msg = message[1]
-            plantuml_syntax += source_msg + '->' + destination_msg + ' : ' + node.get_command() + '\n'
+            msg_type = node.get_type()
+            plantuml_syntax += source_msg + '->' + destination_msg + ' : ' + node.get_command() +':' + msg_type + '\n'
 
         return plantuml_syntax
 
