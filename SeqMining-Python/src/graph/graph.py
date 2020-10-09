@@ -19,8 +19,10 @@ class Graph:
         self.roots = {}
         self.terminal_nodes = {}
         self.edges = {}
-        self.ignore_list = []
-        self.max_height = 0
+        self.exclude_list = []
+        self.include_list = []
+        self.max_height = 8
+        self.max_solutions = 10
         self.DEBUG = False
 
 
@@ -63,10 +65,11 @@ class Graph:
             origin = tokens[1]
             destination = tokens[2]
             command = tokens[3]
+            msg_type = tokens[4]
             message = (origin, destination)
 
             if not self.has_node(symbol_index):
-                node = Node(symbol_index, message, command)
+                node = Node(symbol_index, message, command, msg_type)
                 self.add_node(node)
                 # if symbol_index in root_node_strings:
                 if parse_state == SecType.START:
@@ -124,18 +127,37 @@ class Graph:
 
     # @Author: Hao Zheng
     # @Function: input a list of sequences that should be excluded from mined patterns
-    def read_ignore(self, ignore_filename):
+    def read_filters(self, filters_filename):
         try:
-            ignore_f = open(ignore_filename, 'r')
+            ignore_f = open(filters_filename, 'r')
         except IOError as e:
             print("Couldn't open file (%s)." % e)
             return
 
         lines = ignore_f.readlines()
+        INPUT_IDLE = 0
+        INPUT_EXCLUDE = 1
+        INPUT_INCLUDE = 2
+        parse_state = INPUT_IDLE
         for line in lines:
-            self.ignore_list.append(line.split())
+            line = line.rstrip("\n")
+            if line[0] == '#':
+                if line.lower() == '#include': 
+                    parse_state = INPUT_INCLUDE
+                elif line.lower() == '#exclude': 
+                    parse_state = INPUT_EXCLUDE
+                else:
+                    log('Unrecognized section %s in filters file %s' %(line, filters_filename))
+                    return
+                continue
 
-        print(self.ignore_list)
+            if parse_state == INPUT_EXCLUDE:
+                self.exclude_list.append(line.split())
+            elif parse_state == INPUT_INCLUDE:
+                self.include_list.append(line.split())
+        
+        log('filters are empty', WARN) if len(self.include_list)==0 and len(self.exclude_list)==0 else None
+        
 
     # @Author: Zheng
     # @Function: check if an element in a list in terms of index
@@ -224,16 +246,67 @@ class Graph:
         traversal_queue = []
 
         for root in self.roots.values():
-            self.reset_visited_nodes()
+            #self.reset_visited_nodes()
+            path = []
             dag = Graph()
+
+            ## for the new code
+            # root_copy = deepcopy(root)
+            # dag.add_root(root_copy)
+            # dag.add_node(root_copy)
+            # path.append(root.get_index())
+            # self.generate_dags_util(dag, path)
+            # dag.generate_edges()
+            # dag.remove_cycles()
+            # dags.append(dag)
+
             traversal_queue.append(root)
             self.generate_dags_util(dag, traversal_queue)
             dag.generate_edges()
             dag.remove_cycles()
             dags.append(dag)
 
+            
+            print('created dag for root ', root.get_index())
+
         return dags
 
+    # # A recursive function that generates a rooted DAG up to max_height
+    # def generate_dags_util(self, dag, path):
+    #     head_index = path[-1]
+    #     head_node = self.get_node(head_index)
+    #     if len(path) == self.max_height or self.is_terminal(self.get_node(head_index)):
+    #         print('pop', path)
+    #         print(path.pop(-1))
+    #         return
+
+    #     head_node_copy = dag.get_node(head_index)
+    #     for edge in head_node.get_edges().values():
+    #         succ_node = edge.get_destination()
+    #         succ_index = succ_node.get_index()
+    #         print(head_index, " --> ", succ_index)
+
+    #         if succ_index not in path:
+    #             # create copy of the edge for head_node
+    #             succ_node_copy = deepcopy(succ_node)
+    #             dag.add_node(succ_node_copy)
+    #             edge_copy = Edge(head_node_copy, succ_node_copy)
+    #             edge_copy.set_edge_support(edge.get_edge_support())
+    #             head_node_copy.add_edge(edge_copy)
+    #             head_node_copy.add_succ(succ_node_copy)
+    #             dag.add_edge(edge_copy)
+    #             dag.add_node(succ_node_copy)
+    #             print('add edge ', edge_copy.get_origin(), ' ', edge_copy.get_destination(), ' ', edge_copy.get_support())
+    #             if self.is_terminal(succ_node):
+    #                 dag.add_terminal(succ_node_copy)
+    #             # extend the path and recurse
+    #             path.append(succ_index)
+    #             self.generate_dags_util(dag, path)
+    #     print('pop', path)
+    #     print(path.pop(-1))       
+
+    
+    #************ original definition.    ****************************
     def generate_dags_util(self, dag, traversal_queue):
         if not traversal_queue:
             return
@@ -265,7 +338,12 @@ class Graph:
         self.nodes[str(node)] = node
 
     def get_node(self, symbol_index):
-        return self.nodes[symbol_index]
+        try:
+            return self.nodes[symbol_index]
+        except IndexError as e:
+            print('node ', symbol_index, ' does not exist!')
+            print(e)
+            exit()
 
     def remove_node(self, node):
         self.nodes.pop(str(node), None)
@@ -302,6 +380,12 @@ class Graph:
 
     def get_terminal_nodes(self):
         return self.terminal_nodes
+    
+    def get_exclude_list(self):
+        return self.exclude_list
+
+    def get_include_list(self):
+        return self.include_list
 
     @dispatch(object)
     def add_edge(self, edge):
@@ -411,3 +495,9 @@ class Graph:
 
     def set_max_height(self, height):
         self.max_height = height
+
+    def set_max_solutions(self, sols):
+        self.max_solutions = sols
+
+    def get_max_solutions(self):
+        return self.max_solutions
