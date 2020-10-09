@@ -5,6 +5,7 @@ from src.sequence_printer.sequence_printer import SequencePrinter
 from src.solver.z3solver import Z3Solver
 from src.annotator.annotator import GraphAnnotator
 from src.logging import *
+from src.constraints_t import *
 
 
 def prepare_traces(filename):
@@ -14,11 +15,23 @@ def prepare_traces(filename):
     return f1
 
 
-if __name__ == '__main__':
-    max_pat_len = int(input("Maximum pattern length for mining: "))
+print('Sequence Mining Tool Demo by USF')
+print()
 
-    print('Sequence Mining Tool Demo by USF')
-    print()
+if __name__ == '__main__':
+    max_pat_len = 8
+    len_input = input("Maximum pattern length for mining (default 8): ")
+    if len_input:
+        max_pat_len = int(len_input)
+    log('Max pattern length is ' + str(max_pat_len) + '\n\n')
+
+    max_solutions = 10
+    sol_input = input("Maximum number of solutions allowed (default 10): ")
+    if sol_input:
+        max_solutions = int(sol_input)
+    log('Max number of solutions is ' + str(max_solutions) + '\n\n')
+
+
     print('Which message definition example would you like to run?')
     print()
     print('1. Small example')
@@ -30,51 +43,67 @@ if __name__ == '__main__':
 
     graph = Graph()
     graph.set_max_height(max_pat_len)
+    graph.set_max_solutions(max_solutions)
     traces = None
     def_f = ''
     trace_f = ''
     if example_choice == '1':
-        def_f = './definitions/small_def.txt'
-        trace_f = './traces/small_trace.txt'
+        def_f = 'small_def.txt'
+        trace_f = 'small_trace.txt'
     elif example_choice == '2':
-        def_f = './definitions/medium_def.txt'
-        trace_f = './traces/medium_trace.txt'
+        def_f = 'medium.msg'
+        trace_f = 'medium_trace.txt'
     elif example_choice == '3':
         # def_f = './definitions/large_def.txt'
-        def_f = './definitions/large_v1.def'
-        trace_f = './traces/large_trace.txt'
+        def_f = 'large.msg'
+        #trace_f = 'large_trace.txt'
+        trace_f = 'long-2.tr'
     else:
         print('Run the script again and enter the correct option to run a message definition example.')
         exit()
 
-    ignore_f = input('Sequence exclusion file: ')
-    print('no sequence exclusion file specified') if not ignore_f else print('')
-
     log('Reading the message definition file ... ')
     graph.generate_graph(def_f)
-    log('Done\n')
-
-    log('Reading the sequence exclusion file ... ')
-    graph.read_ignore(ignore_f)
-    log('Done\n')
+    log('DOne\n\n')
 
     log('Reading the trace file ... ')
     traces = prepare_traces(trace_f)
     annotator = GraphAnnotator(traces[0], graph)
     annotator.annotate()
-    log('Done\n')
+    log('Done\n\n')
 
+    filters_f = input('Sequence filter file: ')
+    print('no sequence exclusion file specified') if not filters_f else print('')
+
+    if filters_f:
+        log('Reading the sequence filter file %s ... ' %filters_f, INFO)
+        graph.read_filters(filters_f)
+        log('Done\n', INFO)
+    log('\n', INFO)
     
-    # dags = graph.generate_dags()
+    # *** Solving the (mono or split) graphs
+    cgs = []
+    cgs.append(graph)
 
-    # for dag in dags:
-    #     annotator = GraphAnnotator(traces[0], dag)
-    #     annotator.annotate()
-    #     dag.remove_cycles()
+    log('Mining message flows ... ')
+    split = False
+    if split:
+        # the split CG method does NOT work correct
+        dags = graph.generate_dags()
+        for dag in dags:
+            annotator = GraphAnnotator(traces[0], dag)
+            annotator.annotate()
+            dag.remove_cycles()
+            cgs.append(dag)
+        graph.remove_cycles()
+        z3 = Z3Solver(cgs)
+        z3.generate_split_solutions()
+    else:
+        #graph.remove_cycles()
+        z3 = Z3Solver(cgs)    
+        z3.generate_monolithic_solutions()
+    log('done\n')
 
-    #graph.remove_cycles()
-    dags = []
-    z3 = Z3Solver(graph, dags)
 
     # print('Please indicate the constraint encoding strategy you\'d like to use: ')
     # print()
@@ -88,7 +117,6 @@ if __name__ == '__main__':
     # print()
     solution_dir_name = None#input('Enter a name for this sub-directory: ')
 
-    log('Mining message flows ... ')
     # if strategy_choice == '1':
     #     #graph.remove_cycles()
     #     #z3 = Z3Solver(graph, None)
@@ -106,8 +134,9 @@ if __name__ == '__main__':
     # else:
     #     print('Run the script again and enter the correct option for the constraint encoding strategy.')
     #     exit()
-    z3.generate_monolithic_solutions()
-    log('done\n')
+    #z3.generate_monolithic_solutions()
+    #z3.generate_split_solutions()
+
 
     log('Solutions found ' + str(len(z3.get_solutions()))+'\n')
     if not z3.get_solutions():
@@ -117,4 +146,5 @@ if __name__ == '__main__':
     abs_path = os.path.dirname(os.path.abspath(__file__))
     printer = SequencePrinter(z3.get_solutions(), abs_path, solution_dir_name, graph)
     printer.generate_solutions()
-    log('done\n')
+    log('Done\n')
+
