@@ -17,7 +17,13 @@ class Edge:
     def get_edge_support(self):
         return self.edge_support
 
+    def get_support(self):
+        return self.edge_support
+
     def set_edge_support(self, value):
+        self.edge_support = value
+
+    def set_support(self, value):
         self.edge_support = value
 
     def equals(self, edge):
