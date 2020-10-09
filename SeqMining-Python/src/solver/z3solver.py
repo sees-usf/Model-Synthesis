@@ -4,16 +4,16 @@ from z3 import *
 
 
 class Z3Solver:
-    def __init__(self, graph, dags):
-        self.graph = graph
-        self.dags = dags
+    def __init__(self, cg_vec):
+        self.graph = cg_vec.pop(0)
+        self.dags = cg_vec
         self.solver = Solver()
         self.edge_variables_3D_dict = {}
         self.node_variables_2D_dict = {}
+        self.root_variables_2D_dict = {}
         self.solutions = []
         self.is_monolithic = None
-        self.max_sol = 10
-        self.DEBUG = False
+        self.max_sol = self.graph.get_max_solutions()
 
     def generate_split_solutions(self):
         dagID = 'a'
@@ -27,38 +27,109 @@ class Z3Solver:
 
     def generate_monolithic_solutions(self):
         self.is_monolithic = True
-        self.create_vars_and_edge_constraints(self.graph, 'x')
+        graphID = 'x'
+        self.create_vars_and_edge_constraints(self.graph, graphID)
+        
+        # Create the copy of the original solver for later use.
+        solver_orig = Solver()
+        solver_orig.add(self.solver.assertions())
+
+        # solve and generate solutions.
         self.solve()
+
+        # # ********** in progress ****************************
+        # # break a solution to eliminate ambiguity
+        # for sol in self.solutions:
+        #     solver_copy = Solver()
+        #     solver_copy.add(solver_orig.assertions())
+            
+        #     edge_vars = self.edge_variables_3D_dict[graphID]
+        #     for edge_var_list in edge_vars.values():
+        #         print(edge_var_list)
+        #     root_vars = self.root_variables_2D_dict[graphID]
+        #     node_vars = self.node_variables_2D_dict[graphID]
+
+        #     # split nodes for each root nodes
+        #     for nodeID in node_vars:
+        #         if nodeID not in root_vars:
+        #             node_z3var = node_vars[nodeID]
+        #             root_node_z3var_sum = None
+        #             for rootID in root_vars:
+        #                 root_node_z3var = Int(rootID+'_'+nodeID)
+        #                 if root_node_z3var_sum==None:
+        #                     root_node_z3var_sum = root_node_z3var
+        #                 else:
+        #                     root_node_z3var_sum += root_node_z3var
+        #             solver_copy.add(node_z3var == root_node_z3var_sum)
+
+        #             # split edges for each root nodes
+        #             if nodeID not in edge_vars:  # return in case nodeID is a terminal
+        #                 return
+        #             node_outedges = edge_vars[nodeID]
+        #             for oedgeID in node_outedges:
+        #                 oedge_z3var = node_outedges[oedgeID]
+        #                 root_edge_z3var_sum = None
+        #                 for rootID in root_vars:
+        #                     root_edge_z3var = Int(rootID+'_'+oedgeID)
+        #                     if root_edge_z3var_sum==None:
+        #                         root_edge_z3var_sum = root_edge_z3var
+        #                     else:
+        #                         root_edge_z3var_sum += root_edge_z3var
+        #                 solver_copy.add(oedge_z3var == root_edge_z3var_sum)
+        #                 print(oedge_z3var == root_edge_z3var_sum)
+
+        #     exit()    
+
+        #     for root_var in root_vars:
+                
+        #         root_z3var = node_vars[root_var]
+        #         root_outedges = edge_vars[root_var]
+        #         for edge_var in root_outedges:
+        #             edge_z3var = root_outedges[edge_var]
+        #             edge_z3val = sol[edge_z3var]
+        #             print(edge_var, ' ', edge_z3val)
+        #             solver_copy.add(edge_z3var == edge_z3val)
+
+        #     solver_copy.check()
+        #     m = solver_copy.model()
+        #     print(m)
+        #     exit()
+        # #********************************************************************
+
 
     def create_vars_and_edge_constraints(self, graph, graphID):
         nodes = graph.get_nodes()
         edge_vars = {}
         node_vars = {}
+        root_vars = {}
 
         log('node --> edge constraints ======== \n', DEBUG)
-        self.create_vars_and_outgoing_edge_constraints(graph, graphID, nodes, edge_vars, node_vars)
+        self.create_vars_and_outgoing_edge_constraints(graph, graphID, nodes, edge_vars, node_vars, root_vars)
         log('edge --> node constraints ======== \n', DEBUG)
         self.create_incoming_edge_constraints(graphID, nodes, edge_vars, node_vars)
 
         self.edge_variables_3D_dict[graphID] = edge_vars
         self.node_variables_2D_dict[graphID] = node_vars
+        self.root_variables_2D_dict[graphID] = root_vars
 
     # Possibly need to make this function for monolithic, this is the dag version
-    def create_vars_and_outgoing_edge_constraints(self, graph, graphID, nodes, edge_vars, node_vars):
+    def create_vars_and_outgoing_edge_constraints(self, graph, graphID, nodes, edge_vars, node_vars, root_vars):
         for origin in nodes.values():
             nodeID = graphID + str(origin)
             node_int_var = Int(nodeID)
 
             if graph.is_root(origin) or self.is_monolithic:
                 self.solver.add(node_int_var == origin.get_support())
-                log(str(node_int_var) + " == " + str(origin.get_support())+'\n', 'debug')
+                log(str(node_int_var) + " == " + str(origin.get_support())+'\n', DEBUG)
             else:
                 self.solver.add(node_int_var <= origin.get_support(), node_int_var >= 0)
-                log("0 <= " + str(node_int_var) + " <= " + str(origin.get_support)+'\n', 'debug')
+                log("0 <= " + str(node_int_var) + " <= " + str(origin.get_support)+'\n', DEBUG)
 
             node_vars[nodeID] = node_int_var
+            if graph.is_root(origin):
+                root_vars[nodeID] = node_int_var
+            
             edges = origin.get_edges().values()
-
             if edges:
                 node_edge_vars = {}
                 for edge in edges:
@@ -67,17 +138,17 @@ class Z3Solver:
                     edge_int_var = Int(edgeID)
                     self.solver.add(edge_int_var <= edge_support, edge_int_var >= 0)
                     node_edge_vars[edgeID] = edge_int_var
-                    print(0, ' <= ', edge_int_var, " <= ", edge_support) if self.DEBUG else None
+                    log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
                 
                 sum_int_vars = None
                 s = ''
                 for edge_var in node_edge_vars.values():
                     if sum_int_vars is None:
                         sum_int_vars = edge_var
-                        s = str(edge_var) if self.DEBUG else None
+                        s = str(edge_var) 
                     else:
                         sum_int_vars += edge_var
-                        s = s + ' + ' + str(edge_var) if self.DEBUG else None
+                        s = s + ' + ' + str(edge_var) 
 
                 edge_vars[nodeID] = node_edge_vars
                 # self.solver.add(node_vars[nodeID] == sum_int_vars)
@@ -89,7 +160,7 @@ class Z3Solver:
                     log('skip terminal nodes ' + str(nodeID)+'\n', DEBUG)
                 else:
                     self.solver.add(node_vars[nodeID] == sum_int_vars)
-                    print(node_vars[nodeID], " == ", s) if self.DEBUG else None
+                    log(str(node_vars[nodeID]) + " == " + str(s), DEBUG)
         
     
 
@@ -115,24 +186,24 @@ class Z3Solver:
                 edge_var = edge_vars[originID][graphID + edgeID]
                 if sum_int_vars is None:
                     sum_int_vars = edge_var
-                    s = str(edge_var) if self.DEBUG else None
+                    s = str(edge_var) #if self.DEBUG else None
                 else:
                     sum_int_vars += edge_var   #edge_vars[originID][graphID + edgeID]
-                    s = s + ' + ' + str(edge_var) if self.DEBUG else None
+                    s = s + ' + ' + str(edge_var) #if self.DEBUG else None
 
 
             if sum_int_vars is not None:
                 self.solver.add(node_vars[destinationID] == sum_int_vars)
-                print(node_vars[destinationID], " == ", s) if self.DEBUG else None
+                log(str(node_vars[destinationID]) + " == " + str(s), DEBUG) 
 
             # if self.solver.check() == unsat:
             #     print("*** UNSAT ***")
             #     exit()
 
     def create_unified_constraints(self):
-        print(" unified node constraints ========") if self.DEBUG else None
+        log(" unified node constraints ========", DEBUG) 
         self.create_unified_node_constraints()
-        print(" unified edge constraints ========") if self.DEBUG else None
+        log(" unified edge constraints ========", DEBUG)
         self.create_unified_edge_constraints()
 
     def create_unified_node_constraints(self):
@@ -154,7 +225,7 @@ class Z3Solver:
 
             if sum_int_vars is not None:
                 self.solver.add(sum_int_vars == node.get_support())
-                print(sum_int_vars, " == ", node.get_support()) if self.DEBUG else None
+                log(str(sum_int_vars) + " == " + str(node.get_support()), DEBUG) 
 
     def create_unified_edge_constraints(self):
         for edge in self.graph.get_edges().values():
@@ -182,7 +253,7 @@ class Z3Solver:
 
             if sum_int_vars is not None and str(sum_int_vars).__contains__('+'):
                 self.solver.add(sum_int_vars <= edge.get_edge_support(), 0 <= sum_int_vars)
-                print(sum_int_vars, " <= ", edge.get_edge_support(), " ", "0 <= ", sum_int_vars) if self.DEBUG else None
+                log(str(sum_int_vars) + " <= " + edge.get_edge_support() + " 0 <= " + str(sum_int_vars), DEBUG) 
 
 
     def solve(self):
@@ -215,7 +286,7 @@ class Z3Solver:
             m = self.solver.model()
             #self.solutions.append(m)
             self.add_solution(m)
-            print(m) if self.DEBUG==True else None
+            #print(m) if self.DEBUG==True else None
 
             # self.solver.add(Or(
             #     [And(old_m[edge_var] == m[edge_var], edge_var > 0) for edge_var in edge_vars.values()]))
@@ -253,10 +324,6 @@ class Z3Solver:
                 for edge_var in filtered_edge_vars:
                     new_constr = Or(new_constr, And(m[edge_var] > 0, edge_var == 0))
                 constr = simplify(new_constr)
-                if self.DEBUG == True:
-                    print(new_constr)
-                    print('-------------')
-                    print(constr)
                 self.solver.add(constr)
                 
             # for dag_key in self.edge_variables_3D_dict:
