@@ -4,10 +4,11 @@ from src.graph.edge import Edge
 
 
 class Node:
-    def __init__(self, symbol_index, message, command):
+    def __init__(self, symbol_index, message, command, msg_type):
         self.symbol_index = symbol_index
         self.message = message
         self.command = command
+        self.msg_type = msg_type
         self.edges = {}
         self.succ_nodes = []
         self.support = 0
@@ -28,6 +29,9 @@ class Node:
 
     def get_message(self):
         return self.message
+
+    def get_type(self):
+        return self.msg_type
     
     def get_source(self):
         return self.message[0]
