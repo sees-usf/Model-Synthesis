@@ -7,7 +7,7 @@ Dependencies:
 
 How to run:
 If above dependency is meet, you can simply open a terminal in the visualization folder and type: python3. Then import the class as a module such in the example below:
-
+```
 from plantUML import Planter
 #importing example
 
@@ -18,7 +18,7 @@ pt.global_depth = 5 #specify a max_height of the path (optional)
 pt.msg_file = 'def.msg' #specify the msg definition file (default is large.msg), best practice is to specify the starting and terminating messages in this file by #
 pt.support_file = 'supp.txt'# specify the edge support file (default is sol.txt), it is list of edge info in the form [xA_B, number], [xB_C, number], ...
 pt.draw() # call draw() api to start building the graph
-
+```
 or import to another python script.
 
 
