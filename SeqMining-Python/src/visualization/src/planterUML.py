@@ -1,4 +1,5 @@
 import re, os
+from datetime import datetime
 
 class Planter:
     patterns = []
@@ -139,7 +140,10 @@ class Planter:
         # print(len(edges))
 
         if edges:
-            with open('seq.txt', 'w') as f:
+            now = datetime.now()
+            file_str = "seq"+now.strftime("%H-%M-%S")
+            out_file = file_str+".txt"
+            with open(out_file, 'w') as f:
                 f.write("@startuml \nhide empty description\n")
                 f.write("[*] -->" + str(edges[0][0]) + "\n")
                 for i in edges:
@@ -155,8 +159,8 @@ class Planter:
                 f.write(str(edges[-1][1]) + " --> [*]\n")
                 f.write("@enduml")
                 f.close()
-                os.system("java -jar ./src/plantuml.jar " + 'seq.txt')
-                print(f"Done! State diagram @seq.png")
+                os.system("java -jar ./src/plantuml.jar " + out_file)
+                print(f"Done! State diagram @{file_str}.png")
         else:
             print("No pattern for the specified prefix found!!!")
 
@@ -165,7 +169,7 @@ class Planter:
         if self.prefix:
             print("Producing UML tree for prefixes:", self.prefix)
         else:
-            self.prefix = [0, 18, 10]
+            self.prefix = []
             print("Prefix is not specified, using default prefix:", self.prefix)
 
         if os.path.isfile(self.msg_file):
