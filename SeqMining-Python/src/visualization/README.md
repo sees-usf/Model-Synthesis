@@ -6,25 +6,21 @@ Dependencies:
 (2,3,4 are plantUML depenencies)
 
 How to run:
-A simple example is given in demo.py script
-
+If above dependency is meet, you can simply open a terminal in the visualization folder and type: python3. Then import the class as a module such in the example below:
 ```
-#demo.py
-from src.planterUML import Planter
+from plantUML import Planter
+#importing example
 
 pt = Planter()
-pt.prefix = [0, 18, 10, 11] # specify the prefix for which UML will be drawn (has default [0, 18, 10])
-#following two lines can be commented out, and then deafult 'large.msg' and 'sol-sequences.txt' will be used (these files can be found in the src folder)
-pt.msg_file = './tests/def.msg' # specify the msg definition file (default is large.msg)
-pt.sol_file = './tests/sol.txt'# specify the solution file (defualt is 'sol-sequences.txt')
-pt.draw(detailed=0) #call the api, detailed = 1 means nodes complete definition, if detailed = 0(which is default), only number in the sequences will be there. The purpose is to prevent UMLs from being cut off.
+pt.start_event = [0] #specify a list of starting messages or specify the starting messages in the msg definition file
+pt.end_event = [25] #specify a list of terminal messages (optional)
+pt.global_depth = 5 #specify a max_height of the path (optional)
+pt.msg_file = 'def.msg' #specify the msg definition file (default is large.msg), best practice is to specify the starting and terminating messages in this file by #
+pt.support_file = 'supp.txt'# specify the edge support file (default is sol.txt), it is list of edge info in the form [xA_B, number], [xB_C, number], ...
+pt.draw() # call draw() api to start building the graph
 ```
+or import to another python script.
 
-## Tips:
-1. Import Planter in a script that is in a folder(say tests) in the same directory as src
-2. Use detailed = 0 for better visual
-3. If the error is unable to draw, make sure seq.txt and plantuml.jar are placed correctly as they are called in line 158 in planterUML.py
-4. Put no blank newline at the end of your sequence file
 
 
 
