@@ -1,6 +1,6 @@
 import sys
 
-DEBUG = 'debug1'
+DEBUG = 'debug'
 INFO = 'info'
 WARN = 'warning'
 
