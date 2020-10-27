@@ -2,7 +2,7 @@ import os
 
 from src.graph.graph import Graph
 from src.sequence_printer.sequence_printer import SequencePrinter
-from src.solver.z3solver import Z3Solver
+from src.solver.trace2flows import *
 from src.annotator.annotator import GraphAnnotator
 from src.logging import *
 from src.constraints_t import *
@@ -14,6 +14,8 @@ def prepare_traces(filename):
     f.close()
     return f1
 
+# constraints = constraints_t('filters-large.txt') 
+# exit()
 
 print('Sequence Mining Tool Demo by USF')
 print()
@@ -100,7 +102,7 @@ if __name__ == '__main__':
         z3.generate_split_solutions()
     else:
         #graph.remove_cycles()
-        z3 = Z3Solver(cgs)    
+        z3 = trace2flows(cgs)    
         z3.generate_monolithic_solutions()
     log('done\n')
 
