@@ -1,22 +1,28 @@
 from multipledispatch import dispatch
 
 from src.graph.edge import Edge
-
+from src.logging import *
+from z3 import *
 
 class Node:
-    def __init__(self, symbol_index, message, command, msg_type):
+    def __init__(self, graph, symbol_index, message, command, msg_type):
         self.symbol_index = symbol_index
         self.message = message
         self.command = command
         self.msg_type = msg_type
         self.edges = {}
         self.succ_nodes = []
+        self.pred_nodes = []
+        self.outgoing_edges = []
+        self.incoming_edges = []
         self.support = 0
         self.depth = 0
         self.visited = False
         self.in_degree = 0
         self.out_degree = 0
         self.previous = None
+        self.graph = graph
+        self.z3var = Int(str(self.symbol_index))
 
     def __str__(self):
         return self.symbol_index
@@ -45,6 +51,15 @@ class Node:
     def get_edges(self):
         return self.edges
 
+    def get_outgoing_edges(self):
+        return self.outgoing_edges
+
+    def get_incoming_edges(self):
+        return self.incoming_edges
+
+    def get_z3var(self):
+        return self.z3var
+
     def get_succ_nodes(self):
         return self.succ_nodes
         # indices = []
@@ -52,6 +67,9 @@ class Node:
         #     indices.append(succ.get_symbol_index())
         # return indices
     
+    def get_pred_nodes(self):
+        return self.pred_nodes
+
     def get_support(self):
         return self.support
 
@@ -116,6 +134,17 @@ class Node:
 
     def add_succ(self, dest):
         self.succ_nodes.append(dest)
+
+    def add_pred(self, src):
+        self.pred_nodes.append(src)
+
+    def add_incoming_edge(self, edge):
+        self.pred_nodes.append(edge.get_source())
+        self.incoming_edges.append(edge)
+
+    def add_outgoing_edge(self, edge):
+        self.succ_nodes.append(edge.get_destination())
+        self.outgoing_edges.append(edge)
 
     @dispatch(Edge)
     def remove_edge(self, edge):
