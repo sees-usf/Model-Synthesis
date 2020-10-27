@@ -26,12 +26,11 @@ class Graph:
         self.DEBUG = False
 
 
-    def generate_graph(self, filename):
+    def generate_graph(self, msg_def_file_name):
         try:
-            f = open(filename, 'r')
+            f = open(msg_def_file_name, 'r')
         except IOError as e:
             print("Couldn't open file (%s)." % e)
-        # f = open(filename, 'r')
 
         root_node_strings = []
 
@@ -69,7 +68,7 @@ class Graph:
             message = (origin, destination)
 
             if not self.has_node(symbol_index):
-                node = Node(symbol_index, message, command, msg_type)
+                node = Node(self, symbol_index, message, command, msg_type)
                 self.add_node(node)
                 # if symbol_index in root_node_strings:
                 if parse_state == SecType.START:
@@ -115,7 +114,7 @@ class Graph:
                 dest_message = node_dest.get_message()
 
                 if src_message[1] == dest_message[0]:
-                    edge = Edge(node_src, node_dest)
+                    edge = Edge(self, node_src, node_dest)
                     node_src.add_edge(edge)
                     node_src.add_succ(node_dest)
                     self.add_edge(edge)
@@ -387,28 +386,37 @@ class Graph:
     def get_include_list(self):
         return self.include_list
 
-    @dispatch(object)
     def add_edge(self, edge):
-        edge.get_origin().add_edge(edge)
-        self.edges[str(edge)] = edge
+        self.edges[edge.get_id()] = edge
 
-    @dispatch(str, str)
-    def add_edge(self, origin_str, destination_str):
-        origin = self.nodes[origin_str]
-        destination = self.nodes[destination_str]
-        self.add_edge(Edge(origin, destination))
+    # @dispatch(object)
+    # def add_edge(self, edge):
+    #     edge.get_source().add_edge(edge)
+    #     self.edges[str(edge)] = edge
+
+    # @dispatch(str, str)
+    # def add_edge(self, origin_str, destination_str):
+    #     origin = self.nodes[origin_str]
+    #     destination = self.nodes[destination_str]
+    #     self.add_edge(Edge(origin, destination))
 
     def remove_edge(self, edge):
         edge.get_origin().remove_edge(edge)
         self.edges.pop(str(edge), None)
 
-    @dispatch(object, object)
-    def get_edge(self, origin, destination):
-        return self.edges[str(origin) + '_' + str(destination)]
+    def get_edge(self, src, dest):
+        id = str(src) + '_' + str(dest)
+        if id in self.edges:
+            return self.edges[id]
+        return None
 
-    @dispatch(object)
-    def get_edge(self, edge):
-        return self.edges[str(edge)]
+    # @dispatch(object, object)
+    # def get_edge(self, origin, destination):
+    #     return self.edges[str(origin) + '_' + str(destination)]
+
+    # @dispatch(object)
+    # def get_edge(self, edge):
+    #     return self.edges[str(edge)]
 
     def get_max_height(self):
         return self.max_height
