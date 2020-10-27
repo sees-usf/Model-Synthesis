@@ -33,7 +33,7 @@ class GraphAnnotator:
 
     def annotate_edge(self, edge):
         instances = 0
-        source_symbol_index = edge.get_origin().get_symbol_index()
+        source_symbol_index = edge.get_source().get_symbol_index()
 
         for token in self.trace_tokens:
             if not token == '-1':
