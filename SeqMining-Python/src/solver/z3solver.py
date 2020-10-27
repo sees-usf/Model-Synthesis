@@ -3,7 +3,7 @@ from src.logging import *
 from z3 import *
 
 
-class Z3Solver:
+class trace2flows:
     def __init__(self, cg_vec):
         self.graph = cg_vec.pop(0)
         self.dags = cg_vec
