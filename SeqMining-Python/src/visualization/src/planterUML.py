@@ -25,7 +25,8 @@ class Planter:
                 else:
                     temp = line.split(":")
                     msg = [i.replace(" ","") for i in temp[1:]]
-                    self.map_info[int(temp[0])] = str(msg[0])+":"+str(msg[1])+":"+str(msg[2])+":"+str(msg[3][:-1])
+                    # self.map_info[int(temp[0])] = str(msg[0])+":"+str(msg[1])+":"+str(msg[2])+":"+str(msg[3][:-1])
+                    self.map_info[int(temp[0])] = [str(msg[0]), str(msg[1]), str(msg[2])+":"+str(msg[3][:-1])]
 
         if len(start_ends)>=2:
             start_events = lines[start_ends[0]:start_ends[1]]
@@ -147,13 +148,15 @@ class Planter:
                 f.write("@startuml \nhide empty description\n")
                 f.write("[*] -->" + str(edges[0][0]) + "\n")
                 for i in edges:
-                    f.write(str(i[0]) + " --> " + str(i[1]) + " : " + "X" + "\n")
+                    # f.write(str(i[0]) + " --> " + str(i[1]) + " : " + "X" + "\n")
+                    f.write(str(i[0]) + " --> " + str(i[1]) + " : " + str(self.map_info[self.CG[i[0]][1]][2]) + "\n")
                     descriptor.append(i[0])
                     descriptor.append(i[1])
 
                 for ev in set(descriptor):
                     if detailed:
-                        f.write(str(ev) + ":" + str(self.CG[ev][1])+": " + str(self.map_info[self.CG[ev][1]]) + "\n")
+                        # f.write(str(ev) + ":" + str(self.CG[ev][1])+": " + str(self.map_info[self.CG[ev][1]]) + "\n")
+                        f.write(str(ev) + ":" + str(self.CG[ev][1])+": " + str(self.map_info[self.CG[ev][1]][0]) + "\n")
                     else:
                         f.write(str(ev) + ":" + str(self.CG[ev][1]) + "\n")
                 f.write(str(edges[-1][1]) + " --> [*]\n")

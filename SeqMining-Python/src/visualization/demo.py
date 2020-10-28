@@ -8,9 +8,9 @@ for e in prefix_string:
 print(prefix)
 
 
-detail_string = 0
-detail_string = input('Details in the graphs (0: no message definition, 1: with message definition): ')
-detail_level = int(detail_string)
+# detail_string = 1
+# detail_string = input('Details in the graphs (0: no message definition, 1: with message definition): ')
+# detail_level = int(detail_string)
 
 pt = Planter()
 # pt.prefix = [0, 18, 10, 11] # specify the prefix for which UML will be drawn (has default [0, 18, 10])
@@ -21,4 +21,4 @@ pt.msg_file = './src/large.msg' # specify the msg definition file (default is la
 pt.sol_file = './src/sol-sequences.txt'# specify the solution file
 
 # pt.draw(detailed=0) #call the api, detailed = 1 means nodes complete definition, if detailed = 0(which is default), only number in the sequences will be there. The purpose is to prevent UMLs from being cut off.
-pt.draw(detail_level)
+pt.draw(1)
