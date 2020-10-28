@@ -1,4 +1,4 @@
-import re, os
+import re, os, random
 from datetime import datetime
 
 class Planter:
@@ -11,6 +11,15 @@ class Planter:
     sol_file = ''
     edges = []
     prefix = []
+    prev_random = []
+
+    def rn(self):
+        while (True):
+            rand = random.randint(0, 2000)
+            if rand not in self.prev_random:
+                self.prev_random.append(rand)
+                return rand
+        return -1
 
     def map_function(self, file):
         # global map_info
@@ -18,6 +27,7 @@ class Planter:
         start_events = []
         end_events = []
         lines = open(file).read().splitlines()
+
         with open(file, "r", encoding='utf-8-sig') as fileobj:
             for i, line in enumerate(fileobj):
                 if line == "#\n" or line =="#":
@@ -148,17 +158,43 @@ class Planter:
                 f.write("@startuml \nhide empty description\n")
                 f.write("[*] -->" + str(edges[0][0]) + "\n")
                 for i in edges:
-                    # f.write(str(i[0]) + " --> " + str(i[1]) + " : " + "X" + "\n")
-                    f.write(str(i[0]) + " --> " + str(i[1]) + " : " + str(self.map_info[self.CG[i[0]][1]][2]) + "\n")
-                    descriptor.append(i[0])
-                    descriptor.append(i[1])
+                    if detailed == 1:
+                    #     # f.write(str(i[0]) + " --> " + str(i[1]) + " : " + str(self.map_info[self.CG[i[0]][1]][2]) + "\n")
+                    #     f.write(str(i[0]) + " --> " + str(i[1]) + " : " + str(self.CG[i[0]][1])+":" + str(self.map_info[self.CG[i[0]][1]][2]) + "\n")
+                        
+                    #     if self.CG[i[1]][1] in self.end_event:
+                    #         end_ev = "end"+str(random.randint(0, 200))
+                    #         f.write(str(i[1]) + " --> " + end_ev + " : " + str(self.CG[i[1]][1]) + ":" + str(self.map_info[self.CG[i[1]][1]][2]) + "\n")
+                    #         descriptor.append(end_ev)
+                    #         # print(self.map_info[self.CG[i[1]][1]])
+                    #         self.map_info[end_ev] = self.map_info[self.CG[i[1]][1]]
+
+                        f.write(str(i[0]) + " --> " + str(i[1]) + " : " + str(self.CG[i[0]][1])+":" + str(self.map_info[self.CG[i[0]][1]][2]) + "\n")
+                        if self.CG[i[1]][1] in self.end_event:
+                            rand_end = self.rn()
+                            end_ev = "end"+str(rand_end)
+                            f.write(str(i[1]) + " --> " + end_ev + " : " + str(self.CG[i[1]][1]) + ":" + str(self.map_info[self.CG[i[1]][1]][2]) + "\n")
+                            descriptor.append(end_ev)
+                            # print(self.map_info[self.CG[i[1]][1]])
+                            self.map_info[end_ev] = self.map_info[self.CG[i[1]][1]]
+
+                        descriptor.append(i[0])
+                        descriptor.append(i[1])
+                    else:
+                        f.write(str(i[0]) + " --> " + str(i[1]) + " : " + "x" + "\n")
+                        descriptor.append(i[0])
+                        descriptor.append(i[1])
+
 
                 for ev in set(descriptor):
                     if detailed:
-                        # f.write(str(ev) + ":" + str(self.CG[ev][1])+": " + str(self.map_info[self.CG[ev][1]]) + "\n")
-                        f.write(str(ev) + ":" + str(self.CG[ev][1])+": " + str(self.map_info[self.CG[ev][1]][0]) + "\n")
+                        if 'end' in str(ev):
+                            f.write(str(ev) + ":" + str(self.map_info[ev][1]) + "\n")
+                        else:
+                            f.write(str(ev) + ":" + str(self.map_info[self.CG[ev][1]][0]) + "\n")
                     else:
                         f.write(str(ev) + ":" + str(self.CG[ev][1]) + "\n")
+
                 f.write(str(edges[-1][1]) + " --> [*]\n")
                 f.write("@enduml")
                 f.close()
