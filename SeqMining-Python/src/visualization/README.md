@@ -17,6 +17,7 @@ Dependencies:
 
 ## demo.py content
 ```
+demo.py
 from src.planterUML import Planter
 prefix_string = input("Prefix for sequences to show(ex: 0 18 10): ")
 prefix = []
