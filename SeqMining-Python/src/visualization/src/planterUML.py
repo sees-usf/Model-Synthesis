@@ -198,7 +198,7 @@ class Planter:
                 f.write(str(edges[-1][1]) + " --> [*]\n")
                 f.write("@enduml")
                 f.close()
-                os.system("java -jar ./src/plantuml.jar " + out_file)
+                os.system("java -jar plantuml.jar " + out_file)
                 print(f"Done! State diagram @{file_str}.png")
         else:
             print("No pattern for the specified prefix found!!!")

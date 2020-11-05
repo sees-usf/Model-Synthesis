@@ -1,5 +1,12 @@
-from src.planterUML import Planter
 import sys
+
+sys.path.insert(1,'/Users/rubel/SeqMining/SeqMining-Python/src/visualization/src')
+
+from planterUML import Planter
+
+
+
+
 
 pt = Planter()
 

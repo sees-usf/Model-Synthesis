@@ -7,10 +7,9 @@ Dependencies:
 
 ## How to run:
 1. Go to visualization directory
-2. type ``` python3 demo.py```
-3. See simple output in ```tests``` folder
-4. If there is a error, unable to print uml, then make sure ```seq{time-st-amp}.txt``` and ```plantuml.jar``` are in the consistent location as described in line 201 of 
-```planterUML.py```
-5. Enter prefix seperated by spaced only, for example '0 18 10 11' with no ' '.
-6. Use no details to caputure large graph, details tends to be cut off.
-7. Output files i. a text file, and ii. a png file will be placed in the same folder
+2. Go to tests/demo.py
+3. Update the syspath to the planterUML.py file of your computer
+4. Keep plantuml.jar and demo.py in the same folder
+5. type ``` python3 demo.py sequence-list.txt msg_def.txt```
+6. Enter prefix seperated by spaced only, for example '0 18 10 11' with no ' '.
+7. Output files i) a text file, and ii)  a .png file will be placed in the same folder
