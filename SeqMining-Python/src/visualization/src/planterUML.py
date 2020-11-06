@@ -1,4 +1,4 @@
-import re, os, random
+import re, os, random, sys
 from datetime import datetime
 
 class Planter:
@@ -198,7 +198,8 @@ class Planter:
                 f.write(str(edges[-1][1]) + " --> [*]\n")
                 f.write("@enduml")
                 f.close()
-                os.system("java -jar plantuml.jar " + out_file)
+                # print(sys.path[1])
+                os.system("java -jar "+ str(sys.path[1])+"/plantuml.jar " + out_file)
                 print(f"Done! State diagram @{file_str}.png")
         else:
             print("No pattern for the specified prefix found!!!")

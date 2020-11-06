@@ -7,7 +7,6 @@ from planterUML import Planter
 
 
 
-
 pt = Planter()
 
 

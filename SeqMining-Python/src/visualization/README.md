@@ -9,7 +9,6 @@ Dependencies:
 1. Go to visualization directory
 2. Go to tests/demo.py
 3. Update the syspath to the planterUML.py file of your computer
-4. Keep plantuml.jar and demo.py in the same folder
 5. type ``` python3 demo.py sequence-list.txt msg_def.txt```
 6. Enter prefix seperated by spaced only, for example '0 18 10 11' with no ' '.
 7. Output files i) a text file, and ii)  a .png file will be placed in the same folder
