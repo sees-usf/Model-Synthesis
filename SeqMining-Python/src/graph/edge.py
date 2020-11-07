@@ -7,6 +7,7 @@ class Edge:
         self.source = src
         self.destination = dest
         self.edge_support = 0
+        self.conf_measure = 100
         self.graph = graph
         self.z3var = Int(self.edge_id)
         self.source.add_outgoing_edge(self)
@@ -35,6 +36,9 @@ class Edge:
 
     def set_edge_support(self, value):
         self.edge_support = value
+
+    def set_conf_measure(self, value):
+        self.conf_measure = Value
 
     def set_support(self, value):
         self.edge_support = value
