@@ -11,6 +11,8 @@ class split_edge:
         self.seq_index = s_index
         self.z3var = Int(self.graph_edge.get_id() + '_' + str(self.seq_index))
 
+    def get_id(self):
+        return self.graph_edge.get_id()
     
     def get_index(self):
         return self.seq_index
