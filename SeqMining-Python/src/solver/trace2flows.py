@@ -9,12 +9,18 @@ class trace2flows:
         self.graph = cg_vec.pop(0)
         self.dags = cg_vec
         self.solver = Solver()
+        self.edge_z3var_list = []
         self.edge_variables_3D_dict = {}
         self.node_variables_2D_dict = {}
         self.root_variables_2D_dict = {}
         self.solutions = []
         self.is_monolithic = None
         self.max_sol = self.graph.get_max_solutions()
+
+        #@ start generating flow specificatons.
+        self.generate_monolithic_solutions()
+    #@ ---------------------------------------
+
 
     def generate_split_solutions(self):
         dagID = 'a'
@@ -174,9 +180,14 @@ class trace2flows:
         # adding constraints on edge support
         for edge in edges:
             edge_z3var = edge.get_z3var()
+            self.edge_z3var_list.append(edge_z3var)
             edge_support = edge.get_support()
             self.solver.add(edge_z3var <= edge_support, edge_z3var >= 0)
             log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(edge_support) + '\n', DEBUG)
+            # if edge.get_id() == '0_26':
+            #     self.solver.add(edge_z3var == 0)
+            # if  edge.get_id() == '0_25':
+            #     self.solver.add(edge_z3var > 0)
     #------------------------------------------------------------------
 
 
@@ -347,39 +358,48 @@ class trace2flows:
         # self.solver.add(Or(
         #     [old_m[edge_var] != edge_var for edge_var in edge_vars.values()]))
 
-        zero_edges = self.graph.get_edges().values()
         while self.solver.check() == sat:
-            sol_count += 1
-            if sol_count > self.max_sol:
-                break
-            m = self.solver.model()
-            i = input('hit a key to print model:')
-            print(m)
-            i = input('hit a key to extract flow specs')
-            flow_gen = flow_generator(self.graph, m)
-            print(flow_gen.get_status())
-            
+            # sol_count += 1
+            # if sol_count > self.max_sol:
+            #     break
+            model = self.solver.model()
+            log('@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+            # log2file('bin-seq-model.txt', self.z3model2str(model), INFO)
+            log(self.z3model2str(model), INFO)
+            log('@trace2flows:363: call flow-generator to extract flow specifications\n', INFO)
+            flow_gen = flow_generator(self.graph, model)
+
+            #@ -----------------------------
+            #@ flow_spec directed solving
             #@ if extracting flow specs fails, repeat solving after adding constraints excluding
             #@ certain edges
-            if not flow_gen.get_status():
-                print(flow_gen.get_new_constr())
-                self.solver.add(flow_gen.get_new_constr())
-            
+            log('@trace2flows:371: adding node-cover/noncycle constraints returned from flow-generator', DEBUG)
+            node_cover_constraint_list = flow_gen.get_node_cover_constraints()
+            for c in node_cover_constraint_list:
+                # print(c)
+                self.solver.add(c)
+
+            noncycle_constraint_list = flow_gen.get_noncycle_constraints()
+            for c in noncycle_constraint_list:
+                # print(c)
+                self.solver.add(c)
+            #@---------------------
+
+
             #@ if previous solution leads to flow specs, repeat solving by enforcing some 
             #@ zero-edges to be non-zero
-            else:
-                flow_spec = flow_gen.get_flow_spec()
-                # print(flow_spec)
-                edges = self.graph.get_edges().values()
-                new_constr = None
-                for edge in edges:
-                    edge_z3var = edge.get_z3var()
-                    constr = And(m[edge_z3var] == 0, edge_z3var > 0)
-                    new_constr = constr if new_constr is None else Or(new_constr, constr)
-                new_constr = simplify(new_constr)
-                self.solver.add(new_constr)
-
-            i = input('hit a key to continue:')
+            # flow_spec = flow_gen.get_flow_spec()
+            # print(flow_spec)
+            edges = self.graph.get_edges().values()
+            new_constr = False
+            for edge in edges:
+                edge_z3var = edge.get_z3var()
+                new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            new_constr = simplify(new_constr)
+            self.solver.add(new_constr) 
+            log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, True)
+            #@-------------------------------------
              
             #self.solutions.append(m)
             # self.add_solution(m)
@@ -412,12 +432,21 @@ class trace2flows:
             # self.solver.add(
             #     And([If(m[edge_var] == 0, edge_var > 0, edge_var != m[edge_var]) for edge_var in edge_vars.values()]))
 
-            #@ creating new constraints by setting some non-zero edge to 0
+            # #@ creating new constraints by setting some non-zero edge to 0
             # edges = self.graph.get_edges().values()
             # new_constr = False
             # for edge in edges:
             #     edge_z3var = edge.get_z3var()
             #     new_constr = Or(new_constr, And(m[edge_z3var] > 0, edge_z3var == 0))
+            # constr = simplify(new_constr)
+            # self.solver.add(constr)
+
+            # #@ creating new constraints by setting some zero edge to be non-0
+            # edges = self.graph.get_edges().values()
+            # new_constr = False
+            # for edge in edges:
+            #     edge_z3var = edge.get_z3var()
+            #     new_constr = Or(new_constr, And(m[edge_z3var] == 0, edge_z3var > 0))
             # constr = simplify(new_constr)
             # self.solver.add(constr)
                 
@@ -467,6 +496,44 @@ class trace2flows:
             print('Found a redundant solution...')
             #exit()
 
+    def get_new_model(self):
+                edges = self.graph.get_edges().values()
+                new_constr = None
+                for edge in edges:
+                    edge_z3var = edge.get_z3var()
+                    constr = And(m[edge_z3var] == 0, edge_z3var > 0)
+                    new_constr = constr if new_constr is None else Or(new_constr, constr)
+                new_constr = simplify(new_constr)
+                self.solver.add(new_constr) 
 
     def get_solutions(self):
         return self.solutions
+
+    def print_z3model(self, m):
+        for node in self.graph.get_nodes().values():
+            node_z3var = node.get_
+            z3var()
+            if m[node_z3var].as_long() != 0:
+                print(node_z3var, '=', m[node_z3var], ' ', end=' ')
+        print()
+
+        for edge_z3var in self.edge_z3var_list:
+            if m[edge_z3var].as_long() != 0:
+                print(edge_z3var, '=', m[edge_z3var], ' ', end=' ')
+        print()
+
+    def z3model2str(self, m):
+        s = '#Node supports -->\n'
+        for node in self.graph.get_nodes().values():
+            node_z3var = node.get_z3var()
+            if m[node_z3var].as_long() != 0:
+                s += str(node_z3var) + '=' + str(m[node_z3var]) + ' '
+        s += '\n\n'
+        s += '#Edge supports -->\n'
+
+        for edge_z3var in self.edge_z3var_list:
+            if m[edge_z3var].as_long() != 0:
+                s += str(edge_z3var) + '=' + str(m[edge_z3var]) + ' '
+        s += '\n'
+        return s
+
