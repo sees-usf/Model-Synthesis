@@ -6,6 +6,8 @@ from copy import deepcopy
 from src.graph.edge import Edge
 from src.graph.node import Node
 from src.logging import *
+from src.filter_list import *
+
 
 class SecType(Enum):
     IDLE=0
@@ -21,8 +23,12 @@ class Graph:
         self.edges = {}
         self.exclude_list = []
         self.include_list = []
+        
+        self.filters = None
+        self.bin_seq_rank = {}
         self.max_height = 8
         self.max_solutions = 10
+
         self.DEBUG = False
 
 
@@ -79,6 +85,7 @@ class Graph:
                     log('Add terminal node '+str(symbol_index)+'\n', DEBUG)
 
         f.close()
+
         self.generate_edges()
         
         # temp code for generating DAG-CG for each root node
@@ -117,6 +124,8 @@ class Graph:
                     edge = Edge(self, node_src, node_dest)
                     node_src.add_edge(edge)
                     node_src.add_succ(node_dest)
+                    # conf = self.bin_seq_rank[(node_src.get_index(), node_dest.get_index())]
+                    # edge.set_conf_measure(conf)
                     self.add_edge(edge)
 
             if not node_src.get_edges():
@@ -125,37 +134,57 @@ class Graph:
                 
 
     # @Author: Hao Zheng
-    # @Function: input a list of sequences that should be excluded from mined patterns
-    def read_filters(self, filters_filename):
+    # @Function: input a list of binary sequences ranked by their confidence measures
+    def read_bin_seq_ranking(self, rank_filename):
         try:
-            ignore_f = open(filters_filename, 'r')
+            rank_fp = open(rank_filename, 'r')
         except IOError as e:
             print("Couldn't open file (%s)." % e)
             return
 
-        lines = ignore_f.readlines()
-        INPUT_IDLE = 0
-        INPUT_EXCLUDE = 1
-        INPUT_INCLUDE = 2
-        parse_state = INPUT_IDLE
+        lines = rank_fp.readlines()
         for line in lines:
             line = line.rstrip("\n")
-            if line[0] == '#':
-                if line.lower() == '#include': 
-                    parse_state = INPUT_INCLUDE
-                elif line.lower() == '#exclude': 
-                    parse_state = INPUT_EXCLUDE
-                else:
-                    log('Unrecognized section %s in filters file %s' %(line, filters_filename))
-                    return
-                continue
+            src = line[0]
+            dest = line[1]
+            conf = line[4]
+            self.bin_seq_rank[(src, dest)] = conf
 
-            if parse_state == INPUT_EXCLUDE:
-                self.exclude_list.append(line.split())
-            elif parse_state == INPUT_INCLUDE:
-                self.include_list.append(line.split())
+
+    # @Author: Hao Zheng
+    # @Function: input a list of sequences that should be excluded from mined patterns
+    def read_filters(self, filters_filename):
+        self.filters = filter_list(filters_filename)
+
+        # try:
+        #     ignore_f = open(filters_filename, 'r')
+        # except IOError as e:
+        #     print("Couldn't open file (%s)." % e)
+        #     return
+
+        # lines = ignore_f.readlines()
+        # INPUT_IDLE = 0
+        # INPUT_EXCLUDE = 1
+        # INPUT_INCLUDE = 2
+        # parse_state = INPUT_IDLE
+        # for line in lines:
+        #     line = line.rstrip("\n")
+        #     if line[0] == '#':
+        #         if line.lower() == '#include': 
+        #             parse_state = INPUT_INCLUDE
+        #         elif line.lower() == '#exclude': 
+        #             parse_state = INPUT_EXCLUDE
+        #         else:
+        #             log('Unrecognized section %s in filters file %s' %(line, filters_filename))
+        #             return
+        #         continue
+
+        #     if parse_state == INPUT_EXCLUDE:
+        #         self.exclude_list.append(line.split())
+        #     elif parse_state == INPUT_INCLUDE:
+        #         self.include_list.append(line.split())
         
-        log('filters are empty', WARN) if len(self.include_list)==0 and len(self.exclude_list)==0 else None
+        # log('filters are empty', WARN) if len(self.include_list)==0 and len(self.exclude_list)==0 else None
         
 
     # @Author: Zheng
