@@ -5,7 +5,7 @@ from src.sequence_printer.sequence_printer import SequencePrinter
 from src.solver.trace2flows import *
 from src.annotator.annotator import GraphAnnotator
 from src.logging import *
-from src.constraints_t import *
+from src.filter_list import *
 
 
 def prepare_traces(filename):
@@ -13,9 +13,6 @@ def prepare_traces(filename):
     f1 = f.readlines()
     f.close()
     return f1
-
-# constraints = constraints_t('filters-large.txt') 
-# exit()
 
 print('Sequence Mining Tool Demo by USF')
 print()
@@ -58,8 +55,8 @@ if __name__ == '__main__':
     elif example_choice == '3':
         # def_f = './definitions/large_def.txt'
         def_f = 'large.msg'
-        #trace_f = 'large_trace.txt'
-        trace_f = 'long-2.tr'
+        trace_f = 'large_trace.txt'
+        #trace_f = 'long-2.tr'
     else:
         print('Run the script again and enter the correct option to run a message definition example.')
         exit()
@@ -74,12 +71,21 @@ if __name__ == '__main__':
     annotator.annotate()
     log('Done\n\n')
 
-    filters_f = input('Sequence filter file: ')
-    print('no sequence exclusion file specified') if not filters_f else print('')
+    filters_filename = input('Sequence filter file: ')
+    print('no sequence filters file specified') if not filters_filename else print('')
 
-    if filters_f:
-        log('Reading the sequence filter file %s ... ' %filters_f, INFO)
-        graph.read_filters(filters_f)
+    if filters_filename:
+        log('Reading the sequence filter file %s ... ' %filters_filename, INFO)
+        graph.read_filters(filters_filename)
+        log('Done\n', INFO)
+    log('\n', INFO)
+
+    rank_filename = input('Binary sequence ranking file: ')
+    print('no binary sequence ranking file specified') if not rank_filename else print('')
+
+    if rank_filename:
+        log('Reading the sequence filter file %s ... ' %rank_filename, INFO)
+        graph.read_bin_seq_ranking(rank_filename)
         log('Done\n', INFO)
     log('\n', INFO)
     
@@ -87,7 +93,7 @@ if __name__ == '__main__':
     cgs = []
     cgs.append(graph)
 
-    log('Mining message flows ... ')
+    log('Mining message flows ...\n')
     split = False
     if split:
         # the split CG method does NOT work correct
@@ -103,8 +109,7 @@ if __name__ == '__main__':
     else:
         #graph.remove_cycles()
         z3 = trace2flows(cgs)    
-        z3.generate_monolithic_solutions()
-    log('done\n')
+    log('Done\n')
 
 
     # print('Please indicate the constraint encoding strategy you\'d like to use: ')
