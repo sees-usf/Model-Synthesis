@@ -4,7 +4,7 @@ import sys
 sys.path.insert(1,'/Users/haozheng/Desktop/SeqMining/SeqMining-Python/src/visualization/src')
 
 from planterUML import Planter
-
+from uml_graph import *
 
 
 
@@ -17,6 +17,12 @@ print ('Argument List:', str(sys.argv))
 if len(sys.argv) != 3:
     print('missing arguments: this_program message_sequences message_definition')
     exit()
+
+cg = Graph()
+cg.read_msg_def(sys.argv[2])
+cg.read_bin_model(sys.argv[1])
+cg.draw_plantuml()
+exit()
 
 pt.sol_file = sys.argv[1]
 pt.msg_file = sys.argv[2]
