@@ -18,71 +18,93 @@ print('Sequence Mining Tool Demo by USF')
 print()
 
 if __name__ == '__main__':
+    # max_pat_len = 8
+    # len_input = input("Maximum pattern length for mining (default 8): ")
+    # if len_input:
+    #     max_pat_len = int(len_input)
+    # log('Max pattern length is ' + str(max_pat_len) + '\n\n')
+
+    # max_solutions = 10
+    # sol_input = input("Maximum number of solutions allowed (default 10): ")
+    # if sol_input:
+    #     max_solutions = int(sol_input)
+    # log('Max number of solutions is ' + str(max_solutions) + '\n\n')
+
+
+    # print('Which message definition example would you like to run?')
+    # print()
+    # print('1. Small example')
+    # print('2. Medium example')
+    # print('3. Large example')
+    # print()
+    # example_choice = input('Enter your choice (1-3): ')
+
+    
+    # def_f = ''
+    # trace_f = ''
+    # if example_choice == '1':
+    #     def_f = 'small_def.txt'
+    #     trace_f = 'small_trace.txt'
+    # elif example_choice == '2':
+    #     def_f = 'medium.msg'
+    #     trace_f = 'medium_trace.txt'
+    # elif example_choice == '3':
+    #     # def_f = './definitions/large_def.txt'
+    #     def_f = 'large.msg'
+    #     trace_f = 'large_trace.txt'
+    #     #trace_f = 'long-2.tr'
+    # else:
+    #     print('Run the script again and enter the correct option to run a message definition example.')
+    #     exit()
+
+    # filters_filename = input('Sequence filter file: ')
+    # print('no sequence filters file specified') if not filters_filename else print('')
+
+    # rank_filename = input('Binary sequence ranking file: ')
+    # print('no binary sequence ranking file specified') if not rank_filename else print('')
+
     max_pat_len = 8
-    len_input = input("Maximum pattern length for mining (default 8): ")
-    if len_input:
-        max_pat_len = int(len_input)
-    log('Max pattern length is ' + str(max_pat_len) + '\n\n')
-
     max_solutions = 10
-    sol_input = input("Maximum number of solutions allowed (default 10): ")
-    if sol_input:
-        max_solutions = int(sol_input)
-    log('Max number of solutions is ' + str(max_solutions) + '\n\n')
+    def_f = 'large.msg'
+    # trace_f = 'trace-small-5.txt'
+    trace_f = 'trace-small-10.txt'
+    # trace_f = 'trace-small-20.txt'  
+    # trace_f = 'trace-large-5.txt'
+    # trace_f = 'trace-large-10.txt'
+    # trace_f = 'trace-large-20.txt' 
+    # 
+    # 
+    # def_f = 'pat_thread_def.txt'
+    # trace_f = 'pat_thread_tr-1.txt'   
+    # trace_f = 'pat_thread_tr-2.txt'   
+    filters_filename = None
+    rank_filename = None
 
-
-    print('Which message definition example would you like to run?')
-    print()
-    print('1. Small example')
-    print('2. Medium example')
-    print('3. Large example')
-    print()
-
-    example_choice = input('Enter your choice (1-3): ')
 
     graph = Graph()
     graph.set_max_height(max_pat_len)
     graph.set_max_solutions(max_solutions)
-    traces = None
-    def_f = ''
-    trace_f = ''
-    if example_choice == '1':
-        def_f = 'small_def.txt'
-        trace_f = 'small_trace.txt'
-    elif example_choice == '2':
-        def_f = 'medium.msg'
-        trace_f = 'medium_trace.txt'
-    elif example_choice == '3':
-        # def_f = './definitions/large_def.txt'
-        def_f = 'large.msg'
-        trace_f = 'large_trace.txt'
-        #trace_f = 'long-2.tr'
-    else:
-        print('Run the script again and enter the correct option to run a message definition example.')
-        exit()
 
-    log('Reading the message definition file ... ')
-    graph.generate_graph(def_f)
-    log('DOne\n\n')
-
-    log('Reading the trace file ... ')
-    traces = prepare_traces(trace_f)
-    annotator = GraphAnnotator(traces[0], graph)
-    annotator.annotate()
+    log('Reading the message definition file %s... '%def_f)
+    graph.read_message_file(def_f)
     log('Done\n\n')
 
-    filters_filename = input('Sequence filter file: ')
-    print('no sequence filters file specified') if not filters_filename else print('')
+    traces = None
+    log('Reading the trace file %s... '%trace_f)
+    # traces = prepare_traces(trace_f)
+    # annotator = GraphAnnotator(traces[0], graph)
+    graph.read_trace_file(trace_f)
+    # annotator.annotate()
+    log('Done\n\n')
 
+    
     if filters_filename:
         log('Reading the sequence filter file %s ... ' %filters_filename, INFO)
         graph.read_filters(filters_filename)
         log('Done\n', INFO)
     log('\n', INFO)
 
-    rank_filename = input('Binary sequence ranking file: ')
-    print('no binary sequence ranking file specified') if not rank_filename else print('')
-
+    
     if rank_filename:
         log('Reading the sequence filter file %s ... ' %rank_filename, INFO)
         graph.read_bin_seq_ranking(rank_filename)
