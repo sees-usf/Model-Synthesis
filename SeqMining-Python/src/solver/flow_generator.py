@@ -156,7 +156,7 @@ class flow_generator:
             if not s_node_list:  
                 self.feasible = False
                 self.create_node_cover_constraints(g_node)
-                return
+                continue
 
             sum_z3vars = None
             s = ''
@@ -318,15 +318,16 @@ class flow_generator:
     #@ in the next model, also exclude existing incoming edges of 'g_node' as they are useless
     def create_node_cover_constraints(self, g_node):
         g_node_incoming_edges = g_node.get_incoming_edges()
-        constr = False
-        print(g_node.get_index())
+        constr = None
         for edge in g_node_incoming_edges:
             edge_z3var = edge.get_z3var()
             if self.z3model[edge_z3var].as_long() == 0:
             #     constr = Or(constr, edge_z3var == 0)
             # else:
-                constr = Or(constr, edge_z3var > 0)
-        self.node_cover_constraint_list.append(simplify(constr))
+                constr = (edge_z3var > 0) if constr is None else Or(constr, edge_z3var > 0) 
+        if constr is not None: 
+            # print(simplify(constr))
+            self.node_cover_constraint_list.append(simplify(constr))
 
     def get_node_cover_constraints(self):
         return self.node_cover_constraint_list
