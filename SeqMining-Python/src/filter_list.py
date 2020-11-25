@@ -59,12 +59,9 @@ class filter_list:
             elif parse_state == INPUT_INCLUDE:
                 self.includes.append(filter_t(pattern))
 
-        print(pattern)
-
         log('filters are empty', WARN) if len(self.includes)==0 and len(self.excludes)==0 else None
 
         
-
     # Return False -- constraints not sat: any exclude matched, or none of includes matched
     # Return True  -- otherwise 
     def check(self, in_seq):
