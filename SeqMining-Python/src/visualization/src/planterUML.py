@@ -1,5 +1,6 @@
 import re, os, random, sys
 from datetime import datetime
+from uml_graph import *
 
 class Planter:
     patterns = []
@@ -12,6 +13,8 @@ class Planter:
     edges = []
     prefix = []
     prev_random = []
+    msg_def = {}
+    causality_graph = Graph()
 
     def rn(self):
         while (True):
@@ -226,7 +229,6 @@ class Planter:
 
 
         self.draw_planter(detailed)
-
 
 
 # pt = Planter()
