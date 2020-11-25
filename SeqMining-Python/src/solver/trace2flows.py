@@ -18,9 +18,19 @@ class trace2flows:
         self.max_sol = self.graph.get_max_solutions()
 
         #@ start generating flow specificatons.
-        self.generate_monolithic_solutions()
+        model_table = self.find_reduced_model()
+        print('return model table size is ', len(model_table))
+        exit()
+        # self.generate_monolithic_solutions()
     #@ ---------------------------------------
 
+    def reset(self):
+        self.solver = Solver()
+        self.edge_z3var_list = []
+        self.edge_variables_3D_dict = {}
+        self.node_variables_2D_dict = {}
+        self.root_variables_2D_dict = {}
+        self.solutions = []
 
     def generate_split_solutions(self):
         dagID = 'a'
@@ -32,74 +42,24 @@ class trace2flows:
         self.create_unified_constraints()
         self.solve()
 
+
     def generate_monolithic_solutions(self):
-        # self.is_monolithic = True
-        # graphID = 'x'
+        ranking = 100
+        while True:
+            log('@%s:%d: using ranking threshold = %d\n' % (whoami(), line_numb(), ranking), INFO)
+           
+            self.reset()
 
-        # self.create_vars_and_edge_constraints(self.graph, graphID)
-        self.create_constraints()
+            print(self.solver)
+            # self.create_vars_and_edge_constraints(self.graph, graphID)
+            self.create_constraints(ranking)
 
-        # solve and generate solutions.
-        self.solve()
-
-
-        # # ********** in progress ****************************
-        # for sol in self.solutions:
-        #     solver_copy = Solver()
-        #     solver_copy.add(solver_orig.assertions())
-            
-        #     edge_vars = self.edge_variables_3D_dict[graphID]
-        #     for edge_var_list in edge_vars.values():
-        #         print(edge_var_list)
-        #     root_vars = self.root_variables_2D_dict[graphID]
-        #     node_vars = self.node_variables_2D_dict[graphID]
-
-        #     # split nodes for each root nodes
-        #     for nodeID in node_vars:
-        #         if nodeID not in root_vars:
-        #             node_z3var = node_vars[nodeID]
-        #             root_node_z3var_sum = None
-        #             for rootID in root_vars:
-        #                 root_node_z3var = Int(rootID+'_'+nodeID)
-        #                 if root_node_z3var_sum==None:
-        #                     root_node_z3var_sum = root_node_z3var
-        #                 else:
-        #                     root_node_z3var_sum += root_node_z3var
-        #             solver_copy.add(node_z3var == root_node_z3var_sum)
-
-        #             # split edges for each root nodes
-        #             if nodeID not in edge_vars:  # return in case nodeID is a terminal
-        #                 return
-        #             node_outedges = edge_vars[nodeID]
-        #             for oedgeID in node_outedges:
-        #                 oedge_z3var = node_outedges[oedgeID]
-        #                 root_edge_z3var_sum = None
-        #                 for rootID in root_vars:
-        #                     root_edge_z3var = Int(rootID+'_'+oedgeID)
-        #                     if root_edge_z3var_sum==None:
-        #                         root_edge_z3var_sum = root_edge_z3var
-        #                     else:
-        #                         root_edge_z3var_sum += root_edge_z3var
-        #                 solver_copy.add(oedge_z3var == root_edge_z3var_sum)
-        #                 print(oedge_z3var == root_edge_z3var_sum)
-
-        #     exit()    
-
-        #     for root_var in root_vars:
-                
-        #         root_z3var = node_vars[root_var]
-        #         root_outedges = edge_vars[root_var]
-        #         for edge_var in root_outedges:
-        #             edge_z3var = root_outedges[edge_var]
-        #             edge_z3val = sol[edge_z3var]
-        #             print(edge_var, ' ', edge_z3val)
-        #             solver_copy.add(edge_z3var == edge_z3val)
-
-        #     solver_copy.check()
-        #     m = solver_copy.model()
-        #     print(m)
-        #     exit()
-        # #********************************************************************
+            # solve and generate solutions.
+            model_count = self.solve()
+            if model_count > 0:
+                log('@%s:%d: models of consistent binary sequences found = %d\n' % (whoami(), line_numb(), model_count), INFO)
+                break
+            ranking -= 10
 
 
     def create_vars_and_edge_constraints(self, graph, graphID):
@@ -119,26 +79,35 @@ class trace2flows:
 
     
     # Possibly need to make this function for monolithic, this is the dag version
-    def create_constraints(self):
+    def create_constraints(self, ranking_threshold=100):
         nodes = self.graph.get_nodes()
         edges = self.graph.get_edges().values()
 
         for node in nodes.values():
             node_z3var = node.get_z3var()
             node_support = node.get_support()
+            if node_support == 0: continue
             self.solver.add(node_z3var == node_support)
             log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
             
-            # adding constraints on node and its outgoing edges
+            #@ adding constraints on node and its outgoing edges
+            #@--------------------------------------------------
+            #@ constraints on outgoing edges of a node may cause the CSP to be UNSAT if 
+            #@ the node is the source of simultaneous multiple destnations, eg, a cache-write message  
+            #@ can trigger memory-write and cache-invalidate at the same time. 
+            #@ -------------------------------------------------- 
             outgoing_edges = node.get_outgoing_edges() if not self.graph.is_terminal(node) else []
             node_edge_vars = []
             for edge in outgoing_edges:
                 edge_support = edge.get_support()
+                edge_ranking = edge.get_ranking()
                 edge_z3var = edge.get_z3var()
-                # self.solver.add(edge_int_var <= edge_support, edge_int_var >= 0)
-                node_edge_vars.append(edge_z3var)
+                #@ only consider edges with ranking higher than the threshold
+                if edge_ranking >= ranking_threshold:
+                    node_edge_vars.append(edge_z3var)
                 # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
-                
+
+            #@------------------------  
             sum_z3vars = None
             s = ''
             for edge_var in node_edge_vars:
@@ -148,10 +117,10 @@ class trace2flows:
                 else:
                     sum_z3vars += edge_var
                     s = s + ' + ' + str(edge_var) 
-
-            if sum_z3vars != None:
-                self.solver.add(node_z3var == sum_z3vars)
-                log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
+            # if sum_z3vars != None:
+            #     self.solver.add(node_z3var == sum_z3vars)
+            #     log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
+            #@----------------------------
 
             # adding constraints on node and its incoming edges
             incoming_edges = node.get_incoming_edges() if not self.graph.is_root(node) else []
@@ -341,7 +310,7 @@ class trace2flows:
             print('The constraints encoded are not satisfiable.')
             # for x in self.solver.assertions():
             #    print(repr(x))
-            return
+            return sol_count
 
         edge_vars = {}
 
@@ -363,6 +332,7 @@ class trace2flows:
             # if sol_count > self.max_sol:
             #     break
             model = self.solver.model()
+            self.add_solution(model)
             log('@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
             # log2file('bin-seq-model.txt', self.z3model2str(model), INFO)
             log(self.z3model2str(model), INFO)
@@ -376,7 +346,7 @@ class trace2flows:
             log('@trace2flows:371: adding node-cover/noncycle constraints returned from flow-generator', DEBUG)
             node_cover_constraint_list = flow_gen.get_node_cover_constraints()
             for c in node_cover_constraint_list:
-                # print(c)
+                print(c)
                 self.solver.add(c)
 
             noncycle_constraint_list = flow_gen.get_noncycle_constraints()
@@ -400,7 +370,10 @@ class trace2flows:
             self.solver.add(new_constr) 
             log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, True)
             #@-------------------------------------
-             
+    
+        print(sol_count)
+        return sol_count
+
             #self.solutions.append(m)
             # self.add_solution(m)
             #print(m) if self.DEBUG==True else None
@@ -480,6 +453,71 @@ class trace2flows:
         # END
 
 
+    def find_reduced_model(self):
+        #@ add CG constraints into the solver
+        self.create_constraints(0)
+
+        model_table = {}
+        edges = self.graph.get_edges().values()
+        edge_z3var_list = []
+        for edge in edges:
+            edge_z3var_list.append(edge.get_z3var())
+
+        reduced_model_size = 1000000
+        while self.solver.check() == sat:
+            if len(model_table) > 200:
+                break
+            model = self.solver.model()
+            if self.z3model_signature(model) not in model_table:
+                model_table[self.z3model_signature(model)] = model
+                new_model_size = self.model_size(model, edge_z3var_list);
+                if new_model_size < reduced_model_size:
+                    reduced_model_size = new_model_size
+                print(len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
+                log('@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                log(self.z3model2str(model), INFO)
+
+            #@--- start a new scope and recrusively find a reduce model
+            self.solver.push()
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                if model[edge_z3var]==0:
+                    self.solver.add(edge_z3var==0)
+            self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+            self.solver.pop()
+            #@--- end of the scope
+
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            new_constr = simplify(new_constr)
+            self.solver.add(new_constr) 
+            log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+            #@-------------------------------------
+        
+        print('Size of smallest model: ', reduced_model_size)
+        return model_table
+
+
+    def reduce_model_recursive(self, model, edge_z3var_list, model_table, level):
+        if len(model_table) > 1000:
+            return
+        redm = model
+        for edge_z3var in edge_z3var_list:
+            if model[edge_z3var].as_long() > 0:
+                self.solver.push()
+                self.solver.add(edge_z3var==0)
+                if self.solver.check() == sat:
+                    redm = self.solver.model()
+                    if self.z3model_signature(redm) not in model_table:
+                        # print(self.z3model_signature(redm), ' ', self.model_size(redm, edge_z3var_list))
+                        model_table[self.z3model_signature(redm)] = redm
+                        redm = self.reduce_model_recursive(redm, edge_z3var_list, model_table, level+1)
+                self.solver.pop()
+        return
+
+    
     def add_solution(self, solution):
         red = True
         for old_m in self.solutions:
@@ -526,14 +564,31 @@ class trace2flows:
         s = '#Node supports -->\n'
         for node in self.graph.get_nodes().values():
             node_z3var = node.get_z3var()
+            if m[node_z3var] is None: continue
             if m[node_z3var].as_long() != 0:
-                s += str(node_z3var) + '=' + str(m[node_z3var]) + ' '
+                s += str(node_z3var) + ' ' + str(m[node_z3var]) + '\n'
         s += '\n\n'
         s += '#Edge supports -->\n'
 
         for edge_z3var in self.edge_z3var_list:
+            if m[edge_z3var] is None: continue
             if m[edge_z3var].as_long() != 0:
-                s += str(edge_z3var) + '=' + str(m[edge_z3var]) + ' '
+                vars = str(edge_z3var).split('_')
+                s += vars[0] + ' ' + vars[1] + ' ' + str(m[edge_z3var]) + '\n'
         s += '\n'
         return s
 
+    
+    def z3model_signature(self, m):
+        s = ''
+        for edge_z3var in self.edge_z3var_list:
+            if m[edge_z3var].as_long() != 0:
+                s += str(edge_z3var) + ' '
+        return s
+
+
+    def model_size(self, model, edge_z3var_list):
+        cnt = 0
+        for edge_z3var in edge_z3var_list:
+            if model[edge_z3var].as_long() > 0:   cnt += 1
+        return cnt
