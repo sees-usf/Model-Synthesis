@@ -78,7 +78,7 @@ class sequence_generator:
             #     new_flow_list.append(flow)
             #     continue
             # go_deeper = True
-            succ_list = edges[last_node]
+            succ_list = edges[last_node] if last_node in edges.keys() else []
             for node in succ_list:
                 #@ check condition 1:  no duplication messages in a flow
                 if node in seq:
