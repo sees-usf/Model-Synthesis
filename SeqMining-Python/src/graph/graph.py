@@ -17,8 +17,9 @@ class SecType(Enum):
 
 class Graph:
     def __init__(self):
+        self.trace_tokens = []
         self.nodes = {}
-        self.roots = {}
+        self.root_nodes = {}
         self.terminal_nodes = {}
         self.edges = {}
         self.exclude_list = []
@@ -32,7 +33,7 @@ class Graph:
         self.DEBUG = False
 
 
-    def generate_graph(self, msg_def_file_name):
+    def read_message_file(self, msg_def_file_name):
         try:
             f = open(msg_def_file_name, 'r')
         except IOError as e:
@@ -106,7 +107,6 @@ class Graph:
         #     #exit()  
         # f.close()
         
-        
     def generate_edges(self):
         for node_src in self.nodes.values():
             if self.is_terminal(node_src):
@@ -124,13 +124,152 @@ class Graph:
                     edge = Edge(self, node_src, node_dest)
                     node_src.add_edge(edge)
                     node_src.add_succ(node_dest)
-                    # conf = self.bin_seq_rank[(node_src.get_index(), node_dest.get_index())]
-                    # edge.set_conf_measure(conf)
                     self.add_edge(edge)
 
             if not node_src.get_edges():
                 self.add_terminal_node(node_src)
                 log('Add new terminal node '+str(node_src.get_index())+'\n', DEBUG)
+
+    
+    def read_trace_file(self, trace_file):
+        try:
+            trace_fp = open(trace_file, 'r')
+        except IOError as e:
+            print("Couldn't open file (%s)." % e)
+            return
+        original_trace = (trace_fp.readlines())[0]
+        trace_fp.close()
+
+        node_table = {}
+
+        print(len(original_trace))
+        # exit()
+
+        # tokens = regexp_tokenize(self.original_trace, pattern=r'\s|[,:]', gaps=True)
+        tokens = original_trace.split(' ')
+        
+        trace_size = 0
+        pos_index = 0
+        for token in tokens:
+            if token == '-2':
+                break
+
+            if token == '-1' or not self.has_node(token):
+                continue
+
+            if (len(self.trace_tokens) - trace_size) % 100000 == 0:
+                trace_size = len(self.trace_tokens)
+                print('trace size now: ', trace_size)
+
+            node = self.get_node(token)
+            node.set_support(node.get_support() + 1)
+            if node in node_table:
+                node_table[node].append(pos_index)
+            else:
+                idx_list = [pos_index]
+                node_table[node] = idx_list 
+            self.trace_tokens.append(token)
+
+            pos_index += 1
+
+        #@ iteratively finding initial and terminal messages from the input trace
+        initial_msg_table = {}
+        terminal_msg_table = {}
+        while True:
+            new_initial_msg = self.find_initial_msg(node_table, initial_msg_table, terminal_msg_table)
+            new_terminal_msg = self.find_terminal_msg(node_table, initial_msg_table, terminal_msg_table)
+            if not new_initial_msg and not new_terminal_msg:
+                break
+        #@ It is possible that some TRUE initial and terminal messages may not be found
+        #@ as they itnterleave in the trace in certain manner, eg. 15 16 16 15 where 
+        #@ 15 is terminal while 16 is initial. 
+
+        
+        self.add_initial_messages(initial_msg_table)
+        self.add_terminal_messages(terminal_msg_table)
+        
+        # for node in node_table.keys():
+        #     print(node.get_index(), ' ', len(node_table[node]))
+        
+        edges = self.get_edges().values()
+        for edge in edges:
+            if edge.get_source() in terminal_msg_table.keys(): continue
+            self.find_edge_support(edge, node_table)
+            
+       
+    def find_edge_support(self, edge, node_table):
+        src_node = edge.get_source()
+        dest_node = edge.get_destination()
+        if src_node not in node_table or dest_node not in node_table:
+            return
+        src_idx_list = node_table[src_node]
+        dest_idx_list = node_table[dest_node]
+        src_head = 0
+        dest_head = 0
+        support = 0
+        while True:
+            if src_head == len(src_idx_list) or dest_head == len(dest_idx_list):
+                break
+            if src_idx_list[src_head] < dest_idx_list[dest_head]:
+                support += 1
+                src_head += 1
+                dest_head += 1
+            elif src_idx_list[src_head] >= dest_idx_list[dest_head]:
+                dest_head += 1
+        edge.set_support(support)
+        # if support > 0: print(edge, ' ', support)
+
+
+    def find_initial_msg(self, node_table, initial_msg_table, terminal_msg_table):
+        new_initial_msg = False
+        for this_msg in node_table:
+            if this_msg in initial_msg_table: continue
+            this_head = node_table[this_msg][0]
+            causal = False
+            for other_msg in node_table:
+                if other_msg is this_msg or other_msg in terminal_msg_table: continue
+                other_pos_list = node_table[other_msg]
+                for other_pos in other_pos_list:
+                    if other_pos >= this_head: break
+                    if self.causal(other_msg, this_msg):
+                        causal = True
+                        break
+                if causal: break
+            if not causal:
+                new_initial_msg = True
+                initial_msg_table[this_msg] = ''
+                # print('found init msg: ', this_msg)
+        return new_initial_msg
+                    
+
+    def find_terminal_msg(self, node_table, initial_msg_table, terminal_msg_table):
+        new_terminal_msg = False
+        for this_msg in node_table:
+            if this_msg in terminal_msg_table: continue
+            this_tail = node_table[this_msg][-1]
+            causal = False
+            for other_msg in node_table:
+                if other_msg is this_msg or other_msg in initial_msg_table: continue
+                other_pos_list = node_table[other_msg]
+                for other_pos in reversed(other_pos_list):
+                    if other_pos <= this_tail: break
+                    if self.causal(this_msg, other_msg):
+                        # if this_msg.get_index() == '35':
+                        #     print(other_msg, ' ', other_pos, ' ', this_tail)
+                        causal = True
+                        break
+                
+                if causal: break
+            if not causal:
+                new_terminal_msg = True
+                terminal_msg_table[this_msg] = ''
+                # print('found terminal msg: ', this_msg)
+        return new_terminal_msg
+        
+                
+    #@ test causality relation between two messages.
+    def causal(self, msg_1, msg_2):
+        return msg_1.get_destination() == msg_2.get_source()
                 
 
     # @Author: Hao Zheng
@@ -144,11 +283,13 @@ class Graph:
 
         lines = rank_fp.readlines()
         for line in lines:
-            line = line.rstrip("\n")
+            line = line.split()#line.rstrip("\n")
             src = line[0]
             dest = line[1]
-            conf = line[4]
-            self.bin_seq_rank[(src, dest)] = conf
+            edge = self.get_edge(src, dest)
+            if edge is not None:
+                edge.set_ranking(int(line[4]))
+                log('@%s:%d: set edge ranking %s %d\n' % (whoami(), line_numb(), edge.get_id(), edge.get_ranking()), DEBUG)
 
 
     # @Author: Hao Zheng
@@ -273,7 +414,7 @@ class Graph:
         dags = []
         traversal_queue = []
 
-        for root in self.roots.values():
+        for root in self.root_nodes.values():
             #self.reset_visited_nodes()
             path = []
             dag = Graph()
@@ -382,17 +523,31 @@ class Graph:
     def get_nodes(self):
         return self.nodes
 
+    #@ utilities functions for root nodes
+    def add_initial_messages(self, initial_msg_table):
+        # self.root_nodes = {}
+        for r in initial_msg_table.keys():
+            self.add_root(r)
+
     def add_root(self, root):
-        self.roots[str(root)] = root
+        self.root_nodes[str(root)] = root
 
     def remove_root(self, root):
-        self.roots.pop(str(root), None)
+        self.root_nodes.pop(str(root), None)
 
     def is_root(self, node):
-        return node in self.roots.values() or str(node) in self.roots
+        return node in self.root_nodes.values() or str(node) in self.root_nodes
 
     def get_roots(self):
-        return self.roots
+        return self.root_nodes
+    #@-----------------------------------
+
+
+    #@ Utility functions fro terminal nodes
+    def add_terminal_messages(self, terminal_msg_table):
+        # self.terminal_nodes = {}
+        for t in terminal_msg_table:
+            self.add_terminal(t)
 
     def add_terminal(self, node):
         self.terminal_nodes[str(node)] = node
@@ -408,6 +563,7 @@ class Graph:
 
     def get_terminal_nodes(self):
         return self.terminal_nodes
+    #@----------------------------------------
     
     def get_exclude_list(self):
         return self.exclude_list
@@ -435,7 +591,7 @@ class Graph:
 
     def get_edge(self, src, dest):
         id = str(src) + '_' + str(dest)
-        if id in self.edges:
+        if id in self.edges.keys():
             return self.edges[id]
         return None
 
