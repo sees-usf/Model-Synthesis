@@ -17,11 +17,10 @@ class trace2flows:
         self.is_monolithic = None
         self.max_sol = self.graph.get_max_solutions()
 
-        #@ start generating flow specificatons.
-        model_table = self.find_reduced_model()
-        print('return model table size is ', len(model_table))
-        exit()
-        # self.generate_monolithic_solutions()
+        # #@ start generating flow specificatons.
+        # model_table = self.find_reduced_model()
+        # print('return model table size is ', len(model_table))
+        # exit()
     #@ ---------------------------------------
 
     def reset(self):
@@ -32,51 +31,6 @@ class trace2flows:
         self.root_variables_2D_dict = {}
         self.solutions = []
 
-    def generate_split_solutions(self):
-        dagID = 'a'
-        self.is_monolithic = False
-        for dag in self.dags:
-            self.create_vars_and_edge_constraints(dag, dagID)
-            dagID = chr(ord(dagID) + 1)
-
-        self.create_unified_constraints()
-        self.solve()
-
-
-    def generate_monolithic_solutions(self):
-        ranking = 100
-        while True:
-            log('@%s:%d: using ranking threshold = %d\n' % (whoami(), line_numb(), ranking), INFO)
-           
-            self.reset()
-
-            print(self.solver)
-            # self.create_vars_and_edge_constraints(self.graph, graphID)
-            self.create_constraints(ranking)
-
-            # solve and generate solutions.
-            model_count = self.solve()
-            if model_count > 0:
-                log('@%s:%d: models of consistent binary sequences found = %d\n' % (whoami(), line_numb(), model_count), INFO)
-                break
-            ranking -= 10
-
-
-    def create_vars_and_edge_constraints(self, graph, graphID):
-        nodes = graph.get_nodes()
-        edge_vars = {}
-        node_vars = {}
-        root_vars = {}
-
-        log('node --> edge constraints ======== \n', DEBUG)
-        self.create_vars_and_outgoing_edge_constraints(graph, graphID, nodes, edge_vars, node_vars, root_vars)
-        log('edge --> node constraints ======== \n', DEBUG)
-        self.create_incoming_edge_constraints(graphID, nodes, edge_vars, node_vars)
-
-        self.edge_variables_3D_dict[graphID] = edge_vars
-        self.node_variables_2D_dict[graphID] = node_vars
-        self.root_variables_2D_dict[graphID] = root_vars
-
     
     # Possibly need to make this function for monolithic, this is the dag version
     def create_constraints(self, ranking_threshold=100):
@@ -84,169 +38,108 @@ class trace2flows:
         edges = self.graph.get_edges().values()
 
         for node in nodes.values():
+
+            ## create constraint for each node
             node_z3var = node.get_z3var()
             node_support = node.get_support()
             if node_support == 0: continue
             self.solver.add(node_z3var == node_support)
             log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
             
-            #@ adding constraints on node and its outgoing edges
-            #@--------------------------------------------------
-            #@ constraints on outgoing edges of a node may cause the CSP to be UNSAT if 
-            #@ the node is the source of simultaneous multiple destnations, eg, a cache-write message  
-            #@ can trigger memory-write and cache-invalidate at the same time. 
-            #@ -------------------------------------------------- 
-            outgoing_edges = node.get_outgoing_edges() if not self.graph.is_terminal(node) else []
-            node_edge_vars = []
-            for edge in outgoing_edges:
-                edge_support = edge.get_support()
-                edge_ranking = edge.get_ranking()
-                edge_z3var = edge.get_z3var()
-                #@ only consider edges with ranking higher than the threshold
-                if edge_ranking >= ranking_threshold:
-                    node_edge_vars.append(edge_z3var)
-                # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
-
-            #@------------------------  
-            sum_z3vars = None
-            s = ''
-            for edge_var in node_edge_vars:
-                if sum_z3vars is None:
-                    sum_z3vars = edge_var
-                    s = str(edge_var) 
-                else:
-                    sum_z3vars += edge_var
-                    s = s + ' + ' + str(edge_var) 
-            # if sum_z3vars != None:
-            #     self.solver.add(node_z3var == sum_z3vars)
-            #     log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
-            #@----------------------------
-
-            # adding constraints on node and its incoming edges
-            incoming_edges = node.get_incoming_edges() if not self.graph.is_root(node) else []
-            node_edge_vars = []
-            for edge in incoming_edges:
-                edge_support = edge.get_support()
-                edge_z3var = edge.get_z3var()
-                # self.solver.add(edge_int_var <= edge_support, edge_int_var >= 0)
-                node_edge_vars.append(edge_z3var)
-                # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
-                
-            sum_z3vars = None
-            s = ''
-            for edge_var in node_edge_vars:
-                if sum_z3vars is None:
-                    sum_z3vars = edge_var
-                    s = str(edge_var) 
-                else:
-                    sum_z3vars += edge_var
-                    s = s + ' + ' + str(edge_var) 
-
-            if sum_z3vars != None:
-                self.solver.add(node_z3var == sum_z3vars)
-                log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
-
-        # adding constraints on edge support
+            self.create_outgoing_edge_constraints(node)
+            self.create_incoming_edge_constraints(node)
+            
+        #@ adding constraints on edge support
         for edge in edges:
             edge_z3var = edge.get_z3var()
             self.edge_z3var_list.append(edge_z3var)
-            edge_support = edge.get_support()
-            self.solver.add(edge_z3var <= edge_support, edge_z3var >= 0)
-            log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(edge_support) + '\n', DEBUG)
-            # if edge.get_id() == '0_26':
-            #     self.solver.add(edge_z3var == 0)
-            # if  edge.get_id() == '0_25':
-            #     self.solver.add(edge_z3var > 0)
-    #------------------------------------------------------------------
-
-
-    # Possibly need to make this function for monolithic, this is the dag version
-    def create_vars_and_outgoing_edge_constraints(self, graph, graphID, nodes, edge_vars, node_vars, root_vars):
-        for origin in nodes.values():
-            nodeID = graphID + str(origin)
-            node_int_var = Int(nodeID)
-
-            if graph.is_root(origin) or self.is_monolithic:
-                self.solver.add(node_int_var == origin.get_support())
-                log(str(node_int_var) + " == " + str(origin.get_support())+'\n', DEBUG)
+            total_sup = edge.get_support()
+            direct_sup = edge.get_direct_support()
+            if direct_sup == 0:
+                self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
             else:
-                self.solver.add(node_int_var <= origin.get_support(), node_int_var >= 0)
-                log("0 <= " + str(node_int_var) + " <= " + str(origin.get_support)+'\n', DEBUG)
+                self.solver.add(Or(And(edge_z3var >= direct_sup, edge_z3var <= total_sup), edge_z3var == 0))
+            # src_node_sup = edge.get_source().get_support()
+            # self.solver.add(Implies(edge_z3var>0, edge_z3var >= (src_node_sup/5)))
+            log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(total_sup) + '\n', DEBUG)
+    ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-            node_vars[nodeID] = node_int_var
-            if graph.is_root(origin):
-                root_vars[nodeID] = node_int_var
+
+
+    #@ adding constraints on node and its outgoing edges
+    #@--------------------------------------------------
+    #@ constraints on outgoing edges of a node may cause the CSP to be UNSAT if 
+    #@ the node is the source of simultaneous multiple destnations, eg, a cache-write message  
+    #@ can trigger memory-write and cache-invalidate at the same time. 
+    def create_outgoing_edge_constraints(self, node):
+        if self.graph.is_terminal(node):
+            return
+
+        node_z3var = node.get_z3var()
+        outgoing_edges = node.get_outgoing_edges()
+        node_edge_vars = []
+        strong_causality = False
+        total_sup = 0
+        for edge in outgoing_edges:
+            strong_causality = ((edge.get_fconf()==1))# and (edge.get_bconf()==1))
+            edge_support = edge.get_support()
+            total_sup += edge_support
+            edge_ranking = edge.get_ranking()
+            edge_z3var = edge.get_z3var()
+            #@ only consider edges with ranking higher than the threshold
+            if True: #edge_ranking >= ranking_threshold:
+                node_edge_vars.append(edge_z3var)
+            # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
+
+            ### Create unique causality constraint for each edge
+            # all_other_edge_nil = None
+            # for other_edge in outgoing_edges:
+            #     if other_edge == edge: continue
+            #     all_other_edge_nil = (other_edge.get_z3var() == 0) if all_other_edge_nil is None else And(all_other_edge_nil, (other_edge.get_z3var() == 0))
+            # if all_other_edge_nil != None:
+            #     self.solver.add(Implies(all_other_edge_nil, (edge.get_z3var() == edge.get_support())))                
+
+        #@------------------------  
+        #@ generate constraints on outgoing edges of a node
+        sum_z3vars = None
+        concurrent_z3vars = None
+        s = ''
+        for edge_var in node_edge_vars:
+            sum_z3vars = edge_var if sum_z3vars is None else sum_z3vars + edge_var
+            s = str(edge_var) if sum_z3vars is None else s + ' + ' + str(edge_var) 
+        if sum_z3vars != None:
+            if strong_causality == True:
+                self.solver.add(node_z3var <= sum_z3vars)
+            else:
+                self.solver.add(0 < sum_z3vars)
+            log(str(node.get_z3var()) + " <= " + str(s) + '\n', DEBUG)
+    ### '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             
-            edges = origin.get_edges().values()
-            if edges:
-                node_edge_vars = {}
-                for edge in edges:
-                    edge_support = edge.get_edge_support()
-                    edgeID = graphID + str(edge)
-                    edge_int_var = Int(edgeID)
-                    self.solver.add(edge_int_var <= edge_support, edge_int_var >= 0)
-                    node_edge_vars[edgeID] = edge_int_var
-                    log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
+
+    ### create constraints on incoming edges of node
+    def create_incoming_edge_constraints(self, node):
+        if self.graph.is_initial(node):
+            return
+
+        node_z3var = node.get_z3var()
+        incoming_edges = node.get_incoming_edges()
+        node_edge_vars = []
+        for edge in incoming_edges:
+            edge_support = edge.get_support()
+            edge_z3var = edge.get_z3var()
+            node_edge_vars.append(edge_z3var)
                 
-                sum_int_vars = None
-                s = ''
-                for edge_var in node_edge_vars.values():
-                    if sum_int_vars is None:
-                        sum_int_vars = edge_var
-                        s = str(edge_var) 
-                    else:
-                        sum_int_vars += edge_var
-                        s = s + ' + ' + str(edge_var) 
-
-                edge_vars[nodeID] = node_edge_vars
-                # self.solver.add(node_vars[nodeID] == sum_int_vars)
-                # print(node_vars[nodeID], " == ", s) if self.DEBUG else None
-
-                # Manual test of using terminal messages to resolve UNSAT situation                
-                # if nodeID=="x25" or nodeID=="x26" or nodeID=="x29" or nodeID=="x32" or nodeID=="x35" or nodeID=="x36" or nodeID=="x37" or nodeID=="x40" or nodeID=="x41" or nodeID=="x43":
-                if self.graph.is_terminal(origin):
-                    log('skip terminal nodes ' + str(nodeID)+'\n', DEBUG)
-                else:
-                    self.solver.add(node_vars[nodeID] == sum_int_vars)
-                    log(str(node_vars[nodeID]) + " == " + str(s), DEBUG)
-        
-    
-
-    def create_incoming_edge_constraints(self, graphID, nodes, edge_vars, node_vars):
-        for destination in nodes.values():
-            sum_int_vars = None
-            destinationID = graphID + str(destination)
-            s=''
+        sum_z3vars = None
+        s = ''
+        for edge_var in node_edge_vars:
+            sum_z3vars = edge_var if sum_z3vars is None else sum_z3vars + edge_var
+            s = s + ' + ' + str(edge_var) if s != '' else str(edge_var)
             
-            for origin in nodes.values():
-
-                if origin == destination:
-                    continue
-
-                edgeID = str(origin) + '_' + str(destination)
-                edges = origin.get_edges()
-
-                if not edges.keys().__contains__(edgeID):
-                    continue
-
-                originID = graphID + str(origin)
-
-                edge_var = edge_vars[originID][graphID + edgeID]
-                if sum_int_vars is None:
-                    sum_int_vars = edge_var
-                    s = str(edge_var) #if self.DEBUG else None
-                else:
-                    sum_int_vars += edge_var   #edge_vars[originID][graphID + edgeID]
-                    s = s + ' + ' + str(edge_var) #if self.DEBUG else None
-
-
-            if sum_int_vars is not None:
-                self.solver.add(node_vars[destinationID] == sum_int_vars)
-                log(str(node_vars[destinationID]) + " == " + str(s), DEBUG) 
-
-            # if self.solver.check() == unsat:
-            #     print("*** UNSAT ***")
-            #     exit()
+        if sum_z3vars != None:
+            self.solver.add(node_z3var == sum_z3vars)
+            log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
+    ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
 
     def create_unified_constraints(self):
         log(" unified node constraints ========", DEBUG) 
@@ -453,6 +346,81 @@ class trace2flows:
         # END
 
 
+    def find_model_interactive(self):
+        #@ add CG constraints into the solver
+        self.create_constraints(0)
+
+        edge_exclusion_list = []
+        while self.solver.check() == sat:
+            model = self.solver.model()
+            self.print_z3model_edges(model)
+
+            cmdln = input('What to do next? ')
+            tokens = cmdln.split(' ')
+            if tokens[0] == 'noedge' or tokens[0] == 'ne':
+                edge = self.graph.get_edge(tokens[1], tokens[2])
+                if edge is None:
+                    print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
+                else:
+                    edge_z3var = edge.get_z3var()
+                    edge_support = edge.get_support()
+                    if self.solver.check(edge_z3var == 0) == sat:
+                        self.solver.add(edge_z3var == 0)
+                        edge_exclusion_list.append(tokens[1]+' ' + tokens[2]+'\n')
+                    else:
+                        print('unsat -- edge not removed')
+            elif tokens[0] == 'yesedge' or tokens[0]=='ye':
+                edge = self.graph.get_edge(tokens[1], tokens[2])
+                if edge is None:
+                    print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
+                else:
+                    edge_z3var = edge.get_z3var()
+                    edge_support = edge.get_support()
+                    if self.solver.check(edge_z3var > 0) == sat:
+                        self.solver.add(edge_z3var > 0)
+                    else:
+                        print('unsat -- edge not added')
+            elif tokens[0] == 'p' or tokens[0] == 'print':
+                log('@%s:%d: print the model into file %s\n' % (whoami(), line_numb(), tokens[1]), INFO)
+                try:
+                    fp = open(tokens[1], "w")
+                except IOError as e:
+                    print("Couldn't open file (%s)." % tokens[1])
+                for edge in self.graph.get_edges().values():
+                    edge_z3var = edge.get_z3var()
+                    if model[edge_z3var].as_long() != 0:
+                        fp.write(str(edge.get_source().get_index()) + ' ' + str(edge.get_destination().get_index()) + '\n')
+            elif tokens[0] == 'quit' or tokens[0] == 'q':
+                try:
+                    fp = open("edge_exclusion_list.txt", "w")  
+                except IOError as e:
+                    print("Couldn't open file (%s)." % 'edge_exclusion_list.txt')
+                print('Writing excluded edges into file (edge_exclusion_list.txt)')
+                fp.writelines(edge_exclusion_list) 
+                fp.close()  
+                return
+
+            # #@--- start a new scope and recrusively find a reduce model
+            # self.solver.push()
+            # new_constr = False
+            # for edge_z3var in edge_z3var_list:
+            #     if model[edge_z3var]==0:
+            #         self.solver.add(edge_z3var==0)
+            # self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+            # self.solver.pop()
+            # #@--- end of the scope
+
+            # new_constr = False
+            # for edge_z3var in edge_z3var_list:
+            #     new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            # new_constr = simplify(new_constr)
+            # self.solver.add(new_constr) 
+            # log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+            # #@-------------------------------------
+        
+
+
     def find_reduced_model(self):
         #@ add CG constraints into the solver
         self.create_constraints(0)
@@ -559,6 +527,17 @@ class trace2flows:
             if m[edge_z3var].as_long() != 0:
                 print(edge_z3var, '=', m[edge_z3var], ' ', end=' ')
         print()
+
+
+    def print_z3model_edges(self, m):
+        edges = self.graph.get_edges().values()
+        edge_count = 0
+        for edge in edges:
+            edge_z3var = edge.get_z3var()
+            if m[edge_z3var].as_long() != 0:
+                print(edge.print_full() + '\t' + str(m[edge_z3var]))
+                edge_count += 1
+        print('Edges in the model: ', edge_count)
 
     def z3model2str(self, m):
         s = '#Node supports -->\n'

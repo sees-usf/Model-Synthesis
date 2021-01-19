@@ -40,10 +40,10 @@ class Node:
         return self.msg_type
     
     def get_source(self):
-        return self.message[0]
+        return self.message[1]
     
     def get_destination(self):
-        return self.message[1]
+        return self.message[2]
 
     def get_command(self):
         return self.command
@@ -145,6 +145,9 @@ class Node:
     def add_outgoing_edge(self, edge):
         self.succ_nodes.append(edge.get_destination())
         self.outgoing_edges.append(edge)
+
+    def print_full(self):
+        return "{:<7}".format(str(self.symbol_index) + ' : ') + '(' + self.get_source() + ', ' + self.get_destination()+', ' + self.get_command()+', '+self.get_type()+')'
 
     @dispatch(Edge)
     def remove_edge(self, edge):
