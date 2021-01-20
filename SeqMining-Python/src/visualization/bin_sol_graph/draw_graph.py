@@ -63,8 +63,8 @@ class Graph:
 
         self.vert_dict[frm].add_neighbor(self.vert_dict[to], cost)
         # self.vert_dict[to].add_neighbor(self.vert_dict[frm], cost)
+    
     def remove_edge(self,child,parent):
-
         # print(child, parent, "Remove edge: ",self.vert_dict[parent], self.vert_dict[child])
         self.vert_dict[parent].remove_neighbor(self.vert_dict[child])
         # self.vert_dict.pop(child)
@@ -99,6 +99,8 @@ class Planter:
 	processed_verts = []
 
 	leaves = []
+
+	node_connections = {} # {node:[parents], [children]}
 
 
 	def rn(self):
@@ -178,12 +180,37 @@ class Planter:
 
 	        # return map_info
 
-
-	def edge_to_graph(self):
+	def node_connections_finder(self):
 		nodes = sum(self.edges,[])
 		nodes = list(set(nodes))
-		print("Nodes from the solutions: ",nodes)
-		self.prev_random.extend(nodes)
+
+		for node in nodes:
+			parents = []
+			children = []
+			for edge in self.edges:
+				if edge[0] == node:
+					children.append(edge[1])
+				elif edge[1] ==node:
+					parents.append(edge[0])
+				else:
+					pass
+
+			self.node_connections[node] = [parents, children]
+
+		for node in self.node_connections: # connecting terminal nodes to roots.
+			if self.node_connections[node][1] == []:
+				for par in self.node_connections[node][0]:
+					if self.map_info[par][0] == self.map_info[node][1]:
+						self.edges.append([node,par])
+						# print([node,par])
+
+		# print(self.node_connctions)	
+
+
+	def edge_to_graph(self):
+		# nodes = sum(self.edges,[])
+		# nodes = list(set(nodes))
+		self.node_connections_finder()
 
 		g = Graph()
 
@@ -206,29 +233,66 @@ class Planter:
 
 		self.leaves = [int(i) for i in g.get_leaves()]
 
-		for leaf in self.leaves:
-			rand_end = self.rn()
-			g.add_vertex(str(rand_end), self.map_info[leaf][1])
-			g.add_edge(str(leaf), str(rand_end), self.map_info[leaf][2])
-			# print(str(leaf), str(rand_end),map_info[leaf][2])
+		# for leaf in self.leaves:
+		# 	rand_end = self.rn()
+		# 	g.add_vertex(str(rand_end), self.map_info[leaf][1])
+		# 	g.add_edge(str(leaf), str(rand_end), self.map_info[leaf][2])
+		# 	# print(str(leaf), str(rand_end),map_info[leaf][2])
 
-			self.processed_verts.append(rand_end)
+		# 	self.processed_verts.append(rand_end)
 
 		return g
 
+	def graph_pruning(self,g):
+		# for node in self.node_connections:
+		# 	print(node, self.node_connections[node])
 
+		removable = []
 
+		for v in g:
+			# print("\n",v.get_id())
+			conns = list(v.get_connections())
+			if len(conns)>1:
+				siblings_group = [] #children of a vertex, checking if all of them have single root.
+				for w in conns:
+					if [int(v.get_id())] == self.node_connections[int(w.get_id())][0]: #single parent for all childs
+					# if int(v.get_id()) in self.node_connections[int(w.get_id())][0] and self.map_info[int(v.get_id())][1] == self.map_info[int(w.get_id())][0]:
+
+						# g.remove_edge(w.get_id(),v.get_id())
+						siblings_group.append(int(w.get_id()))
+
+				if len(siblings_group)>1:
+					live_node = siblings_group[0]
+					# print("live_node", live_node)
+
+					for sib in siblings_group[1:]:
+						for ch in self.node_connections[sib][1]:
+							g.add_edge(str(live_node), str(ch), self.map_info[sib][2])
+							# print("added:", live_node, str(ch), self.map_info[sib][2])
+
+						g.remove_edge(str(sib), v.get_id())
+						removable.append(sib)
+
+		removable = set(removable)
+		# print("Removable: ",removable)
+		for vert in removable:
+			g.remove_vertex(str(vert))
+					# print(v.get_id(),siblings_group)
+		return g
 
 
 	def draw(self, msg_file, seq_file):
 		self.map_function(msg_file)
 		self.parse_seqs(seq_file)
 		g = self.edge_to_graph()
+		g = self.graph_pruning(g)
+
+
 
 		now = datetime.now()
 
 		file_str = "diagrams/seq-"+now.strftime("%H-%M-%S")
-		# file_str = "diagrams/seq-"
+		# file_str = "simple"
 		out_file = file_str+".dot"
 		with open(out_file, 'w') as f:
 			
@@ -263,5 +327,8 @@ class Planter:
 		os.remove(file_str+".dot")
 		print("\nWrote "+file_str+".png")
 
+
+
 pt = Planter()
-pt.draw('large.msg','model.txt') # replace with your message definition and sequence file in the binary format
+
+pt.draw('large.msg','model.txt')
