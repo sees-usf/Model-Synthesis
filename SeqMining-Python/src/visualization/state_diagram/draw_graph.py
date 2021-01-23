@@ -296,7 +296,7 @@ class Planter:
 
 		now = datetime.now()
 
-		file_str = "diagrams/seq-"+now.strftime("%H-%M-%S")
+		file_str = "seq-"+now.strftime("%H-%M-%S")
 		# file_str = "simple"
 		out_file = file_str+".dot"
 
