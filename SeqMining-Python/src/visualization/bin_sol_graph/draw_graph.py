@@ -286,49 +286,112 @@ class Planter:
 		self.parse_seqs(seq_file)
 		g = self.edge_to_graph()
 		g = self.graph_pruning(g)
-
-
+		
+		cpus = []
+		cache0s = []
+		cache1s = []
+		membuses = []
+		mems = []
+		periferals = []
 
 		now = datetime.now()
 
 		file_str = "diagrams/seq-"+now.strftime("%H-%M-%S")
 		# file_str = "simple"
 		out_file = file_str+".dot"
+
+		components = []
+
+		for v in g:
+			node = v.get_id()+"_"+v.label
+			components.append(node)
+			# print ('\"%s_%s\"' % (v.get_id(), v.label), end="; ")
+		# print("\n")
+		
+		# print(nodes)
+		
 		with open(out_file, 'w') as f:
 			
-			f.write("digraph {\n")
+			f.write("digraph asde91{\n")
+			f.write("\n ranksep=.75;\n node [color=red,fontname=Courier,shape=box, weight=.5]\n edge [color=white, style=dashed]\n\n" )
 
 			color = 1
+
+			for node in components:
+				if 'cpu' in node:
+					cpus.append(node)
+				elif 'cache0' in node:
+					cache0s.append(node)
+				elif 'cache1' in node:
+					cache1s.append(node)
+				elif 'membus' in node:
+					membuses.append(node)
+				elif 'mem' in node:
+					mems.append(node)
+				else:
+					periferals.append(node)
+
+			nodes = [cpus, cache0s, cache1s, membuses, mems, periferals]
+
+			f.write("\n{ 1->2->3->4->5->6;\n")
+			for node in components:
+				f.write("\""+node+"\""+'; ')
+			f.write("\n}\n\n")
+
+			for  rank ,node in enumerate(nodes):
+				f.write("{ rank=same; "+str(rank+1)+"; ")
+				for n in node:
+					# print(rank, n, end=" ")
+					f.write("\""+n+"\"; ")
+				f.write(" }\n")
+				# print()
+			f.write("\n\n")
+			
+			f.write("\n node [color=red,fontname=Courier,shape=box, weight=.2]\n edge [color=blue4, fontname=Courier, style=dotted]\n\n" )
 			
 			for v in g:
 				for w in v.get_connections():
 				    vl = v.label
 				    wl = w.label
+				    # print ('%s_%s'  % (w.get_id(), wl), end="; ")
 
 				    if color:
 				        color = 0
-				        f.write("{id"+str(v.get_id())+"_"+str(vl)+"[color=red]}\n")
-				        print("{id"+str(v.get_id())+"_"+str(vl)+"[color=red]}")
+				        # f.write("{id"+str(v.get_id())+"_"+str(vl)+"[color=red]}\n")
+				        # prind"+str(v.get_id())+"_"+str(vl)+"[color=red]}")
 
 				    if w.get_id() not in self.leaves:
-				        print ('id%s_%s->id%s_%s[label=\"%s\"];'  % (v.get_id(), vl, w.get_id(), wl, v.get_weight(w)))
-				        f.write("id"+str(v.get_id())+"_"+str(vl)+"->id"+str(w.get_id())+"_"+str(wl)+"[label=\""+str(v.get_weight(w))+"\"];\n")
+				        # print ('id%s_%s->id%s_%s[label=\"%s\"];'  % (v.get_id(), vl, w.get_id(), wl, v.get_weight(w))) #dot format
+				        # f.write("id"+str(v.get_id())+"_"+str(vl)+"->id"+str(w.get_id())+"_"+str(wl)+"[label=\""+str(v.get_weight(w))+"\"];\n")
+				        f.write("\""+str(v.get_id())+"_"+str(vl)+"\"->\""+str(w.get_id())+"_"+str(wl)+"\""+"[label=\""+str(v.get_weight(w))+"\"];\n") #with ranks
+
+				        # print ('%s_%s --> %s_%s : %s'  % (v.get_id(), vl, w.get_id(), wl, v.get_weight(w))) #plantUML format
+				        # print ('\"%s_%s\"->\"%s_%s\"[label=\"%s\"];'  % (v.get_id(), vl, w.get_id(), wl, v.get_weight(w))) #dot format
+
 				    else:
-				        print ('id%s_%s->%s[label=\"%s\"];'  % (v.get_id(), vl, wl, v.get_weight(w)))
-				        f.write("id"+str(v.get_id())+"_"+str(vl)+"->"+str(wl)+"[label=\""+str(v.get_weight(w))+"\"];\n")
+				        # print ('id%s_%s->%s[label=\"%s\"];'  % (v.get_id(), vl, wl, v.get_weight(w))) #dot format
+				        # f.write("id"+str(v.get_id())+"_"+str(vl)+"->"+str(wl)+"[label=\""+str(v.get_weight(w))+"\"];\n")
+				        f.write("\""+str(v.get_id())+"_"+str(vl)+"->"+str(wl)+"\""+"[label=\""+str(v.get_weight(w))+"\"];\n") #with ranks
+
+				        # print ('id%s_%s->%s[label=\"%s\"];'  % (v.get_id(), vl, wl, v.get_weight(w))) #plantUML format
+				        # print(leaves)
+
+				# print ('\"%s_%s\"' % (v.get_id(), v.label), end="; ")
+
 			f.write("}")
 		f.close()
 
+		# print(g.get_vertices())
 		B = pgv.AGraph(out_file)  # create a new graph from file
 		B.layout(prog='dot')  # layout with default (neato)
 		B.draw(file_str+".png")  # draw png
-        # vertices = g.get_vertices()
-        # print("\nNumber of vertices in the graph(before merging terminals): ",len(vertices))
+		vertices = g.get_vertices()
+		print("\nNumber of vertices in the graph: ",len(vertices))
 		os.remove(file_str+".dot")
 		print("\nWrote "+file_str+".png")
 
 
 
-pt = Planter()
+# pt = Planter()
 
-pt.draw('large.msg','model.txt')
+# pt.draw('large.msg','model.txt')
