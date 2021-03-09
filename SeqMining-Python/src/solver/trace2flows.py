@@ -2,6 +2,7 @@ import copy
 from src.logging import *
 from src.solver.flow_generator import *
 from z3 import *
+from src.visualization.state_diagram.draw_graph import Planter
 
 
 class trace2flows:
@@ -390,6 +391,10 @@ class trace2flows:
                     edge_z3var = edge.get_z3var()
                     if model[edge_z3var].as_long() != 0:
                         fp.write(str(edge.get_source().get_index()) + ' ' + str(edge.get_destination().get_index()) + '\n')
+                ### Draw the output model into graph file in png.
+                fp.close()
+                pt = Planter()
+                pt.draw(self.graph.get_msg_def_file_name(), tokens[1])
             elif tokens[0] == 'quit' or tokens[0] == 'q':
                 try:
                     fp = open("edge_exclusion_list.txt", "w")  
