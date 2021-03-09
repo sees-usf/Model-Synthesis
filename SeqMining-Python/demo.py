@@ -76,7 +76,10 @@ if __name__ == '__main__':
     # 
     # def_f = 'pat_thread_def.txt'
     # trace_f = 'pat_thread_tr-1.txt'   
-    # trace_f = 'pat_thread_tr-2.txt'   
+    #trace_f = 'pat_thread_tr-2.txt'
+    # trace_f = 'split-trace-icache0.txt'  
+    # trace_f = 'split-trace-tol2bus.txt'
+    
     filters_filename = None
     rank_filename = None
 
@@ -130,7 +133,9 @@ if __name__ == '__main__':
         z3.generate_split_solutions()
     else:
         #graph.remove_cycles()
-        z3 = trace2flows(cgs)    
+        z3solver = trace2flows(cgs)
+        z3solver.find_model_interactive()
+
     log('Done\n')
 
 
@@ -167,8 +172,8 @@ if __name__ == '__main__':
     #z3.generate_split_solutions()
 
 
-    log('Solutions found ' + str(len(z3.get_solutions()))+'\n')
-    if not z3.get_solutions():
+    log('Solutions found ' + str(len(z3solver.get_solutions()))+'\n')
+    if not z3solver.get_solutions():
         exit()
 
     log('Generating solutions and sequence diagrams ... \n')
