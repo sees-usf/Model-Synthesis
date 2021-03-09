@@ -26,6 +26,9 @@ class Graph:
         # ## transitive causality
         # self.transitive_causality_table = {}
 
+        self.msg_def_file_name = None
+        self.trace_file_name = None
+
         self.exclude_list = []
         self.include_list = []
         
@@ -42,6 +45,8 @@ class Graph:
             f = open(msg_def_file_name, 'r')
         except IOError as e:
             print("Couldn't open file (%s)." % e)
+
+        self.msg_def_file_name = msg_def_file_name
 
         root_node_strings = []
 
@@ -150,6 +155,9 @@ class Graph:
         except IOError as e:
             print("Couldn't open file (%s)." % e)
             return
+
+        self.trace_file_name = trace_file
+
         original_trace = (trace_fp.readlines())[0]
         trace_fp.close()
 
@@ -169,9 +177,10 @@ class Graph:
             if token == '-1' or not self.has_node(token):
                 continue
 
-            if (len(self.trace_tokens) - trace_size) % 100000 == 0:
-                trace_size = len(self.trace_tokens)
-                print('trace size now: ', trace_size)
+            # # status report on reading input trace
+            # if (len(self.trace_tokens) - trace_size) % 100000 == 0:
+            #     trace_size = len(self.trace_tokens)
+            #     print('trace size now: ', trace_size)
 
             node = self.get_node(token)
             node.set_support(node.get_support() + 1)
@@ -242,19 +251,20 @@ class Graph:
 
         roots = self.get_roots()
         terminals = self.get_terminal_nodes()
-        for t in roots:
-            print(t)
-        print('---------------\n')
-        for t in terminals:
-            print(t)
+        # for t in roots:
+        #     print(t)
+        # print('---------------\n')
+        # for t in terminals:
+        #     print(t)
         # input()
 
         # node = self.get_node('44')
         # self.add_terminal(node)
-        for node in node_table.keys():
-            print(node.get_index(), ' ', node.get_support())
+        # for node in node_table.keys():
+        #     print(node.get_index(), ' ', node.get_support())
         
         ## Compute edge support wrt the input trace
+        print('\nBinary sequence information:')
         edges = self.get_edges().values()
         for edge in edges:
             src_node = edge.get_source()
@@ -303,7 +313,12 @@ class Graph:
                 dest_head += 1
         edge.set_support(support)
         if True:#edge.get_fconf()==1 and edge.get_bconf()==1: 
-            print(edge, ' ', edge.get_support(), ' ', edge.get_fconf(), ' ', edge.get_bconf(), ' ', edge.get_hconf())
+            id = "{0:<10}".format(str(edge.get_id()))
+            sup  = "{0:<6}".format(str(edge.get_support()))
+            fconf = "{0:<6}".format(str(round(edge.get_fconf(), 2)))
+            bconf = "{0:<6}".format(str(round(edge.get_bconf(), 2)))
+            hconf = "{0:<6}".format(str(round(edge.get_hconf(), 2)))
+            print(id, ' ', sup, ' ', fconf, ' ', bconf, ' ', hconf)
         return len(support)
 
 
@@ -875,3 +890,9 @@ class Graph:
 
     def get_max_solutions(self):
         return self.max_solutions
+
+    def get_msg_def_file_name(self):
+        return self.msg_def_file_name
+
+    def get_trace_file_name(self):
+        return self.trace_file_name
