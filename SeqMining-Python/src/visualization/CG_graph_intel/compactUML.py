@@ -444,7 +444,8 @@ class Planter:
 
 
 pt = Planter()
-pt.prefix = [0, 18,10, 11] #specify the prefix of the graph, at least one node.
+pt.prefix = [] #[0, 18,10, 11] #specify the prefix of the graph, at least one node.
 pt.msg_file = 'large.msg' #specify the msg definition file (default is large.msg), best practice is to specify the starting and terminating messages in this file by #
 pt.sol_file = 'sol-sequences.txt'# specify the solution file (default is sol-sequences.txt)
+pt.sol_file = 'model.txt'# specify the solution file (default is sol-sequences.txt)
 pt.draw(detailed=1) #call the api, detailed = 1 means nodes complete definition, if detailed = 0, only number in the sequences will be there. The purpose is to prevent UMLs from being cut off.
