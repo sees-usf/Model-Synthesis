@@ -63,6 +63,9 @@ class GraphAnnotator:
         for edge in edges:
             if edge.get_source() in terminal_msg_table.keys(): continue
             self.find_edge_support(edge, node_table)
+            # self.annotate_edge(edge)
+            print(edge, ' ', edge.get_support())
+
             
        
     def find_edge_support(self, edge, node_table):
@@ -139,17 +142,17 @@ class GraphAnnotator:
     def causal(self, msg_1, msg_2):
         return msg_1.get_destination() == msg_2.get_source()
 
-    # def annotate_edge(self, edge):
-    #     instances = 0
-    #     source_symbol_index = edge.get_source().get_symbol_index()
+    def annotate_edge(self, edge):
+        instances = 0
+        source_symbol_index = edge.get_source().get_symbol_index()
 
-    #     for token in self.trace_tokens:
-    #         if not token == '-1':
-    #             if source_symbol_index == token:
-    #                 instances += 1
-    #             elif str(edge) == source_symbol_index + '_' + token and instances > 0:
-    #                 edge.set_edge_support(edge.get_edge_support() + 1)
-    #                 instances -= 1
+        for token in self.trace_tokens:
+            if not token == '-1':
+                if source_symbol_index == token:
+                    instances += 1
+                elif str(edge) == source_symbol_index + '_' + token and instances > 0:
+                    edge.set_edge_support(edge.get_edge_support() + 1)
+                    instances -= 1
                     
 
 
