@@ -1,7 +1,9 @@
 import copy
+
+from z3 import *
 from src.logging import *
 from src.solver.flow_generator import *
-from z3 import *
+import pulp as pl
 from src.visualization.state_diagram.draw_graph import Planter
 
 
@@ -10,6 +12,7 @@ class trace2flows:
         self.graph = cg_vec.pop(0)
         self.dags = cg_vec
         self.solver = Solver()
+        self.pulp_solver = pl.LpProblem('minimum_solution', pl.LpMinimize)
         self.edge_z3var_list = []
         self.edge_variables_3D_dict = {}
         self.node_variables_2D_dict = {}
@@ -31,6 +34,23 @@ class trace2flows:
         self.node_variables_2D_dict = {}
         self.root_variables_2D_dict = {}
         self.solutions = []
+        self.pulp_solver.variables().clear()
+        self.pulp_solver.constraints.clear()
+
+    def find_minimum_solution(self):
+        self.create_constraints(0)
+        status = self.pulp_solver.solve()
+        print(pl.LpStatus[status])
+
+        nodes = self.graph.get_nodes()
+        edges = self.graph.get_edges().values()
+
+        # Solution for Node Supports
+        for node in nodes:
+            print(node.get_symbol_index() + ' = ' + str(pl.value(node.get_pulp_var())))
+
+        for edge in edges:
+            print(edge.get_id() + ' = ' + str(pl.value(edge.get_pulp_var())))
 
     
     # Possibly need to make this function for monolithic, this is the dag version
@@ -39,14 +59,12 @@ class trace2flows:
         edges = self.graph.get_edges().values()
 
         for node in nodes.values():
-
             ## create constraint for each node
             node_z3var = node.get_z3var()
             node_support = node.get_support()
             if node_support == 0: continue
             self.solver.add(node_z3var == node_support)
             log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
-            
             self.create_outgoing_edge_constraints(node)
             self.create_incoming_edge_constraints(node)
             
@@ -77,6 +95,8 @@ class trace2flows:
             return
 
         node_z3var = node.get_z3var()
+        node_pulp_var = node.get_pulp_var()
+        pulp_var_edge_sum = 0
         outgoing_edges = node.get_outgoing_edges()
         node_edge_vars = []
         strong_causality = False
@@ -87,11 +107,13 @@ class trace2flows:
             total_sup += edge_support
             edge_ranking = edge.get_ranking()
             edge_z3var = edge.get_z3var()
+            pulp_var_edge_sum += edge.get_pulp_var()
             #@ only consider edges with ranking higher than the threshold
             if True: #edge_ranking >= ranking_threshold:
                 node_edge_vars.append(edge_z3var)
             # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
 
+        self.pulp_solver += node_pulp_var == pulp_var_edge_sum
             ### Create unique causality constraint for each edge
             # all_other_edge_nil = None
             # for other_edge in outgoing_edges:
@@ -123,13 +145,18 @@ class trace2flows:
             return
 
         node_z3var = node.get_z3var()
+        node_pulp_var = node.get_pulp_var()
+        pulp_var_edge_sum = 0
         incoming_edges = node.get_incoming_edges()
         node_edge_vars = []
         for edge in incoming_edges:
             edge_support = edge.get_support()
+            pulp_var_edge_sum += edge.get_pulp_var()
             edge_z3var = edge.get_z3var()
             node_edge_vars.append(edge_z3var)
-                
+
+        self.pulp_solver += node_pulp_var == pulp_var_edge_sum
+
         sum_z3vars = None
         s = ''
         for edge_var in node_edge_vars:

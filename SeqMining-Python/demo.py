@@ -134,7 +134,8 @@ if __name__ == '__main__':
     else:
         #graph.remove_cycles()
         z3solver = trace2flows(cgs)
-        z3solver.find_model_interactive()
+        #z3solver.find_model_interactive()
+        z3solver.find_minimum_solution()
 
     log('Done\n')
 

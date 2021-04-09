@@ -1,12 +1,13 @@
-from enum import Enum
 import copy
-from multipledispatch import dispatch
-from nltk.tokenize import regexp_tokenize
 from copy import deepcopy
+from enum import Enum
+
+from nltk.tokenize import regexp_tokenize
+from src.filter_list import *
 from src.graph.edge import Edge
 from src.graph.node import Node
 from src.logging import *
-from src.filter_list import *
+import pulp as pl
 
 
 class SecType(Enum):
@@ -232,6 +233,9 @@ class Graph:
         # exit()
         # ## end of trace splitting
 
+        for node in self.nodes.values():
+            node.set_pulp_var(pl.LpVariable(node.get_symbol_index(), node.get_support(), node.get_support()))
+
 
         #@ iteratively finding initial and terminal messages from the input trace
         initial_msg_table = {}
@@ -271,6 +275,7 @@ class Graph:
             dest_node = edge.get_destination()
             if self.is_terminal(src_node) or self.is_initial(dest_node): continue
             self.find_edge_support(edge, node_table)
+            edge.set_pulp_var(pl.LpVariable(edge.get_id(), 0, edge.get_support()))
 
         ## For each edge, compute its direct support count --> potentially more efficient model finding
         for edge in edges:
