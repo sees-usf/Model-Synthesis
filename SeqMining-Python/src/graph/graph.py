@@ -11,10 +11,11 @@ import pulp as pl
 
 
 class SecType(Enum):
-    IDLE=0
+    IDLE = 0
     START = 1
     MIDDLE = 2
     TERMINAL = 3
+
 
 class Graph:
     def __init__(self):
@@ -32,7 +33,7 @@ class Graph:
 
         self.exclude_list = []
         self.include_list = []
-        
+
         self.filters = None
         self.bin_seq_rank = {}
         self.max_height = 8
@@ -40,24 +41,23 @@ class Graph:
 
         self.DEBUG = False
 
-
     def read_message_file(self, msg_def_file_name):
         try:
             f = open(msg_def_file_name, 'r')
         except IOError as e:
             print("Couldn't open file (%s)." % e)
 
+        f1 = f.readlines()
         self.msg_def_file_name = msg_def_file_name
 
         root_node_strings = []
 
-        f1 = f.readlines()
         is_root_definitions = False
         parse_state = SecType.IDLE
         for line in f1:
             tokens = regexp_tokenize(line, pattern=r'\s|[,:]', gaps=True)
-            if not tokens: # token list is empty
-                continue 
+            if not tokens:  # token list is empty
+                continue
             if tokens[0] == '#':
                 # is_root_definitions = not is_root_definitions
                 # continue
@@ -82,7 +82,7 @@ class Graph:
             destination = tokens[2]
             command = tokens[3]
             msg_type = tokens[4]
-            message = tokens #(origin, destination)
+            message = tokens  # (origin, destination)
 
             if not self.has_node(symbol_index):
                 node = Node(self, symbol_index, message, command, msg_type)
@@ -90,15 +90,15 @@ class Graph:
                 # if symbol_index in root_node_strings:
                 if parse_state == SecType.START:
                     self.add_root(node)
-                    log('Add root node '+str(symbol_index)+'\n', DEBUG)
+                    log('Add root node ' + str(symbol_index) + '\n', DEBUG)
                 elif parse_state == SecType.TERMINAL:
                     self.add_terminal(node)
-                    log('Add terminal node '+str(symbol_index)+'\n', DEBUG)
+                    log('Add terminal node ' + str(symbol_index) + '\n', DEBUG)
 
         f.close()
 
         self.generate_edges()
-        
+
         # temp code for generating DAG-CG for each root node
         # for n in self.nodes.keys():
         #     idx=[]
@@ -116,7 +116,7 @@ class Graph:
         #     f.write("#\n")
         #     #exit()  
         # f.close()
-        
+
     def generate_edges(self):
         for node_src in self.nodes.values():
             for node_dest in self.nodes.values():
@@ -128,10 +128,10 @@ class Graph:
                     node_src.add_edge(edge)
                     node_src.add_succ(node_dest)
                     self.add_edge(edge)
-        
+
             if not node_src.get_edges():
                 self.add_terminal_node(node_src)
-                log('Add new terminal node '+str(node_src.get_index())+'\n', DEBUG)
+                log('Add new terminal node ' + str(node_src.get_index()) + '\n', DEBUG)
 
             # for node_dest in self.nodes.values():
             #     if node_src == node_dest or self.is_root(node_dest):
@@ -149,7 +149,6 @@ class Graph:
             #     self.add_terminal_node(node_src)
             #     log('Add new terminal node '+str(node_src.get_index())+'\n', DEBUG)
 
-    
     def read_trace_file(self, trace_file):
         try:
             trace_fp = open(trace_file, 'r')
@@ -162,12 +161,12 @@ class Graph:
         original_trace = (trace_fp.readlines())[0]
         trace_fp.close()
 
-        #@ Tables of messags from the trace
+        # @ Tables of messags from the trace
         node_table = {}
 
         # tokens = regexp_tokenize(self.original_trace, pattern=r'\s|[,:]', gaps=True)
         tokens = original_trace.split(' ')
-        
+
         trace_size = 0
         pos_index = 0
         split_traces = {}
@@ -189,7 +188,7 @@ class Graph:
                 node_table[node].append(pos_index)
             else:
                 idx_list = [pos_index]
-                node_table[node] = idx_list 
+                node_table[node] = idx_list
             self.trace_tokens.append(token)
 
             pos_index += 1
@@ -236,8 +235,7 @@ class Graph:
         for node in self.nodes.values():
             node.set_pulp_var(pl.LpVariable(node.get_symbol_index(), node.get_support(), node.get_support()))
 
-
-        #@ iteratively finding initial and terminal messages from the input trace
+        # @ iteratively finding initial and terminal messages from the input trace
         initial_msg_table = {}
         terminal_msg_table = {}
         while True:
@@ -245,11 +243,10 @@ class Graph:
             new_terminal_msg = self.find_terminal_msg(node_table, initial_msg_table, terminal_msg_table)
             if not new_initial_msg and not new_terminal_msg:
                 break
-        #@ It is possible that some TRUE initial and terminal messages may not be found
-        #@ as they itnterleave in the trace in certain manner, eg. 15 16 16 15 where 
-        #@ 15 is terminal while 16 is initial. 
+        # @ It is possible that some TRUE initial and terminal messages may not be found
+        # @ as they itnterleave in the trace in certain manner, eg. 15 16 16 15 where
+        # @ 15 is terminal while 16 is initial.
 
-        
         self.add_initial_messages(initial_msg_table)
         self.add_terminal_messages(terminal_msg_table)
 
@@ -266,7 +263,7 @@ class Graph:
         # self.add_terminal(node)
         # for node in node_table.keys():
         #     print(node.get_index(), ' ', node.get_support())
-        
+
         ## Compute edge support wrt the input trace
         print('\nBinary sequence information:')
         edges = self.get_edges().values()
@@ -290,8 +287,7 @@ class Graph:
                     direct_sup += 1
             edge.set_direct_support(direct_sup)
 
-
-    ## for argument 'edge', find its support as a list of index pairs, such that 
+    ## for argument 'edge', find its support as a list of index pairs, such that
     ## each pair specifies positions of src/dest of the 'edge' in the trace
     def find_edge_support(self, edge, node_table):
         src_node = edge.get_source()
@@ -317,15 +313,14 @@ class Graph:
             elif src_idx_list[src_head] >= dest_idx_list[dest_head]:
                 dest_head += 1
         edge.set_support(support)
-        if True:#edge.get_fconf()==1 and edge.get_bconf()==1: 
+        if True:  # edge.get_fconf()==1 and edge.get_bconf()==1:
             id = "{0:<10}".format(str(edge.get_id()))
-            sup  = "{0:<6}".format(str(edge.get_support()))
+            sup = "{0:<6}".format(str(edge.get_support()))
             fconf = "{0:<6}".format(str(round(edge.get_fconf(), 2)))
             bconf = "{0:<6}".format(str(round(edge.get_bconf(), 2)))
             hconf = "{0:<6}".format(str(round(edge.get_hconf(), 2)))
             print(id, ' ', sup, ' ', fconf, ' ', bconf, ' ', hconf)
         return len(support)
-
 
     def find_initial_msg(self, node_table, initial_msg_table, terminal_msg_table):
         new_initial_msg = False
@@ -347,7 +342,7 @@ class Graph:
                 initial_msg_table[this_msg] = ''
                 # print('found init msg: ', this_msg)
         return new_initial_msg
-                    
+
     ## for each message (this_msg), check its final index (this_final_index) against 
     ## the final indices (other_final_index) of other messages (other_msg)
     ## If no other message exists such that other_final_index > this_final_index, and 
@@ -374,15 +369,14 @@ class Graph:
                 #         #     print(other_msg, ' ', other_pos, ' ', this_tail)
                 #         causal = True
                 #         break
-                
+
                 # if causal: break
-                
+
             if not causal:
                 new_terminal_msg = True
                 terminal_msg_table[this_msg] = ''
                 # print('found terminal msg: ', this_msg)
         return new_terminal_msg
-        
 
     # ## Computer transitive causality using edge support.  
     # def find_transitive_causality(self):
@@ -397,7 +391,7 @@ class Graph:
     #     for (k, l) in self.transitive_causality_table.keys():
     #         matrix[k][l] = 1
     #         print(k.get_index(), ',', l.get_index())
-        
+
     #     for i in nodes:
     #         if self.is_terminal(i): continue
     #         for k in nodes:
@@ -410,14 +404,13 @@ class Graph:
     #     # for (m, n) in self.transitive_causality_table:
     #     #     print(m.get_index(), ' ', n.get_index())
 
-                
-    #@ test causality relation between two messages.
-    #@ the condition depends on source/destination matching, and relations between messages types
-    #@ if there are more message types than just 'req' or 'resp', this function needs to update
+    # @ test causality relation between two messages.
+    # @ the condition depends on source/destination matching, and relations between messages types
+    # @ if there are more message types than just 'req' or 'resp', this function needs to update
     def causal(self, msg_1, msg_2):
         if msg_1.get_destination() != msg_2.get_source():
             return False
-        
+
         if msg_1.get_source() == msg_2.get_destination():
             if msg_1.get_type().lower() == 'resp':
                 return False
@@ -425,16 +418,15 @@ class Graph:
                 return (msg_2.get_type().lower() == 'resp')
         elif msg_1.get_type().lower() == 'req':
             return (msg_2.get_type().lower() != 'resp')
-        
+
         return True
         raise ValueError("Wrong message type:", msg_1.get_message(), ' ', msg_2.get_message())
 
-
-    ## An approximate function to check if there is any direct support for an edge delimited by head_idx/tail_idx 
+    ## An approximate function to check if there is any direct support for an edge delimited by head_idx/tail_idx
     ## Returns True/False
     def find_edge_direct_support(self, head_idx, tail_idx):
         if (head_idx + 1) == tail_idx:
-            return True 
+            return True
         for i in range(head_idx, tail_idx):
             if (self.is_initial(self.trace_tokens[i]) or self.is_terminal(self.trace_tokens[i])):
                 continue
@@ -469,7 +461,6 @@ class Graph:
     #             return True
     #     return False
 
-
     # @Author: Hao Zheng
     # @Function: input a list of binary sequences ranked by their confidence measures
     def read_bin_seq_ranking(self, rank_filename):
@@ -481,14 +472,14 @@ class Graph:
 
         lines = rank_fp.readlines()
         for line in lines:
-            line = line.split()#line.rstrip("\n")
+            line = line.split()  # line.rstrip("\n")
             src = line[0]
             dest = line[1]
             edge = self.get_edge(src, dest)
             if edge is not None:
                 edge.set_ranking(int(line[4]))
-                log('@%s:%d: set edge ranking %s %d\n' % (whoami(), line_numb(), edge.get_id(), edge.get_ranking()), DEBUG)
-
+                log('@%s:%d: set edge ranking %s %d\n' % (whoami(), line_numb(), edge.get_id(), edge.get_ranking()),
+                    DEBUG)
 
     # @Author: Hao Zheng
     # @Function: input a list of sequences that should be excluded from mined patterns
@@ -522,9 +513,8 @@ class Graph:
         #         self.exclude_list.append(line.split())
         #     elif parse_state == INPUT_INCLUDE:
         #         self.include_list.append(line.split())
-        
+
         # log('filters are empty', WARN) if len(self.include_list)==0 and len(self.exclude_list)==0 else None
-        
 
     # @Author: Zheng
     # @Function: check if an element in a list in terms of index
@@ -533,7 +523,7 @@ class Graph:
             if el.get_symbol_index() == target.get_symbol_index():
                 return True
         return False
-    
+
     # Author: Zheng
     # Function: generate a tree for 'root' node such that no cycle exists in any path from the root, and
     #           every path is up to length of 'heigth'
@@ -547,10 +537,10 @@ class Graph:
         path_node.append(root_node_copy)
         path_succ.append(root_node_copy_succ)
         mono_cg[root_node_copy] = []
-            
-        path_index=[]
+
+        path_index = []
         path_index.append(root_node.get_symbol_index())
-            
+
         while len(path_node) != 0:
             head_node = path_node[-1]
             head_succ_nodes = path_succ[-1]
@@ -559,34 +549,33 @@ class Graph:
                 path_succ.pop(-1)
                 path_index.pop(-1)
                 continue
-                
+
             nxt_node = copy.copy(head_succ_nodes.pop(-1))
-            if self.checkList(path_node, nxt_node) == False:#nxt_node not in path_node:
+            if self.checkList(path_node, nxt_node) == False:  # nxt_node not in path_node:
                 # if len(path_node) == height-1:
                 #     path_index.append(nxt_node.get_symbol_index())
                 #     print(path_index)
                 #     path_index.pop(-1)
-                    
-                if len(path_node) < self.max_height-1:
+
+                if len(path_node) < self.max_height - 1:
                     path_node.append(nxt_node)
                     path_succ.append(copy.copy(self.nodes[nxt_node.get_symbol_index()].get_succ_nodes()))
                     path_index.append(nxt_node.get_symbol_index())
-                #if nxt_node not in mono_cg:
+                # if nxt_node not in mono_cg:
                 mono_cg[nxt_node] = []
-                nxt_node.set_depth(head_node.get_depth()+1)
+                nxt_node.set_depth(head_node.get_depth() + 1)
                 mono_cg[head_node].append(nxt_node)
             #     
             #     
             # else:
             #     print(' cycle found from ', nxt_node)
             #     print(path_index)
-   
+
         # print(root_node_copy)
         # path = [root_node_copy.get_symbol_index()]
         # self.print_path(mono_cg, root_node_copy, path, 1)
         return mono_cg
-        
-        
+
     def print_cg(self, cg):
         cg_str = ""
         for node in cg.keys():
@@ -596,24 +585,23 @@ class Graph:
                 cg_str += succ.get_symbol_index() + "@" + str(succ.get_depth()) + " "
             cg_str += "\n"
         return cg_str
-        
+
     # Author; Zheng
     # Function: print to stdout all paths in 'cg' starting from 'root_node'
     def print_path(self, cg, root_node, path, level):
-        #print('level ', level, "  ", len(cg[root_node]))        
+        # print('level ', level, "  ", len(cg[root_node]))
         for node in cg[root_node]:
             path.append(node.get_symbol_index())
             print(path)
-            self.print_path(cg, node, path, level+1)
+            self.print_path(cg, node, path, level + 1)
             path.pop(-1)
 
-    
     def generate_dags(self):
         dags = []
         traversal_queue = []
 
         for root in self.root_nodes.values():
-            #self.reset_visited_nodes()
+            # self.reset_visited_nodes()
             path = []
             dag = Graph()
 
@@ -633,7 +621,6 @@ class Graph:
             dag.remove_cycles()
             dags.append(dag)
 
-            
             print('created dag for root ', root.get_index())
 
         return dags
@@ -672,8 +659,7 @@ class Graph:
     #     print('pop', path)
     #     print(path.pop(-1))       
 
-    
-    #************ original definition.    ****************************
+    # ************ original definition.    ****************************
     def generate_dags_util(self, dag, traversal_queue):
         if not traversal_queue:
             return
@@ -721,7 +707,7 @@ class Graph:
     def get_nodes(self):
         return self.nodes
 
-    #@ utilities functions for root nodes
+    # @ utilities functions for root nodes
     def add_initial_messages(self, initial_msg_table):
         # self.root_nodes = {}
         for r in initial_msg_table.keys():
@@ -741,10 +727,10 @@ class Graph:
 
     def get_roots(self):
         return self.root_nodes
-    #@-----------------------------------
 
+    # @-----------------------------------
 
-    #@ Utility functions fro terminal nodes
+    # @ Utility functions fro terminal nodes
     def add_terminal_messages(self, terminal_msg_table):
         # self.terminal_nodes = {}
         for t in terminal_msg_table:
@@ -764,8 +750,9 @@ class Graph:
 
     def get_terminal_nodes(self):
         return self.terminal_nodes
-    #@----------------------------------------
-    
+
+    # @----------------------------------------
+
     def get_exclude_list(self):
         return self.exclude_list
 
@@ -806,7 +793,7 @@ class Graph:
 
     def get_max_height(self):
         return self.max_height
-    
+
     def get_edges(self):
         return self.edges
 
@@ -862,8 +849,8 @@ class Graph:
 
         for node in self.nodes.values():
             text = (
-                '''     %s : %s to %s with node support of %d'''
-                % (node.get_symbol_index(), node.get_message()[0], node.get_message()[1], node.get_support())
+                    '''     %s : %s to %s with node support of %d'''
+                    % (node.get_symbol_index(), node.get_message()[0], node.get_message()[1], node.get_support())
             )
 
             total_node_support += node.get_support()
@@ -879,13 +866,12 @@ class Graph:
             print('     Origin: %s' % node.get_symbol_index())
 
             for edge in node.get_edges().values():
-                print('        ' + str(edge) + ' with edge support of ' + str(edge.get_edge_support()))
+                print('        ' + str(edge) + ' with edge support of ' + str(edge.get_support_pos()))
             print()
 
     def print_graph(self):
         self.print_nodes()
         self.print_edges()
-
 
     def set_max_height(self, height):
         self.max_height = height

@@ -4,7 +4,7 @@ from z3 import *
 from src.logging import *
 from src.solver.flow_generator import *
 import pulp as pl
-from src.visualization.state_diagram.draw_graph import Planter
+# from src.visualization.state_diagram.draw_graph import Planter
 
 
 class trace2flows:
@@ -42,7 +42,7 @@ class trace2flows:
         status = self.pulp_solver.solve()
         print(pl.LpStatus[status])
 
-        nodes = self.graph.get_nodes()
+        nodes = self.graph.get_nodes().values()
         edges = self.graph.get_edges().values()
 
         # Solution for Node Supports
@@ -374,83 +374,83 @@ class trace2flows:
         # END
 
 
-    def find_model_interactive(self):
-        #@ add CG constraints into the solver
-        self.create_constraints(0)
-
-        edge_exclusion_list = []
-        while self.solver.check() == sat:
-            model = self.solver.model()
-            self.print_z3model_edges(model)
-
-            cmdln = input('What to do next? ')
-            tokens = cmdln.split(' ')
-            if tokens[0] == 'noedge' or tokens[0] == 'ne':
-                edge = self.graph.get_edge(tokens[1], tokens[2])
-                if edge is None:
-                    print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
-                else:
-                    edge_z3var = edge.get_z3var()
-                    edge_support = edge.get_support()
-                    if self.solver.check(edge_z3var == 0) == sat:
-                        self.solver.add(edge_z3var == 0)
-                        edge_exclusion_list.append(tokens[1]+' ' + tokens[2]+'\n')
-                    else:
-                        print('unsat -- edge not removed')
-            elif tokens[0] == 'yesedge' or tokens[0]=='ye':
-                edge = self.graph.get_edge(tokens[1], tokens[2])
-                if edge is None:
-                    print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
-                else:
-                    edge_z3var = edge.get_z3var()
-                    edge_support = edge.get_support()
-                    if self.solver.check(edge_z3var > 0) == sat:
-                        self.solver.add(edge_z3var > 0)
-                    else:
-                        print('unsat -- edge not added')
-            elif tokens[0] == 'p' or tokens[0] == 'print':
-                log('@%s:%d: print the model into file %s\n' % (whoami(), line_numb(), tokens[1]), INFO)
-                try:
-                    fp = open(tokens[1], "w")
-                except IOError as e:
-                    print("Couldn't open file (%s)." % tokens[1])
-                for edge in self.graph.get_edges().values():
-                    edge_z3var = edge.get_z3var()
-                    if model[edge_z3var].as_long() != 0:
-                        fp.write(str(edge.get_source().get_index()) + ' ' + str(edge.get_destination().get_index()) + '\n')
-                ### Draw the output model into graph file in png.
-                fp.close()
-                pt = Planter()
-                pt.draw(self.graph.get_msg_def_file_name(), tokens[1])
-            elif tokens[0] == 'quit' or tokens[0] == 'q':
-                try:
-                    fp = open("edge_exclusion_list.txt", "w")  
-                except IOError as e:
-                    print("Couldn't open file (%s)." % 'edge_exclusion_list.txt')
-                print('Writing excluded edges into file (edge_exclusion_list.txt)')
-                fp.writelines(edge_exclusion_list) 
-                fp.close()  
-                return
-
-            # #@--- start a new scope and recrusively find a reduce model
-            # self.solver.push()
-            # new_constr = False
-            # for edge_z3var in edge_z3var_list:
-            #     if model[edge_z3var]==0:
-            #         self.solver.add(edge_z3var==0)
-            # self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
-            # self.solver.pop()
-            # #@--- end of the scope
-
-            # new_constr = False
-            # for edge_z3var in edge_z3var_list:
-            #     new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
-            # # new_constr = constr if new_constr is None else Or(new_constr, constr)
-            # new_constr = simplify(new_constr)
-            # self.solver.add(new_constr) 
-            # log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
-            # #@-------------------------------------
-        
+    # def find_model_interactive(self):
+    #     #@ add CG constraints into the solver
+    #     self.create_constraints(0)
+    #
+    #     edge_exclusion_list = []
+    #     while self.solver.check() == sat:
+    #         model = self.solver.model()
+    #         self.print_z3model_edges(model)
+    #
+    #         cmdln = input('What to do next? ')
+    #         tokens = cmdln.split(' ')
+    #         if tokens[0] == 'noedge' or tokens[0] == 'ne':
+    #             edge = self.graph.get_edge(tokens[1], tokens[2])
+    #             if edge is None:
+    #                 print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
+    #             else:
+    #                 edge_z3var = edge.get_z3var()
+    #                 edge_support = edge.get_support()
+    #                 if self.solver.check(edge_z3var == 0) == sat:
+    #                     self.solver.add(edge_z3var == 0)
+    #                     edge_exclusion_list.append(tokens[1]+' ' + tokens[2]+'\n')
+    #                 else:
+    #                     print('unsat -- edge not removed')
+    #         elif tokens[0] == 'yesedge' or tokens[0]=='ye':
+    #             edge = self.graph.get_edge(tokens[1], tokens[2])
+    #             if edge is None:
+    #                 print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
+    #             else:
+    #                 edge_z3var = edge.get_z3var()
+    #                 edge_support = edge.get_support()
+    #                 if self.solver.check(edge_z3var > 0) == sat:
+    #                     self.solver.add(edge_z3var > 0)
+    #                 else:
+    #                     print('unsat -- edge not added')
+    #         elif tokens[0] == 'p' or tokens[0] == 'print':
+    #             log('@%s:%d: print the model into file %s\n' % (whoami(), line_numb(), tokens[1]), INFO)
+    #             try:
+    #                 fp = open(tokens[1], "w")
+    #             except IOError as e:
+    #                 print("Couldn't open file (%s)." % tokens[1])
+    #             for edge in self.graph.get_edges().values():
+    #                 edge_z3var = edge.get_z3var()
+    #                 if model[edge_z3var].as_long() != 0:
+    #                     fp.write(str(edge.get_source().get_index()) + ' ' + str(edge.get_destination().get_index()) + '\n')
+    #             ### Draw the output model into graph file in png.
+    #             fp.close()
+    #             pt = Planter()
+    #             pt.draw(self.graph.get_msg_def_file_name(), tokens[1])
+    #         elif tokens[0] == 'quit' or tokens[0] == 'q':
+    #             try:
+    #                 fp = open("edge_exclusion_list.txt", "w")
+    #             except IOError as e:
+    #                 print("Couldn't open file (%s)." % 'edge_exclusion_list.txt')
+    #             print('Writing excluded edges into file (edge_exclusion_list.txt)')
+    #             fp.writelines(edge_exclusion_list)
+    #             fp.close()
+    #             return
+    #
+    #         # #@--- start a new scope and recrusively find a reduce model
+    #         # self.solver.push()
+    #         # new_constr = False
+    #         # for edge_z3var in edge_z3var_list:
+    #         #     if model[edge_z3var]==0:
+    #         #         self.solver.add(edge_z3var==0)
+    #         # self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+    #         # self.solver.pop()
+    #         # #@--- end of the scope
+    #
+    #         # new_constr = False
+    #         # for edge_z3var in edge_z3var_list:
+    #         #     new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+    #         # # new_constr = constr if new_constr is None else Or(new_constr, constr)
+    #         # new_constr = simplify(new_constr)
+    #         # self.solver.add(new_constr)
+    #         # log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+    #         # #@-------------------------------------
+    #
 
 
     def find_reduced_model(self):
