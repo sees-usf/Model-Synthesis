@@ -64,17 +64,20 @@ if __name__ == '__main__':
 
     max_pat_len = 8
     max_solutions = 10
-    # def_f = './traces/medium.msg'
-    def_f = './traces/large.msg'
-    # def_f = './definitions/small_def.txt'
-    # trace_f = 'trace-small-5.txt'
-    # trace_f = './traces/small_trace.txt'
-    # trace_f = './traces/medium_trace.txt'
-    trace_f = './traces/large_trace.txt'
-    # trace_f = 'trace-small-20.txt'
+    # def_f = 'medium.msg'
+    # trace_f = 'medium_trace.txt'
+    
+    def_f = 'large.msg'
+    trace_f = 'large_trace.txt'
     # trace_f = 'trace-large-5.txt'
     # trace_f = 'trace-large-10.txt'
     # trace_f = 'trace-large-20.txt' 
+
+    # def_f = 'small_def.txt'
+    # trace_f = 'trace-small-5.txt'
+    # trace_f = './traces/small_trace.txt'
+    # trace_f = 'trace-small-20.txt'
+    
     # 
     # 
     # def_f = 'pat_thread_def.txt'
