@@ -3,6 +3,7 @@ from multipledispatch import dispatch
 from src.graph.edge import Edge
 from src.logging import *
 from z3 import *
+import pulp as pl
 
 class Node:
     def __init__(self, graph, symbol_index, message, command, msg_type):
@@ -23,6 +24,7 @@ class Node:
         self.previous = None
         self.graph = graph
         self.z3var = Int(str(self.symbol_index))
+        self.pulp_var = None
 
     def __str__(self):
         return self.symbol_index
@@ -159,3 +161,9 @@ class Node:
 
     def clear_edges(self):
         self.edges.clear()
+
+    def set_pulp_var(self, pulp_var):
+        self.pulp_var = pulp_var
+
+    def get_pulp_var(self):
+        return self.pulp_var

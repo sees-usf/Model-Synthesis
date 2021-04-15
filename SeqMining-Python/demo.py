@@ -14,6 +14,7 @@ def prepare_traces(filename):
     f.close()
     return f1
 
+
 print('Sequence Mining Tool Demo by USF')
 print()
 
@@ -30,7 +31,6 @@ if __name__ == '__main__':
     #     max_solutions = int(sol_input)
     # log('Max number of solutions is ' + str(max_solutions) + '\n\n')
 
-
     # print('Which message definition example would you like to run?')
     # print()
     # print('1. Small example')
@@ -39,7 +39,6 @@ if __name__ == '__main__':
     # print()
     # example_choice = input('Enter your choice (1-3): ')
 
-    
     # def_f = ''
     # trace_f = ''
     # if example_choice == '1':
@@ -65,10 +64,14 @@ if __name__ == '__main__':
 
     max_pat_len = 8
     max_solutions = 10
-    def_f = 'large.msg'
+    # def_f = './traces/medium.msg'
+    def_f = './traces/large.msg'
+    # def_f = './definitions/small_def.txt'
     # trace_f = 'trace-small-5.txt'
-    trace_f = 'trace-small-10.txt'
-    # trace_f = 'trace-small-20.txt'  
+    # trace_f = './traces/small_trace.txt'
+    # trace_f = './traces/medium_trace.txt'
+    trace_f = './traces/large_trace.txt'
+    # trace_f = 'trace-small-20.txt'
     # trace_f = 'trace-large-5.txt'
     # trace_f = 'trace-large-10.txt'
     # trace_f = 'trace-large-20.txt' 
@@ -76,44 +79,41 @@ if __name__ == '__main__':
     # 
     # def_f = 'pat_thread_def.txt'
     # trace_f = 'pat_thread_tr-1.txt'   
-    #trace_f = 'pat_thread_tr-2.txt'
+    # trace_f = 'pat_thread_tr-2.txt'
     # trace_f = 'split-trace-icache0.txt'  
     # trace_f = 'split-trace-tol2bus.txt'
-    
+
     filters_filename = None
     rank_filename = None
-
 
     graph = Graph()
     graph.set_max_height(max_pat_len)
     graph.set_max_solutions(max_solutions)
 
-    log('Reading the message definition file %s... '%def_f)
+    log('Reading the message definition file %s... ' % def_f)
     graph.read_message_file(def_f)
     log('Done\n\n')
 
     traces = None
-    log('Reading the trace file %s... '%trace_f)
+    log('Reading the trace file %s... ' % trace_f)
     # traces = prepare_traces(trace_f)
     # annotator = GraphAnnotator(traces[0], graph)
     graph.read_trace_file(trace_f)
     # annotator.annotate()
     log('Done\n\n')
 
-    
     if filters_filename:
-        log('Reading the sequence filter file %s ... ' %filters_filename, INFO)
+        log('Reading the sequence filter file %s ... ' % filters_filename, INFO)
         graph.read_filters(filters_filename)
         log('Done\n', INFO)
     log('\n', INFO)
 
-    
     if rank_filename:
-        log('Reading the sequence filter file %s ... ' %rank_filename, INFO)
+        log('Reading the sequence filter file %s ... ' % rank_filename, INFO)
         graph.read_bin_seq_ranking(rank_filename)
         log('Done\n', INFO)
     log('\n', INFO)
-    
+
     # *** Solving the (mono or split) graphs
     cgs = []
     cgs.append(graph)
@@ -132,12 +132,12 @@ if __name__ == '__main__':
         z3 = Z3Solver(cgs)
         z3.generate_split_solutions()
     else:
-        #graph.remove_cycles()
+        # graph.remove_cycles()
         z3solver = trace2flows(cgs)
-        z3solver.find_model_interactive()
+        # z3solver.find_model_interactive()
+        z3solver.find_minimum_solution()
 
     log('Done\n')
-
 
     # print('Please indicate the constraint encoding strategy you\'d like to use: ')
     # print()
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     # print()
     # print("Solutions will be generated and printed to a sub-directory in the \"solutions\" directory.")
     # print()
-    solution_dir_name = None#input('Enter a name for this sub-directory: ')
+    solution_dir_name = None  # input('Enter a name for this sub-directory: ')
 
     # if strategy_choice == '1':
     #     #graph.remove_cycles()
@@ -168,17 +168,15 @@ if __name__ == '__main__':
     # else:
     #     print('Run the script again and enter the correct option for the constraint encoding strategy.')
     #     exit()
-    #z3.generate_monolithic_solutions()
-    #z3.generate_split_solutions()
+    # z3.generate_monolithic_solutions()
+    # z3.generate_split_solutions()
 
-
-    log('Solutions found ' + str(len(z3solver.get_solutions()))+'\n')
+    log('Solutions found ' + str(len(z3solver.get_solutions())) + '\n')
     if not z3solver.get_solutions():
         exit()
 
-    log('Generating solutions and sequence diagrams ... \n')
-    abs_path = os.path.dirname(os.path.abspath(__file__))
-    printer = SequencePrinter(z3.get_solutions(), abs_path, solution_dir_name, graph)
-    printer.generate_solutions()
-    log('Done\n')
-
+    # log('Generating solutions and sequence diagrams ... \n')
+    # abs_path = os.path.dirname(os.path.abspath(__file__))
+    # printer = SequencePrinter(z3.get_solutions(), abs_path, solution_dir_name, graph)
+    # printer.generate_solutions()
+    # log('Done\n')

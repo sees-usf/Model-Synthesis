@@ -1,6 +1,7 @@
 from src.logging import *
 from z3 import *
 
+
 class Edge:
     def __init__(self, graph, src, dest):
         self.graph = graph
@@ -22,6 +23,7 @@ class Edge:
         self.mean_conf = 0
         self.ranking = 100
         self.z3var = Int(self.id)
+        self.pulp_var = None
         self.source.add_outgoing_edge(self)
         self.destination.add_incoming_edge(self)
 
@@ -69,13 +71,20 @@ class Edge:
 
     def set_support(self, value):
         self.support = value
-        self.forward_conf = (self.get_support()/self.source.get_support())
-        self.backward_conf = (self.get_support()/self.destination.get_support())
+        self.forward_conf = (self.get_support() / self.source.get_support())
+        self.backward_conf = (self.get_support() / self.destination.get_support())
         if self.get_support() != 0:
-            self.mean_conf = (2 * self.forward_conf * self.backward_conf)/(self.forward_conf + self.backward_conf)
+            self.mean_conf = (2 * self.forward_conf * self.backward_conf) / (self.forward_conf + self.backward_conf)
 
     def equals(self, edge):
         return self.id == edge.id
 
     def print_full(self):
-        return "{:<45}".format(self.get_source().print_full()) + ' -->  ' + "{:<45}".format(self.get_destination().print_full())
+        return "{:<45}".format(self.get_source().print_full()) + ' -->  ' + "{:<45}".format(
+            self.get_destination().print_full())
+
+    def set_pulp_var(self, pulp_var):
+        self.pulp_var = pulp_var
+
+    def get_pulp_var(self):
+        return self.pulp_var
