@@ -3,7 +3,8 @@ import copy
 from z3 import *
 from src.logging import *
 from src.solver.flow_generator import *
-import pulp as pl
+import re
+#import pulp as pl
 # from src.visualization.state_diagram.draw_graph import Planter
 
 
@@ -12,11 +13,16 @@ class trace2flows:
         self.graph = cg_vec.pop(0)
         self.dags = cg_vec
         self.solver = Solver()
-        self.pulp_solver = pl.LpProblem('minimum_solution', pl.LpMinimize)
+        # self.pulp_solver = pl.LpProblem('minimum_solution', pl.LpMinimize)
         self.edge_z3var_list = []
         self.edge_variables_3D_dict = {}
         self.node_variables_2D_dict = {}
         self.root_variables_2D_dict = {}
+
+        self.node_constraints = []
+        self.incoming_edge_constraints = []
+        self.outgoing_edge_constraints = []
+
         self.solutions = []
         self.is_monolithic = None
         self.max_sol = self.graph.get_max_solutions()
@@ -34,27 +40,57 @@ class trace2flows:
         self.node_variables_2D_dict = {}
         self.root_variables_2D_dict = {}
         self.solutions = []
-        self.pulp_solver.variables().clear()
-        self.pulp_solver.constraints.clear()
+        # self.pulp_solver.variables().clear()
+        # self.pulp_solver.constraints.clear()
 
-    def find_minimum_solution(self):
-        self.create_constraints(0)
-        status = self.pulp_solver.solve()
-        print(pl.LpStatus[status])
-
-        nodes = self.graph.get_nodes().values()
-        edges = self.graph.get_edges().values()
-
-        # Solution for Node Supports
-        for node in nodes:
-            print(node.get_symbol_index() + ' = ' + str(pl.value(node.get_pulp_var())))
-
-        for edge in edges:
-            print(edge.get_id() + ' = ' + str(pl.value(edge.get_pulp_var())))
 
     
     # Possibly need to make this function for monolithic, this is the dag version
-    def create_constraints(self, ranking_threshold=100):
+    #@ conf_thres:  h-confidence threshold for an edge to be conisdered into the model
+    def create_constraints(self, conf_thres=0):
+        nodes = self.graph.get_nodes()
+        edges = self.graph.get_edges().values()
+
+        for node in nodes.values():
+            ## create constraint for each node
+            node_z3var = node.get_z3var()
+            node_support = node.get_support()
+            if node_support == 0: 
+                continue
+            self.solver.add(node_z3var == node_support)
+            log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
+            self.create_outgoing_edge_constraints(node)
+            self.create_incoming_edge_constraints(node)
+            
+        #@ adding constraints on edge support
+        for edge in edges:
+            edge_z3var = edge.get_z3var()
+            self.edge_z3var_list.append(edge_z3var)
+
+            # ignore edge if its h-confidence is lower than threshold
+            if edge.get_fconf() != 1 and edge.get_bconf() != 1 and edge.get_hconf() < conf_thres:  
+                self.solver.add(edge_z3var == 0)
+                continue
+            
+            #@ include edges such that their fconf or bconf is 1, or hconf is above threshold
+            total_sup = edge.get_support()
+            direct_sup = edge.get_direct_support()
+
+            self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+
+            # if direct_sup == 0:
+            #     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            # else:
+            #     self.solver.add(Or(And(edge_z3var >= direct_sup, edge_z3var <= total_sup), edge_z3var == 0))
+            # src_node_sup = edge.get_source().get_support()
+            # self.solver.add(Implies(edge_z3var>0, edge_z3var >= (src_node_sup/5)))
+            log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(total_sup) + '\n', DEBUG)
+    ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+    # Possibly need to make this function for monolithic, this is the dag version
+    #@ conf_thres:  h-confidence threshold for an edge to be conisdered into the model
+    def create_constraints_relaxed(self, conf_thres=0):
         nodes = self.graph.get_nodes()
         edges = self.graph.get_edges().values()
 
@@ -65,19 +101,32 @@ class trace2flows:
             if node_support == 0: continue
             self.solver.add(node_z3var == node_support)
             log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
-            self.create_outgoing_edge_constraints(node)
+            self.create_outgoing_edge_constraints_relaxed(node)
             self.create_incoming_edge_constraints(node)
-            
+
         #@ adding constraints on edge support
         for edge in edges:
             edge_z3var = edge.get_z3var()
             self.edge_z3var_list.append(edge_z3var)
+
+            # # ignore edge if its h-confidence is lower than threshold
+            # if edge.get_fconf() != 1 and edge.get_bconf() != 1 and edge.get_hconf() < conf_thres:  
+            #     self.solver.add(edge_z3var == 0)
+            #     continue
+            
+            #@ include edges such that their fconf or bconf is 1, or hconf is above threshold
             total_sup = edge.get_support()
             direct_sup = edge.get_direct_support()
-            if direct_sup == 0:
-                self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
-            else:
-                self.solver.add(Or(And(edge_z3var >= direct_sup, edge_z3var <= total_sup), edge_z3var == 0))
+
+            self.node_constraints.append(edge_z3var <= total_sup)
+            self.node_constraints.append(edge_z3var >= 0)
+            
+            # self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+
+            # if direct_sup == 0:
+            #     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            # else:
+            #     self.solver.add(Or(And(edge_z3var >= direct_sup, edge_z3var <= total_sup), edge_z3var == 0))
             # src_node_sup = edge.get_source().get_support()
             # self.solver.add(Implies(edge_z3var>0, edge_z3var >= (src_node_sup/5)))
             log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(total_sup) + '\n', DEBUG)
@@ -91,7 +140,7 @@ class trace2flows:
     #@ the node is the source of simultaneous multiple destnations, eg, a cache-write message  
     #@ can trigger memory-write and cache-invalidate at the same time. 
     def create_outgoing_edge_constraints(self, node):
-        if self.graph.is_terminal(node):
+        if self.graph.is_terminal(node) or node.get_support()==0:
             return
 
         node_z3var = node.get_z3var()
@@ -104,16 +153,18 @@ class trace2flows:
         for edge in outgoing_edges:
             strong_causality = ((edge.get_fconf()==1))# and (edge.get_bconf()==1))
             edge_support = edge.get_support()
+            if edge_support==0:
+                continue
             total_sup += edge_support
             edge_ranking = edge.get_ranking()
             edge_z3var = edge.get_z3var()
-            pulp_var_edge_sum += edge.get_pulp_var()
+            # pulp_var_edge_sum += edge.get_pulp_var()
             #@ only consider edges with ranking higher than the threshold
             if True: #edge_ranking >= ranking_threshold:
                 node_edge_vars.append(edge_z3var)
             # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
 
-        self.pulp_solver += node_pulp_var == pulp_var_edge_sum
+        #self.pulp_solver += node_pulp_var == pulp_var_edge_sum
             ### Create unique causality constraint for each edge
             # all_other_edge_nil = None
             # for other_edge in outgoing_edges:
@@ -132,16 +183,76 @@ class trace2flows:
             s = str(edge_var) if sum_z3vars is None else s + ' + ' + str(edge_var) 
         if sum_z3vars != None:
             if strong_causality == True:
-                self.solver.add(node_z3var <= sum_z3vars)
+                self.solver.add(node_z3var == sum_z3vars)
             else:
                 self.solver.add(0 < sum_z3vars)
+            log(str(node.get_z3var()) + " <= " + str(s) + '\n', DEBUG)
+    ### '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    #@ adding constraints on node and its outgoing edges
+    #@--------------------------------------------------
+    #@ This encoding considers the case where a node is the source of simultaneous multiple destnations, 
+    #@ eg, a cache-write message  
+    #@ can trigger memory-write and cache-invalidate at the same time.      
+    def create_outgoing_edge_constraints_relaxed(self, node):
+        if self.graph.is_terminal(node) or node.get_support()==0:
+            return
+
+        node_z3var = node.get_z3var()
+        node_pulp_var = node.get_pulp_var()
+        pulp_var_edge_sum = 0
+        outgoing_edges = node.get_outgoing_edges()
+        node_edge_vars = []
+        strong_causality = False
+        total_sup = 0
+        for edge in outgoing_edges:
+            strong_causality = ((edge.get_fconf()==1))# and (edge.get_bconf()==1))
+            edge_support = edge.get_support()
+            if edge_support==0:
+                continue
+            total_sup += edge_support
+            edge_ranking = edge.get_ranking()
+            edge_z3var = edge.get_z3var()
+            pulp_var_edge_sum += edge.get_pulp_var()
+            #@ only consider edges with ranking higher than the threshold
+            if True: #edge_ranking >= ranking_threshold:
+                node_edge_vars.append(edge_z3var)
+            # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
+
+        #self.pulp_solver += node_pulp_var == pulp_var_edge_sum
+            ### Create unique causality constraint for each edge
+            # all_other_edge_nil = None
+            # for other_edge in outgoing_edges:
+            #     if other_edge == edge: continue
+            #     all_other_edge_nil = (other_edge.get_z3var() == 0) if all_other_edge_nil is None else And(all_other_edge_nil, (other_edge.get_z3var() == 0))
+            # if all_other_edge_nil != None:
+            #     self.solver.add(Implies(all_other_edge_nil, (edge.get_z3var() == edge.get_support())))                
+
+        #@------------------------  
+        #@ generate constraints on outgoing edges of a node
+        sum_z3vars = None
+        concurrent_z3vars = None
+        s = None
+        for edge_var in node_edge_vars:
+            sum_z3vars = edge_var if sum_z3vars is None else sum_z3vars + edge_var
+            s = str(edge_var) if s is None else s + ' + ' + str(edge_var) 
+            
+        if sum_z3vars != None:
+            # self.solver.add(node_z3var <= sum_z3vars)
+            constr = (node_z3var <= sum_z3vars)
+            self.outgoing_edge_constraints.append(constr)
+            # self.solver.add(0 <= sum_z3vars)
+            # if strong_causality == True:
+            #     self.solver.add(node_z3var <= sum_z3vars)
+            # else:
+            #     self.solver.add(0 < sum_z3vars)
             log(str(node.get_z3var()) + " <= " + str(s) + '\n', DEBUG)
     ### '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
             
 
     ### create constraints on incoming edges of node
     def create_incoming_edge_constraints(self, node):
-        if self.graph.is_initial(node):
+        if self.graph.is_initial(node) or node.get_support() == 0:
             return
 
         node_z3var = node.get_z3var()
@@ -151,11 +262,13 @@ class trace2flows:
         node_edge_vars = []
         for edge in incoming_edges:
             edge_support = edge.get_support()
-            pulp_var_edge_sum += edge.get_pulp_var()
+            if edge_support == 0:
+                continue
+            # pulp_var_edge_sum += edge.get_pulp_var()
             edge_z3var = edge.get_z3var()
             node_edge_vars.append(edge_z3var)
 
-        self.pulp_solver += node_pulp_var == pulp_var_edge_sum
+        #self.pulp_solver += node_pulp_var == pulp_var_edge_sum
 
         sum_z3vars = None
         s = ''
@@ -164,7 +277,8 @@ class trace2flows:
             s = s + ' + ' + str(edge_var) if s != '' else str(edge_var)
             
         if sum_z3vars != None:
-            self.solver.add(node_z3var == sum_z3vars)
+            # self.solver.add(node_z3var == sum_z3vars)
+            self.incoming_edge_constraints.append(node_z3var == sum_z3vars)
             log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
     ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
@@ -373,64 +487,125 @@ class trace2flows:
         #             print(str(edge_var) + ' with edge support of ' + str(solution[edge_var]))
         # END
 
+    #2 parse a command line input and split it into commaond, and two messages
+    #@ used to find_model_interactive()
+    def parse_cmdline(self, cmdln):
+        tokens = re.split(r'[,|(|)\s]\s*', cmdln)
+        tokens = list(filter(None, tokens))
+        cmd = tokens[0]
+        tokens_len = len(tokens)
+            
+        src_node_list = []
+        dest_node_list = []
+        if len(tokens) == 4:
+            src_node_list.append(self.graph.get_node(tokens[1]))
+            dest_node_list.append(self.graph.get_node(tokens[3]))
+        elif len(tokens) == 10:
+            print(tokens[1:5])
+            src_node_list = self.graph.get_nodes(tokens[1:5])
+            print(tokens[6:10])
+            dest_node_list = self.graph.get_nodes(tokens[6:10])
 
-    # def find_model_interactive(self):
-    #     #@ add CG constraints into the solver
-    #     self.create_constraints(0)
-    #
-    #     edge_exclusion_list = []
-    #     while self.solver.check() == sat:
-    #         model = self.solver.model()
-    #         self.print_z3model_edges(model)
-    #
-    #         cmdln = input('What to do next? ')
-    #         tokens = cmdln.split(' ')
-    #         if tokens[0] == 'noedge' or tokens[0] == 'ne':
-    #             edge = self.graph.get_edge(tokens[1], tokens[2])
-    #             if edge is None:
-    #                 print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
-    #             else:
-    #                 edge_z3var = edge.get_z3var()
-    #                 edge_support = edge.get_support()
-    #                 if self.solver.check(edge_z3var == 0) == sat:
-    #                     self.solver.add(edge_z3var == 0)
-    #                     edge_exclusion_list.append(tokens[1]+' ' + tokens[2]+'\n')
-    #                 else:
-    #                     print('unsat -- edge not removed')
-    #         elif tokens[0] == 'yesedge' or tokens[0]=='ye':
-    #             edge = self.graph.get_edge(tokens[1], tokens[2])
-    #             if edge is None:
-    #                 print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
-    #             else:
-    #                 edge_z3var = edge.get_z3var()
-    #                 edge_support = edge.get_support()
-    #                 if self.solver.check(edge_z3var > 0) == sat:
-    #                     self.solver.add(edge_z3var > 0)
-    #                 else:
-    #                     print('unsat -- edge not added')
-    #         elif tokens[0] == 'p' or tokens[0] == 'print':
-    #             log('@%s:%d: print the model into file %s\n' % (whoami(), line_numb(), tokens[1]), INFO)
-    #             try:
-    #                 fp = open(tokens[1], "w")
-    #             except IOError as e:
-    #                 print("Couldn't open file (%s)." % tokens[1])
-    #             for edge in self.graph.get_edges().values():
-    #                 edge_z3var = edge.get_z3var()
-    #                 if model[edge_z3var].as_long() != 0:
-    #                     fp.write(str(edge.get_source().get_index()) + ' ' + str(edge.get_destination().get_index()) + '\n')
-    #             ### Draw the output model into graph file in png.
-    #             fp.close()
-    #             pt = Planter()
-    #             pt.draw(self.graph.get_msg_def_file_name(), tokens[1])
-    #         elif tokens[0] == 'quit' or tokens[0] == 'q':
-    #             try:
-    #                 fp = open("edge_exclusion_list.txt", "w")
-    #             except IOError as e:
-    #                 print("Couldn't open file (%s)." % 'edge_exclusion_list.txt')
-    #             print('Writing excluded edges into file (edge_exclusion_list.txt)')
-    #             fp.writelines(edge_exclusion_list)
-    #             fp.close()
-    #             return
+        edge_list = []
+        for src_node in src_node_list:
+            for dest_node in dest_node_list:
+                edge = self.graph.get_edge(src_node, dest_node)
+                if edge:
+                    edge_list.append(edge)
+
+        return cmd, edge_list
+
+
+    def find_model_interactive(self):
+        #@ add CG constraints into the solver
+        self.create_constraints(0)
+    
+        cmd_list = ['exclude', 'out', 'include', 'in', 'print', 'p', 'quit', 'q']
+
+        solver_update = True
+        edge_exclusion_list = []
+        while self.solver.check() == sat:
+            if solver_update == True:
+                model = self.solver.model()
+                self.print_z3model_edges(model)
+    
+            cmdln = input('What to do next? ')
+            tokens = cmdln.split()  # create a list of tokens separated by white spaces
+            if len(tokens) > 0:
+                cmd, edge_list = self.parse_cmdline(cmdln)
+            else:
+                solver_update = False
+                continue
+
+            if cmd == 'exclude' or cmd == 'out':
+                # edge = self.graph.get_edge(tokens[1], tokens[2])
+                # if edge is None:
+                #     print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
+                # else:
+                #     edge_z3var = edge.get_z3var()
+                #     edge_support = edge.get_support()
+                #     if self.solver.check(edge_z3var == 0) == sat:
+                #         self.solver.add(edge_z3var == 0)
+                #         edge_exclusion_list.append(tokens[1]+' ' + tokens[2]+'\n')
+                #     else:
+                #         print('unsat -- edge not removed')
+                for edge in edge_list:
+                    edge_z3var = edge.get_z3var()
+                    edge_signature = '(' + edge.get_source().get_index()+' ' + edge.get_destination().get_index()+')'
+                    if self.solver.check(edge_z3var == 0) == sat:
+                        self.solver.add(edge_z3var == 0)
+                        edge_exclusion_list.append(edge_signature+'\n')
+                        print('edge %s removed'%edge_signature)
+                        solver_update = True
+                    else:
+                        print('edge %s not removed'%edge_signature)
+                        solver_update = False
+            elif cmd == 'include' or cmd =='in':
+                edge = self.graph.get_edge(tokens[1], tokens[2])
+                if edge is None:
+                    print('Edge (%s, %s) does not exist' % (tokens[1], tokens[2]))
+                else:
+                    edge_z3var = edge.get_z3var()
+                    edge_support = edge.get_support()
+                    if self.solver.check(edge_z3var > 0) == sat:
+                        self.solver.add(edge_z3var > 0)
+                        solver_update = True
+                    else:
+                        print('unsat -- edge not added')
+                        solver_update = False
+            elif cmd == 'p' or cmd == 'print':
+                if len(tokens) < 2:
+                    log('@%s:%d: need an outfile name\n' % (whoami(), line_numb()), INFO)
+                    solver_update = False
+                    continue
+
+                log('@%s:%d: print the model into file %s\n' % (whoami(), line_numb(), tokens[1]), INFO)
+                try:
+                    fp = open(tokens[1], "w")
+                except IOError as e:
+                    print("Couldn't open file (%s)." % tokens[1])
+                for edge in self.graph.get_edges().values():
+                    edge_z3var = edge.get_z3var()
+                    if model[edge_z3var].as_long() != 0:
+                        fp.write(str(edge.get_source().get_index()) + ' ' + str(edge.get_destination().get_index()) + '\n')
+                ### Draw the output model into graph file in png.
+                fp.close()
+                pt = Planter()
+                pt.draw(self.graph.get_msg_def_file_name(), tokens[1])
+                solver_update = False
+            elif cmd == 'quit' or cmd == 'q':
+                try:
+                    fp = open("edge_exclusion_list.txt", "w")
+                except IOError as e:
+                    print("Couldn't open file (%s)." % 'edge_exclusion_list.txt')
+                print('Writing excluded edges into file (edge_exclusion_list.txt)')
+                fp.writelines(edge_exclusion_list)
+                fp.close()
+                return
+            else:
+                print('Illegal command. Try again')
+                solver_update = False
+
     #
     #         # #@--- start a new scope and recrusively find a reduce model
     #         # self.solver.push()
@@ -453,6 +628,51 @@ class trace2flows:
     #
 
 
+    
+    #@ Find a model with minimum number of edges using a contrain solver PULP
+    def find_minimum_model(self):
+        self.create_constraints(0)
+        
+        status = self.pulp_solver.solve()
+        print(pl.LpStatus[status])
+
+        nodes = self.graph.get_nodes().values()
+        edges = self.graph.get_edges().values()
+
+        # Solution for Node Supports
+        # for node in nodes:
+        #     print(node.get_symbol_index() + ' = ' + str(pl.value(node.get_pulp_var())))
+
+        edge_count = 0
+        for edge in edges:
+            if pl.value(edge.get_pulp_var()) != 0:
+                # print(edge.get_id() + ' = ' + str(pl.value(edge.get_pulp_var())))
+                print(edge.print_full())
+                edge_count += 1
+        print('Total number of edges in the model: ', edge_count)
+
+
+    #@ find a model by incrementally considerring more edges ranked by their confidences.
+    def find_model_incremental(self):
+        step = 0.1
+        conf_thres = 1
+        while conf_thres > 0:
+            self.create_constraints(conf_thres)
+            if self.solver.check() == sat:
+                model = self.solver.model()
+                log('@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                # log(self.z3model2str(model), INFO)
+                self.print_z3model_edges(model)
+                return model
+            
+            self.reset()
+            conf_thres -= step
+
+        log('@%s:%d: cannot find a model\n' % (whoami(), line_numb()), INFO)
+        return None
+
+
+    #@ find a model with reduced number of edges by experimentally turning off edges
     def find_reduced_model(self):
         #@ add CG constraints into the solver
         self.create_constraints(0)
@@ -470,11 +690,78 @@ class trace2flows:
             model = self.solver.model()
             if self.z3model_signature(model) not in model_table:
                 model_table[self.z3model_signature(model)] = model
-                new_model_size = self.model_size(model, edge_z3var_list);
+                new_model_size = self.model_size(model, edge_z3var_list)
                 if new_model_size < reduced_model_size:
                     reduced_model_size = new_model_size
-                print(len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
-                log('@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                print("Model No: ",len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
+                log('\n@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                log(self.z3model2str(model), INFO)
+
+            #@--- start a new scope and recrusively find a reduce model
+            self.solver.push()
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                if model[edge_z3var]==0:
+                    self.solver.add(edge_z3var==0)
+            self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+            self.solver.pop()
+            #@--- end of the scope
+
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            new_constr = simplify(new_constr)
+            self.solver.add(new_constr) 
+            log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+            #@-------------------------------------
+        
+        print('Size of smallest model: ', reduced_model_size)
+        return model_table
+
+
+    #@ find models with reduced number of edges by using the relaxed constraints
+    def find_reduced_model_relaxed(self):
+        self.reset()        
+
+        #@ add CG constraints into the solver
+        self.create_constraints_relaxed(0)
+
+        self.solver.add(self.node_constraints)
+        self.solver.add(self.incoming_edge_constraints)
+        oedge_constratints = []
+        # check each outgoing edge constraints, and skip those that would make solver unsat
+        for oedge_constr in self.outgoing_edge_constraints:
+            oedge_constratints.append(oedge_constr)
+            if self.solver.check(oedge_constratints) == unsat:
+                oedge_constratints.pop()
+                # print("solver is unsat, pop")
+                # print(oedge_constr)
+
+        self.solver.add(oedge_constratints)
+        # self.solver.check()
+        # m = self.solver.model()
+        # print("model sat", m)
+        # exit()
+
+        model_table = {}
+        edges = self.graph.get_edges().values()
+        edge_z3var_list = []
+        for edge in edges:
+            edge_z3var_list.append(edge.get_z3var())
+
+        reduced_model_size = 1000000
+        while self.solver.check() == sat:
+            if len(model_table) > 200:
+                break
+            model = self.solver.model()
+            if self.z3model_signature(model) not in model_table:
+                model_table[self.z3model_signature(model)] = model
+                new_model_size = self.model_size(model, edge_z3var_list)
+                if new_model_size < reduced_model_size:
+                    reduced_model_size = new_model_size
+                print("Model No: ",len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
+                log('\n@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
                 log(self.z3model2str(model), INFO)
 
             #@--- start a new scope and recrusively find a reduce model
@@ -501,9 +788,10 @@ class trace2flows:
 
 
     def reduce_model_recursive(self, model, edge_z3var_list, model_table, level):
-        if len(model_table) > 1000:
+        if len(model_table) > 10: #defualt 1000
             return
-        redm = model
+        print("Finding Reduced Model Recursively: ",len(model_table))
+        redm = model #redm means reduced model
         for edge_z3var in edge_z3var_list:
             if model[edge_z3var].as_long() > 0:
                 self.solver.push()
@@ -511,7 +799,7 @@ class trace2flows:
                 if self.solver.check() == sat:
                     redm = self.solver.model()
                     if self.z3model_signature(redm) not in model_table:
-                        # print(self.z3model_signature(redm), ' ', self.model_size(redm, edge_z3var_list))
+                        print("Reduced: ",self.z3model_signature(redm), ' ', self.model_size(redm, edge_z3var_list))
                         model_table[self.z3model_signature(redm)] = redm
                         redm = self.reduce_model_recursive(redm, edge_z3var_list, model_table, level+1)
                 self.solver.pop()

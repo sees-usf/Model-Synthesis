@@ -1,0 +1,56 @@
+@startuml 
+hide empty description
+[*] -->0
+0 --> 1 : 39:uprd:req
+1 --> 2 : 10:rd:req
+1 --> 30 : 10:rd:req
+2 --> 3 : 17:rd:req
+3 --> 4 : 19:rd:resp
+4 --> 5 : 27:rd:resp
+4 --> 21 : 27:rd:resp
+21 --> end1068 : 40:uprd:resp
+4 --> 27 : 27:rd:resp
+27 --> end355 : 41:uprd:resp	
+5 --> 6 : 15:rd:req
+6 --> 7 : 23:rd:resp
+7 --> end1287 : 40:uprd:resp
+6 --> 15 : 23:rd:resp
+15 --> end687 : 41:uprd:resp	
+30 --> 31 : 27:rd:resp
+30 --> 43 : 27:rd:resp
+43 --> end589 : 40:uprd:resp
+30 --> 47 : 27:rd:resp
+47 --> end1209 : 41:uprd:resp	
+31 --> 32 : 15:rd:req
+32 --> 33 : 23:rd:resp
+33 --> end1543 : 40:uprd:resp
+32 --> 39 : 23:rd:resp
+39 --> end1087 : 41:uprd:resp	
+0:audio
+1:membus
+2:cache0
+3:cache1
+4:cache0
+5:membus
+6:mem
+7:membus
+15:membus
+21:membus
+27:membus
+end1087:audio
+30:cache0
+31:membus
+32:mem
+33:membus
+end1068:gfx
+39:membus
+43:membus
+47:membus
+end589:gfx
+end355:audio
+end1209:audio
+end1287:gfx
+end687:audio
+end1543:gfx
+39 --> [*]
+@enduml

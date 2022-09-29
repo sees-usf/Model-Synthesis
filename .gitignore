@@ -8,3 +8,7 @@ SeqMining-Python/src/__pycache__/__init__.cpython-38.pyc
 SeqMining-Python/src/graph/__pycache__/graph.cpython-38.pyc
 SeqMining-Python/src/graph/__pycache__/node.cpython-38.pyc
 *.pyc
+SeqMining-Python/traces/gem5_traces/fs/addr_sliced/address_sliced.jbl
+SeqMining-Python/traces/gem5_traces/fs/packet_sliced/packet_sliced.jbl
+fs_boot_unsliced.txt
+SeqMining-Python/traces/gem5_traces/pat_thread (old_dont_use)/*

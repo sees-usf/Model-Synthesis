@@ -1,0 +1,112 @@
+@startuml 
+hide empty description
+[*] -->0
+0 --> 1 : 0:wt:req
+1 --> 2 : 18:wt:resp
+2 --> 3 : 10:rd:req
+3 --> 4 : 11:wt:resp
+3 --> 26 : 11:wt:resp
+3 --> 83 : 11:wt:resp
+4 --> 5 : 14:wt:req
+5 --> end778 : 35:upwt:resp
+4 --> 11 : 14:wt:req
+11 --> 12 : 52:rd:req
+12 --> 13 : 53:rd:resp
+13 --> end673 : 40:uprd:resp
+12 --> 21 : 53:rd:resp
+21 --> end1413 : 43:uprd:resp
+26 --> 27 : 19:rd:resp
+26 --> 42 : 19:rd:resp
+26 --> 49 : 19:rd:resp
+49 --> end1478 : 25:wt:resp
+26 --> 55 : 19:rd:resp
+27 --> 28 : 17:rd:req
+27 --> 36 : 17:rd:req
+36 --> end1106 : 29:wt:resp
+28 --> 29 : 12:wt:resp
+29 --> end1282 : 26:rd:resp
+42 --> 43 : 21:rd:req
+43 --> end789 : 36:upwt:resp
+55 --> 56 : 27:rd:resp
+55 --> 64 : 27:rd:resp
+64 --> end1259 : 35:upwt:resp
+55 --> 71 : 27:rd:resp
+71 --> end504 : 36:upwt:resp
+55 --> 78 : 27:rd:resp
+78 --> end1237 : 40:uprd:resp
+56 --> 57 : 31:rd:resp
+57 --> end1142 : 32:rd:resp
+83 --> 84 : 22:rd:req
+84 --> end642 : 36:upwt:resp
+83 --> 90 : 22:rd:req
+90 --> end197 : 37:uprd:resp
+83 --> 96 : 22:rd:req
+96 --> 97 : 9:wt:req
+96 --> 105 : 9:wt:req
+96 --> 113 : 9:wt:req
+97 --> 98 : 13:wt:req
+98 --> end29 : 36:upwt:resp
+105 --> 106 : 17:rd:req
+106 --> end1794 : 29:wt:resp
+113 --> 114 : 27:rd:resp
+114 --> end1167 : 35:upwt:resp
+113 --> 122 : 27:rd:resp
+122 --> end1796 : 36:upwt:resp
+113 --> 130 : 27:rd:resp
+130 --> end1852 : 40:uprd:resp
+0:cpu0
+1:cache0
+2:membus
+3:cache0
+4:cache1
+5:membus
+130:membus
+end789:audio
+end504:audio
+11:membus
+12:usb
+13:membus
+end642:audio
+21:membus
+26:cache1
+27:cache0
+28:cache1
+29:cache0
+end1413:uart
+end1794:cpu1
+end778:gfx
+36:cache1
+42:cache0
+43:membus
+end1796:audio
+49:cache0
+end197:usb
+end1478:cpu0
+55:cache0
+56:membus
+end1259:gfx
+57:cache1
+64:membus
+71:membus
+end1237:gfx
+78:membus
+83:cache1
+84:membus
+90:membus
+end1167:gfx
+end1282:cpu0
+end1852:gfx
+end1106:cpu1
+96:membus
+97:cache0
+98:membus
+end29:audio
+end1142:cpu1
+105:cache0
+106:cache1
+113:cache0
+114:membus
+end673:gfx
+122:membus
+130 --> [*]
+@enduml

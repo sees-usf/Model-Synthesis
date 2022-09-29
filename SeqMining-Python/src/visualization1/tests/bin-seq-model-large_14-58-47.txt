@@ -1,0 +1,223 @@
+@startuml
+Message_0:cpu0:cache0:wt:req
+Message_1:cpu1:cache1:wt:req
+Message_2:cpu0:cache0:rd:req
+Message_3:cpu1:cache1:rd:req
+Message_4:gfx:membus:upwt:req
+Message_5:audio:membus:upwt:req
+Message_6:usb:membus:uprd:req
+Message_38:gfx:membus:uprd:req
+Message_39:audio:membus:uprd:req
+Message_42:uart:membus:uprd:req
+Message_7:cache1:cache0:wt:req
+Message_8:cache0:cache1:wt:req
+Message_9:membus:cache0:wt:req
+Message_10:membus:cache0:rd:req
+Message_11:cache0:cache1:wt:resp
+Message_12:cache1:cache0:wt:resp
+Message_13:cache0:membus:wt:req
+Message_14:cache1:membus:wt:req
+Message_15:membus:mem:rd:req
+Message_16:cache1:cache0:rd:req
+Message_17:cache0:cache1:rd:req
+Message_18:cache0:membus:wt:resp
+Message_19:cache1:cache0:rd:resp
+Message_20:cache0:cache1:rd:resp
+Message_21:cache0:membus:rd:req
+Message_22:cache1:membus:rd:req
+Message_23:mem:membus:rd:resp
+Message_24:membus:cache0:wt:resp
+Message_27:cache0:membus:rd:resp
+Message_28:membus:cache1:wt:resp
+Message_30:membus:cache0:rd:resp
+Message_31:membus:cache1:rd:resp
+Message_33:membus:mem:wt:req
+Message_34:mem:membus:wt:resp
+Message_44:membus:usb:wt:req
+Message_45:usb:membus:wt:resp
+Message_46:membus:uart:rd:req
+Message_47:uart:membus:rd:resp
+Message_48:membus:audio:rd:req
+Message_49:audio:membus:rd:resp
+Message_50:membus:uart:wt:req
+Message_51:uart:membus:wt:resp
+Message_52:membus:usb:rd:req
+Message_53:usb:membus:rd:resp
+Message_54:membus:gfx:rd:req
+Message_55:gfx:membus:rd:resp
+Message_56:membus:gfx:wt:req
+Message_57:gfx:membus:wt:resp
+Message_58:audio:membus:wt:req
+Message_59:membus:audio:wt:resp
+Message_25:cache0:cpu0:wt:resp
+Message_26:cache0:cpu0:rd:resp
+Message_29:cache1:cpu1:wt:resp
+Message_32:cache1:cpu1:rd:resp
+Message_35:membus:gfx:upwt:resp
+Message_36:membus:audio:upwt:resp
+Message_37:membus:usb:uprd:resp
+Message_40:membus:gfx:uprd:resp
+Message_41:membus:audio:uprd:resp
+Message_43:membus:uart:uprd:resp
+Message_0 --> Message_17
+Message_0 --> Message_21
+Message_0 --> Message_26
+Message_1 --> Message_7
+Message_1 --> Message_12
+Message_1 --> Message_29
+Message_1 --> Message_32
+Message_2 --> Message_17
+Message_2 --> Message_18
+Message_2 --> Message_27
+Message_2 --> Message_25
+Message_3 --> Message_12
+Message_3 --> Message_19
+Message_3 --> Message_29
+Message_4 --> Message_10
+Message_4 --> Message_15
+Message_4 --> Message_46
+Message_4 --> Message_37
+Message_5 --> Message_28
+Message_5 --> Message_48
+Message_5 --> Message_40
+Message_6 --> Message_15
+Message_6 --> Message_24
+Message_6 --> Message_30
+Message_6 --> Message_50
+Message_6 --> Message_40
+Message_38 --> Message_15
+Message_38 --> Message_50
+Message_38 --> Message_52
+Message_38 --> Message_41
+Message_39 --> Message_9
+Message_39 --> Message_10
+Message_39 --> Message_30
+Message_39 --> Message_48
+Message_39 --> Message_40
+Message_42 --> Message_15
+Message_42 --> Message_24
+Message_42 --> Message_31
+Message_7 --> Message_8
+Message_7 --> Message_27
+Message_7 --> Message_25
+Message_8 --> Message_7
+Message_8 --> Message_19
+Message_8 --> Message_29
+Message_9 --> Message_17
+Message_9 --> Message_27
+Message_9 --> Message_25
+Message_10 --> Message_17
+Message_10 --> Message_26
+Message_11 --> Message_19
+Message_11 --> Message_32
+Message_12 --> Message_8
+Message_12 --> Message_13
+Message_12 --> Message_18
+Message_12 --> Message_20
+Message_13 --> Message_10
+Message_13 --> Message_28
+Message_13 --> Message_48
+Message_13 --> Message_50
+Message_13 --> Message_54
+Message_14 --> Message_52
+Message_14 --> Message_54
+Message_14 --> Message_36
+Message_14 --> Message_37
+Message_15 --> Message_23
+Message_16 --> Message_11
+Message_16 --> Message_27
+Message_17 --> Message_12
+Message_17 --> Message_14
+Message_17 --> Message_16
+Message_17 --> Message_19
+Message_17 --> Message_32
+Message_18 --> Message_24
+Message_18 --> Message_31
+Message_18 --> Message_44
+Message_18 --> Message_46
+Message_18 --> Message_54
+Message_18 --> Message_35
+Message_18 --> Message_36
+Message_19 --> Message_8
+Message_19 --> Message_11
+Message_19 --> Message_13
+Message_19 --> Message_18
+Message_19 --> Message_20
+Message_19 --> Message_21
+Message_19 --> Message_25
+Message_20 --> Message_14
+Message_20 --> Message_22
+Message_20 --> Message_32
+Message_21 --> Message_10
+Message_22 --> Message_15
+Message_22 --> Message_28
+Message_22 --> Message_33
+Message_22 --> Message_37
+Message_22 --> Message_40
+Message_22 --> Message_41
+Message_23 --> Message_9
+Message_23 --> Message_33
+Message_23 --> Message_44
+Message_23 --> Message_52
+Message_23 --> Message_56
+Message_23 --> Message_59
+Message_24 --> Message_8
+Message_24 --> Message_11
+Message_24 --> Message_27
+Message_27 --> Message_9
+Message_27 --> Message_10
+Message_27 --> Message_56
+Message_27 --> Message_35
+Message_27 --> Message_43
+Message_28 --> Message_16
+Message_28 --> Message_19
+Message_30 --> Message_20
+Message_30 --> Message_21
+Message_30 --> Message_27
+Message_31 --> Message_7
+Message_31 --> Message_14
+Message_31 --> Message_22
+Message_33 --> Message_34
+Message_34 --> Message_28
+Message_34 --> Message_36
+Message_44 --> Message_53
+Message_45 --> Message_44
+Message_45 --> Message_54
+Message_45 --> Message_59
+Message_45 --> Message_35
+Message_46 --> Message_47
+Message_46 --> Message_51
+Message_47 --> Message_30
+Message_47 --> Message_46
+Message_47 --> Message_54
+Message_47 --> Message_37
+Message_48 --> Message_49
+Message_48 --> Message_58
+Message_49 --> Message_10
+Message_49 --> Message_35
+Message_49 --> Message_41
+Message_50 --> Message_47
+Message_51 --> Message_28
+Message_51 --> Message_52
+Message_52 --> Message_45
+Message_52 --> Message_53
+Message_53 --> Message_24
+Message_53 --> Message_28
+Message_53 --> Message_52
+Message_53 --> Message_36
+Message_53 --> Message_41
+Message_54 --> Message_55
+Message_54 --> Message_57
+Message_55 --> Message_10
+Message_55 --> Message_24
+Message_55 --> Message_48
+Message_55 --> Message_43
+Message_56 --> Message_55
+Message_57 --> Message_31
+Message_57 --> Message_46
+Message_57 --> Message_43
+Message_58 --> Message_28
+Message_58 --> Message_33
+Message_59 --> Message_49
+Message_59 --> Message_58
+@enduml

@@ -3,7 +3,7 @@ from multipledispatch import dispatch
 from src.graph.edge import Edge
 from src.logging import *
 from z3 import *
-import pulp as pl
+# import pulp as pl
 
 class Node:
     def __init__(self, graph, symbol_index, message, command, msg_type):
@@ -37,6 +37,9 @@ class Node:
 
     def get_message(self):
         return self.message
+        
+    def get_message_str(self):
+        return '(' + self.get_source() + ', ' + self.get_destination() + ', ' + self.get_command() + ', ' + self.get_type() + ')'
 
     def get_type(self):
         return self.msg_type

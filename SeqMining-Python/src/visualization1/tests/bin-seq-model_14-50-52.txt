@@ -1,0 +1,24 @@
+@startuml
+Message_38:gfx:membus:uprd:req
+Message_39:audio:membus:uprd:req
+Message_10:membus:cache0:rd:req
+Message_15:membus:mem:rd:req
+Message_17:cache0:cache1:rd:req
+Message_19:cache1:cache0:rd:resp
+Message_23:mem:membus:rd:resp
+Message_27:cache0:membus:rd:resp
+Message_40:membus:gfx:uprd:resp
+Message_41:membus:audio:uprd:resp
+Message_38 --> Message_10
+Message_39 --> Message_10
+Message_10 --> Message_17
+Message_10 --> Message_27
+Message_15 --> Message_23
+Message_17 --> Message_19
+Message_19 --> Message_27
+Message_23 --> Message_40
+Message_23 --> Message_41
+Message_27 --> Message_15
+Message_27 --> Message_40
+Message_27 --> Message_41
+@enduml

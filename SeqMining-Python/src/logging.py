@@ -43,13 +43,13 @@ def log2file(filename, input, type='info'):
 
 def log(inp, type='info', stop=False):
     if type.lower() == 'debug':
-        print('* DEBUG *', inp, end='')
+        print('* DEBUG *', inp, end='', flush=True)
         if stop: input('Stop, hit a key to continue ->')
     elif type.lower() == 'warning':
-        print('** WARNING **', inp, end='')
+        print('** WARNING **', inp, end='', flush=True)
         if stop: input('Stop, hit a key to continue ->')
     elif type.lower() == 'info':
-        print(inp, end='')
+        print(inp, end='', flush=True)
         if stop: input('Stop, hit a key to continue ->')
 
 

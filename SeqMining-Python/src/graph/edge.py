@@ -1,5 +1,6 @@
 from src.logging import *
 from z3 import *
+# import pulp as pulp
 
 
 class Edge:
@@ -13,7 +14,7 @@ class Edge:
 
         ## support is a list of index pairs of positions of src/dest in the trace
         ## its length gives support count
-        self.support = None
+        self.support = []
 
         ## An approximate number of edges where src/dest happen w/o other causal messages 
         self.direct_support_count = 0
@@ -23,7 +24,7 @@ class Edge:
         self.mean_conf = 0
         self.ranking = 100
         self.z3var = Int(self.id)
-        self.pulp_var = None
+        # self.pulp_var = pulp.LpVariable(self.id)
         self.source.add_outgoing_edge(self)
         self.destination.add_incoming_edge(self)
 
@@ -41,9 +42,12 @@ class Edge:
 
     def get_support(self):
         return 0 if self.support is None else len(self.support)
-
-    def get_support_pos(self):
+        
+    def get_support_list(self):
         return self.support
+
+    # def get_support_pos(self):
+    #     return self.support
 
     def get_direct_support(self):
         return self.direct_support_count

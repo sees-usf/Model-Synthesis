@@ -1,0 +1,112 @@
+@startuml 
+hide empty description
+[*] -->0
+0 --> 1 : 0:wt:req
+1 --> 2 : 18:wt:resp
+2 --> 3 : 10:rd:req
+3 --> 4 : 11:wt:resp
+3 --> 26 : 11:wt:resp
+3 --> 83 : 11:wt:resp
+4 --> 5 : 14:wt:req
+5 --> end845 : 35:upwt:resp
+4 --> 11 : 14:wt:req
+11 --> 12 : 52:rd:req
+12 --> 13 : 53:rd:resp
+13 --> end1754 : 40:uprd:resp
+12 --> 21 : 53:rd:resp
+21 --> end867 : 43:uprd:resp
+26 --> 27 : 19:rd:resp
+26 --> 42 : 19:rd:resp
+26 --> 49 : 19:rd:resp
+49 --> end1615 : 25:wt:resp
+26 --> 55 : 19:rd:resp
+27 --> 28 : 17:rd:req
+27 --> 36 : 17:rd:req
+36 --> end1303 : 29:wt:resp
+28 --> 29 : 12:wt:resp
+29 --> end305 : 26:rd:resp
+42 --> 43 : 21:rd:req
+43 --> end270 : 36:upwt:resp
+55 --> 56 : 27:rd:resp
+55 --> 64 : 27:rd:resp
+64 --> end35 : 35:upwt:resp
+55 --> 71 : 27:rd:resp
+71 --> end1468 : 36:upwt:resp
+55 --> 78 : 27:rd:resp
+78 --> end1078 : 40:uprd:resp
+56 --> 57 : 31:rd:resp
+57 --> end1297 : 32:rd:resp
+83 --> 84 : 22:rd:req
+84 --> end1601 : 36:upwt:resp
+83 --> 90 : 22:rd:req
+90 --> end547 : 37:uprd:resp
+83 --> 96 : 22:rd:req
+96 --> 97 : 9:wt:req
+96 --> 105 : 9:wt:req
+96 --> 113 : 9:wt:req
+97 --> 98 : 13:wt:req
+98 --> end509 : 36:upwt:resp
+105 --> 106 : 17:rd:req
+106 --> end1983 : 29:wt:resp
+113 --> 114 : 27:rd:resp
+114 --> end628 : 35:upwt:resp
+113 --> 122 : 27:rd:resp
+122 --> end253 : 36:upwt:resp
+113 --> 130 : 27:rd:resp
+130 --> end106 : 40:uprd:resp
+0:cpu0
+1:cache0
+2:membus
+3:cache0
+4:cache1
+5:membus
+130:membus
+end305:cpu0
+11:membus
+12:usb
+13:membus
+end270:audio
+end106:gfx
+end1754:gfx
+21:membus
+26:cache1
+27:cache0
+28:cache1
+29:cache0
+end628:gfx
+end1297:cpu1
+36:cache1
+42:cache0
+43:membus
+end509:audio
+49:cache0
+55:cache0
+56:membus
+57:cache1
+end867:uart
+end1468:audio
+64:membus
+71:membus
+end547:usb
+78:membus
+end845:gfx
+83:cache1
+84:membus
+end1078:gfx
+90:membus
+end1601:audio
+end1303:cpu1
+96:membus
+97:cache0
+98:membus
+end1983:cpu1
+105:cache0
+end35:gfx
+106:cache1
+end253:audio
+113:cache0
+114:membus
+end1615:cpu0
+122:membus
+130 --> [*]
+@enduml
