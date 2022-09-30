@@ -1,4 +1,4 @@
-#!C:\Users\abdel\OneDrive\Documents\GitHub\REU Project\venv\Scripts\python.exe
+#!C:\Users\abdel\OneDrive\Documents\GitHub\REU Project\SeqMining-Python\venv\Scripts\python.exe
 
 import sys
 from operator import attrgetter

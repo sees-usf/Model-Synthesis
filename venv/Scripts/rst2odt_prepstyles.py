@@ -1,4 +1,4 @@
-#!C:\Users\abdel\OneDrive\Documents\GitHub\REU Project\venv\Scripts\python.exe
+#!C:\Users\abdel\OneDrive\Documents\GitHub\REU Project\SeqMining-Python\venv\Scripts\python.exe
 
 # $Id: rst2odt_prepstyles.py 8346 2019-08-26 12:11:32Z milde $
 # Author: Dave Kuhlman <dkuhlman@rexx.com>

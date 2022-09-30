@@ -1,4 +1,4 @@
-#!C:\Users\abdel\OneDrive\Documents\GitHub\REU Project\venv\Scripts\python.exe
+#!C:\Users\abdel\OneDrive\Documents\GitHub\REU Project\SeqMining-Python\venv\Scripts\python.exe
 
 # $Id: rst2odt.py 5839 2009-01-07 19:09:28Z dkuhlman $
 # Author: Dave Kuhlman <dkuhlman@rexx.com>
