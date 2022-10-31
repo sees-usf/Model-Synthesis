@@ -695,7 +695,7 @@ class trace2flows:
                     reduced_model_size = new_model_size
                 print("Model No: ",len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
                 log('\n@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
-                log(self.z3model2str(model), INFO)
+                # log(self.z3model2str(model), INFO)
 
             #@--- start a new scope and recrusively find a reduce model
             self.solver.push()

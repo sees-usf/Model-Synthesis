@@ -11,7 +11,7 @@ from src.filter_list import *
 
 from datetime import timedelta
 
-
+start_time = time.time()
 def prepare_traces(filename):
     f = open(filename, 'r')
     f1 = f.readlines()
@@ -19,7 +19,7 @@ def prepare_traces(filename):
     return f1
 
 
-start_time = time.time()
+
 
 print('Sequence Mining Tool Demo by USF')
 print()
@@ -96,20 +96,20 @@ if __name__ == '__main__':
     # trace_f = ['./traces/gem5_traces/snoop/addr_sliced/address_sliced.jbl']
 
     # Threads (SE) traces
-    # def_f = './traces/gem5_traces/threads/definition/threads_def.msg'
+    def_f = './traces/gem5_traces/threads/definition/threads_def.msg'
     # threads unsliced
     # trace_f = ['./traces/gem5_traces/threads/unsliced/unsliced.txt']
     # threads packet id sliced
-    # trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']
+    trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']
     # snoop memory address sliced
     # trace_f = ['./traces/gem5_traces/threads/addr_sliced/address_sliced.jbl']
 
 
     # For synthetic traces
-    def_f = './traces/synthetic/large.msg'
+    # def_f = './traces/synthetic/large.msg'
 
     # small traces
-    trace_f = ['./traces/synthetic/trace-small-5.txt']
+    # trace_f = ['./traces/synthetic/trace-small-5.txt']
     # trace_f = ['./traces/synthetic/trace-small-10.txt']
     # trace_f = ['./traces/synthetic/trace-small-20.txt']
 
@@ -125,8 +125,8 @@ if __name__ == '__main__':
     graph.set_max_height(max_pat_len)
     graph.set_max_solutions(max_solutions)
 
-    graph.window = False
-    graph.window_size = 300
+    graph.window = True
+    graph.window_size = 20
 
     if (graph.window and (graph.window <= 0)):
         print("Winodw size must > 0")
@@ -150,6 +150,12 @@ if __name__ == '__main__':
     # annotator.annotate()
     log('Trace reading and processing status: Done\n\n')
 
+
+    elapsed_time = time.time() - start_time
+    msg = "Trace reading and proc took: %s secs (Wall clock time)" % timedelta(milliseconds=round(elapsed_time*1000))
+    print(msg)
+
+
     # graph.print_graph()
     # exit()
 
@@ -165,6 +171,7 @@ if __name__ == '__main__':
         log('Done\n', INFO)
     log('\n', INFO)
 
+    # breakpoint()
     # *** Solving the (mono or split) graphs
     cgs = []
     cgs.append(graph)
@@ -247,4 +254,3 @@ if __name__ == '__main__':
     log('Solutions found ' + str(len(z3solver.get_solutions())) + '\n')
     if not z3solver.get_solutions():
         exit()
-

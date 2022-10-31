@@ -7,7 +7,9 @@ from src.filter_list import *
 from src.graph.edge import Edge
 from src.graph.node import Node
 from src.logging import *
-#import pulp as pl
+
+
+# import pulp as pl
 
 
 class SecType(Enum):
@@ -25,7 +27,7 @@ class Graph:
         self.terminal_nodes = {}
         self.edges = {}
 
-        self.edge_support_info = {} #Rubel added
+        self.edge_support_info = {}  # Rubel added
         self.node_support_info = {}  # Rubel added
 
         # ## transitive causality
@@ -116,11 +118,11 @@ class Graph:
         # print("******************")
         # f = open("cg.cg", "w+")
         # for root in self.roots:
-        #     print('Generating CG rooted at ', root, ' with length ', self.max_height)        
+        #     print('Generating CG rooted at ', root, ' with length ', self.max_height)
         #     mono_cg = self.generate_cg(self.nodes[root])
         #     f.write(self.print_cg(mono_cg))
         #     f.write("#\n")
-        #     #exit()  
+        #     #exit()
         # f.close()
 
     def generate_edges(self):
@@ -128,7 +130,7 @@ class Graph:
             if self.is_terminal(node_src):  # skip if the source node is terminal
                 continue
             for node_dest in self.nodes.values():
-                if self.is_initial(node_dest) or node_src == node_dest: # skip if the destination is initial
+                if self.is_initial(node_dest) or node_src == node_dest:  # skip if the destination is initial
                     continue
 
                 if self.causal(node_src, node_dest):
@@ -157,14 +159,12 @@ class Graph:
             #     self.add_terminal_node(node_src)
             #     log('Add new terminal node '+str(node_src.get_index())+'\n', DEBUG)
 
-    
     # read a list of trace files for mining
     def read_trace_file_list(self, trace_file_list):
         for tf in trace_file_list:
             self.read_trace_file(tf)
 
-
-#Dr. Zheng's original Trace file reading code
+    # Dr. Zheng's original Trace file reading code
 
     # def read_trace_file(self, trace_file):
     #     try:
@@ -207,9 +207,9 @@ class Graph:
                 self.process_trace(file[i])
                 traces = traces + 1
 
-                    # if traces > 2800:
-                    #     print(i, len(file[i]), file[i])
-                    #     break
+                # if traces > 2800:
+                #     print(i, len(file[i]), file[i])
+                #     break
         else:
             try:
                 trace_fp = open(trace_file, 'r')
@@ -237,8 +237,8 @@ class Graph:
         # tokens = regexp_tokenize(self.original_trace, pattern=r'\s|[,:]', gaps=True)
         # tokens = raw_trace.split(' ')
 
-        #rubel added this if-else clause for jbl files
-        if isinstance(raw_trace,list):
+        # rubel added this if-else clause for jbl files
+        if isinstance(raw_trace, list):
             tokens = raw_trace
         else:
             tokens = raw_trace.split(' ')
@@ -258,7 +258,7 @@ class Graph:
             #     trace_size = len(self.trace_tokens)
             #     print('trace size now: ', trace_size)
 
-            #@ Find the support for each node
+            # @ Find the support for each node
             node = self.get_node(token)
             node.set_support(node.get_support() + 1)
             if node in node_table:
@@ -305,14 +305,14 @@ class Graph:
         #     s = ''
         #     for t in tr:
         #         s += t + ' '
-        #     file1 = open('split-trace-'+key+'.txt', "w")  
+        #     file1 = open('split-trace-'+key+'.txt', "w")
         #     file1.write(s)
-        #     file1.close()  
+        #     file1.close()
         # exit()
         # ## end of trace splitting
 
         # @ create pulp variable along with node creation
-        #for node in self.nodes.values():
+        # for node in self.nodes.values():
         #    node.set_pulp_var(pl.LpVariable(node.get_symbol_index(), node.get_support(), node.get_support()))
 
         # @ iteratively finding initial and terminal messages from the input trace
@@ -347,12 +347,43 @@ class Graph:
         ## Compute edge support wrt the input trace
         print('\nBinary sequence information:')
         edges = self.get_edges().values()
+
+        # print("nodes: ", self.get_nodes().values())
+        # nodes = node_table.keys()
+
+        ########################### Rubel Added for faster reading ###################
+        # keys = self.get_nodes()
+        # # for key in keys:
+        # #     print(str(key))
+        # causalty = dict.fromkeys(keys, [])
+        #
+        # for key in causalty.keys():
+        #     temp = []
+        #     for edge in edges:
+        #         src_node = edge.get_source()
+        #         dest_node = edge.get_destination()
+        #         if self.is_terminal(src_node) or self.is_initial(dest_node): continue
+        #         if str(dest_node) not in self.trace_tokens or str(src_node) not in self.trace_tokens: continue
+        #         if str(src_node) == key:
+        #             temp.append(edge)
+        #     if temp:
+        #         causalty[key] = set(temp)
+        #         self.find_edge_support2_0(key, list(causalty[key]), node_table)
+        ########################### Rubel Added for faster reading ###################
+
         for edge in edges:
             src_node = edge.get_source()
             dest_node = edge.get_destination()
             if self.is_terminal(src_node) or self.is_initial(dest_node): continue
+            # print(src_node, dest_node)
+            if str(src_node) not in self.trace_tokens: continue
+            # causalty[str(src_node)].append(str(dest_node))
             self.find_edge_support(edge, node_table)
-            #edge.set_pulp_var(pl.LpVariable(edge.get_id(), 0, edge.get_support()))
+
+        # for key in causalty:
+        #     print(key,set(causalty[key]))
+
+        # edge.set_pulp_var(pl.LpVariable(edge.get_id(), 0, edge.get_support()))
 
         ## For each edge, compute its direct support count --> potentially more efficient model finding
         """ for edge in edges:
@@ -371,41 +402,144 @@ class Graph:
 
     ## for argument 'edge', find its support as a list of index pairs, such that
     ## each pair specifies positions of src/dest of the 'edge' in the trace
+    def find_edge_support2_0(self, root, childs, node_table):
+
+        src_node = childs[0].get_source()
+        # dest_idx_list = node_table[dest_node]
+        src_idx_list = node_table[src_node]
+
+        for edge in childs:
+            # if child not in node_table: return 0
+            dest_node = edge.get_destination()
+            try:
+                dest_idx_list = node_table[dest_node]
+            except KeyError:
+                print("Not found: ", str(dest_node))
+                break
+            src_head = 0
+            dest_head = 0
+            # support = 0
+            support = []
+            # if (self.window):
+            #
+            #     # Rubel added for window slicing code
+            #     src_idx = src_idx_list.copy()
+            #     dest_idx = dest_idx_list.copy()
+            #
+            #     # print(src_idx)
+            #     # print(dest_idx)
+            #
+            #     # breakpoint()
+            #
+            #     while src_idx and dest_idx:
+            #         if src_idx[0] > dest_idx[0]:
+            #             dest_idx.pop(0)
+            #             continue
+            #
+            #         if src_idx[0] + self.window_size >= dest_idx[0]:
+            #             # print("Ping!!!")
+            #             support.append((src_idx.pop(0), dest_idx.pop(0)))
+            #             continue
+            #
+            #         if src_idx[0] + self.window_size < dest_idx[0]:
+            #             src_idx.pop(0)
+            #             continue
+            #
+            #     edge.set_support(edge.get_support_list() + support)
+
+            # else:
+            while True:
+                if src_head == len(src_idx_list) or dest_head == len(dest_idx_list):
+                    break
+                src_idx = src_idx_list[src_head]
+                dest_idx = dest_idx_list[dest_head]
+                if src_idx < dest_idx:
+                    # support += 1
+                    support.append((src_idx, dest_idx))
+                    src_head += 1
+                    dest_head += 1
+                elif src_idx_list[src_head] >= dest_idx_list[dest_head]:
+                    dest_head += 1
+
+            # edge = (self,root , child)
+            edge.set_support(edge.get_support_list() + support)
+
+            if True:  # edge.get_fconf()==1 and edge.get_bconf()==1:
+                id = "{0:<10}".format(str(edge.get_id()))
+                sup = "{0:<6}".format(str(edge.get_support()))
+                fconf = "{0:<6}".format(str(round(edge.get_fconf(), 2)))
+                bconf = "{0:<6}".format(str(round(edge.get_bconf(), 2)))
+                hconf = "{0:<6}".format(str(round(edge.get_hconf(), 2)))
+                print(id, ' ', sup, ' ', fconf, ' ', bconf, ' ', hconf)
+
+        # print("done")
+        # return len(support)
+
+    ## for argument 'edge', find its support as a list of index pairs, such that
+    ## each pair specifies positions of src/dest of the 'edge' in the trace
     def find_edge_support(self, edge, node_table):
         src_node = edge.get_source()
         dest_node = edge.get_destination()
+        # print(src_node, dest_node)
         if src_node not in node_table or dest_node not in node_table:
             return 0
         src_idx_list = node_table[src_node]
         dest_idx_list = node_table[dest_node]
+
         src_head = 0
         dest_head = 0
         # support = 0
         support = []
 
-
         if (self.window):
+            while True:
+                if src_head == len(src_idx_list) or dest_head == len(dest_idx_list):
+                    break
+                src_idx = src_idx_list[src_head]
+                dest_idx = dest_idx_list[dest_head]
+                # print(src_idx, dest_idx)
 
-
-
-            # Rubel added for window slicing code
-            src_idx = src_idx_list.copy()
-            dest_idx = dest_idx_list.copy()
-
-            while src_idx and dest_idx:
-
-                if src_idx[0] > dest_idx[0]:
-                    dest_idx.pop(0)
+                if src_idx > dest_idx:
+                    dest_head += 1
+                    # print("dest_head", dest_head)
                     continue
 
-                if src_idx[0] + self.window_size >= dest_idx[0]:
-                    # print("Ping!!!")
-                    support.append((src_idx.pop(0), dest_idx.pop(0)))
+                if (src_idx + self.window_size) >= dest_idx:
+                    _ = (src_idx, dest_idx)
+                    # print(_)
+                    support.append(_)
+                    src_head += 1
+                    dest_head += 1
                     continue
 
-                if src_idx[0] + self.window_size < dest_idx[0]:
-                    src_idx.pop(0)
+                if (src_idx + self.window_size) < dest_idx:
+                    src_head += 1
+                    # print("src_head", src_head)
                     continue
+                # elif src_idx_list[src_head] >= dest_idx_list[dest_head]:
+                #     dest_head += 1
+
+            # # Rubel added for window slicing code
+            # src_idx = src_idx_list.copy()
+            # dest_idx = dest_idx_list.copy()
+            #
+            # # while src_idx and dest_idx:
+            # while True:
+            #     if len(src_idx) == 0 or len(dest_idx) == 0:
+            #         break
+            #     if src_idx[0] > dest_idx[0]:
+            #         dest_idx.pop(0)
+            #         continue
+            #
+            #     if src_idx[0] + self.window_size >= dest_idx[0]:
+            #         _ = (src_idx.pop(0), dest_idx.pop(0))
+            #         # print(_)
+            #         support.append(_)
+            #         continue
+            #
+            #     if src_idx[0] + self.window_size < dest_idx[0]:
+            #         src_idx.pop(0)
+            #         continue
 
             edge.set_support(edge.get_support_list() + support)
 
@@ -423,7 +557,6 @@ class Graph:
                 elif src_idx_list[src_head] >= dest_idx_list[dest_head]:
                     dest_head += 1
             edge.set_support(edge.get_support_list() + support)
-
 
         if True:  # edge.get_fconf()==1 and edge.get_bconf()==1:
             id = "{0:<10}".format(str(edge.get_id()))
@@ -458,10 +591,10 @@ class Graph:
         # print("Initial: ",new_initial_msg)
         return new_initial_msg
 
-    ## for each message (this_msg), check its final index (this_final_index) against 
+    ## for each message (this_msg), check its final index (this_final_index) against
     ## the final indices (other_final_index) of other messages (other_msg)
-    ## If no other message exists such that other_final_index > this_final_index, and 
-    ## causal(other_msg, this_msg), then this message is terminal 
+    ## If no other message exists such that other_final_index > this_final_index, and
+    ## causal(other_msg, this_msg), then this message is terminal
     def find_terminal_msg(self, node_table, initial_msg_table, terminal_msg_table):
         new_terminal_msg = False
         for this_msg in node_table:
@@ -494,7 +627,7 @@ class Graph:
         # print("Terminal: ",new_terminal_msg)
         return new_terminal_msg
 
-    # ## Computer transitive causality using edge support.  
+    # ## Computer transitive causality using edge support.
     # def find_transitive_causality(self):
     #     matrix = {}
     #     nodes = self.get_nodes().values()
@@ -550,7 +683,7 @@ class Graph:
                 return False
         return True
 
-    ## From a trace segment delimited by head_idx and tail_idx, find a sequence of edges 
+    ## From a trace segment delimited by head_idx and tail_idx, find a sequence of edges
     ## that connects nodes at head_idx and tail_idx, stored in argument 'seq'
     # def find_causal_seq(self, head_idx, tail_idx):
     #     head_node = self.get_node(self.trace_tokens[head_idx])
@@ -616,9 +749,9 @@ class Graph:
         # for line in lines:
         #     line = line.rstrip("\n")
         #     if line[0] == '#':
-        #         if line.lower() == '#include': 
+        #         if line.lower() == '#include':
         #             parse_state = INPUT_INCLUDE
-        #         elif line.lower() == '#exclude': 
+        #         elif line.lower() == '#exclude':
         #             parse_state = INPUT_EXCLUDE
         #         else:
         #             log('Unrecognized section %s in filters file %s' %(line, filters_filename))
@@ -681,8 +814,8 @@ class Graph:
                 mono_cg[nxt_node] = []
                 nxt_node.set_depth(head_node.get_depth() + 1)
                 mono_cg[head_node].append(nxt_node)
-            #     
-            #     
+            #
+            #
             # else:
             #     print(' cycle found from ', nxt_node)
             #     print(path_index)
@@ -773,7 +906,7 @@ class Graph:
     #             path.append(succ_index)
     #             self.generate_dags_util(dag, path)
     #     print('pop', path)
-    #     print(path.pop(-1))       
+    #     print(path.pop(-1))
 
     # ************ original definition.    ****************************
     def generate_dags_util(self, dag, traversal_queue):
@@ -836,13 +969,11 @@ class Graph:
             node_list.append(node)
         return node_list
 
-
     def remove_node(self, node):
         self.nodes.pop(str(node), None)
 
     def has_node(self, node):
         return node in self.nodes.values() or str(node) in self.nodes
-
 
     # @ utilities functions for root nodes
     def add_initial_messages(self, initial_msg_table):
@@ -990,7 +1121,7 @@ class Graph:
                     % (node.get_symbol_index(), node.get_message()[0], node.get_message()[1], node.get_support())
             )
 
-            self.node_support_info[node.get_symbol_index()] = node.get_support() # Rubel Added
+            self.node_support_info[node.get_symbol_index()] = node.get_support()  # Rubel Added
 
             total_node_support += node.get_support()
             print(text)
@@ -1007,10 +1138,8 @@ class Graph:
 
             for edge in node.get_edges().values():
                 # print('        ' + str(edge) + ' with edge support of ' + str(edge.get_support_pos())) origina implementation
-                print('        ' + str(edge) + ' with edge support of ' + str(edge.get_support())) # Rubel Edits
+                print('        ' + str(edge) + ' with edge support of ' + str(edge.get_support()))  # Rubel Edits
                 self.edge_support_info[str(edge)] = str(edge.get_support())
-
-
 
             print()
         # joblib.dump(self.edge_support_info,'./edge_support.jbl')
