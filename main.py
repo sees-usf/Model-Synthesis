@@ -8,6 +8,7 @@ from src.solver.trace2flows import *
 from src.annotator.annotator import GraphAnnotator
 from src.logging import *
 from src.filter_list import *
+import src.essential.EssentialsEfficient
 
 from datetime import timedelta
 
@@ -96,11 +97,11 @@ if __name__ == '__main__':
     # trace_f = ['./traces/gem5_traces/snoop/addr_sliced/address_sliced.jbl']
 
     # Threads (SE) traces
-    def_f = './traces/gem5_traces/threads/definition/threads_def.msg'
+    def_f = './traces/gem5_traces/threads/definition/threads_def.msg'   # This is the main definition file
     # threads unsliced
     # trace_f = ['./traces/gem5_traces/threads/unsliced/unsliced.txt']
     # threads packet id sliced
-    trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']
+    trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']    # This is the main trace file
     # snoop memory address sliced
     # trace_f = ['./traces/gem5_traces/threads/addr_sliced/address_sliced.jbl']
 
@@ -117,6 +118,14 @@ if __name__ == '__main__':
     # trace_f = ['./traces/synthetic/trace-large-5.txt']
     # trace_f = ['./traces/synthetic/trace-large-10.txt']
     # trace_f = ['./traces/synthetic/trace-large-20.txt']
+
+    essential_mode = False
+    essential_edges_array = []
+    if (essential_mode == True):
+        print("Reading Essentails!")
+        essential_edges_array = src.essential.EssentialsEfficient.find_essential_causalities(def_f, trace_f[0])
+    print (essential_edges_array)
+    print("Reading Essentails Done!")
 
     filters_filename = None
     rank_filename = None
@@ -196,11 +205,11 @@ if __name__ == '__main__':
         z3solver = trace2flows(cgs)
         # z3solver.find_model_interactive()
         log('Finding models with standard constraints ...\n')
-        models = z3solver.find_reduced_model()
+        models = z3solver.find_reduced_model(essential_mode=essential_mode, essential_edges_array=essential_edges_array)
         # @ find models with relaxed constraints if no model is found by the regular constraints
         if len(models) == 0:
             log('Finding models with relaxed constraints ...\n')
-            models = z3solver.find_reduced_model_relaxed()
+            models = z3solver.find_reduced_model_relaxed(essential_mode=essential_mode, essential_edges_array=essential_edges_array)
         # z3solver.find_minimum_model()
         # z3solver.find_model_incremental()
         log('Numbers of models found is %s\n' % (len(models)))
