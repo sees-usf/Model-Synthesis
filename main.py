@@ -97,11 +97,11 @@ if __name__ == '__main__':
     # trace_f = ['./traces/gem5_traces/snoop/addr_sliced/address_sliced.jbl']
 
     # Threads (SE) traces
-    def_f = './traces/gem5_traces/threads/definition/threads_def.msg'   # This is the main definition file
+    def_f = './traces/gem5_traces/threads/definition/threads_def.msg'  
     # threads unsliced
     # trace_f = ['./traces/gem5_traces/threads/unsliced/unsliced.txt']
     # threads packet id sliced
-    trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']    # This is the main trace file
+    trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']   
     # snoop memory address sliced
     # trace_f = ['./traces/gem5_traces/threads/addr_sliced/address_sliced.jbl']
 
