@@ -47,7 +47,8 @@ class trace2flows:
     
     # Possibly need to make this function for monolithic, this is the dag version
     #@ conf_thres:  h-confidence threshold for an edge to be conisdered into the model
-    def create_constraints(self, conf_thres=0):
+    # essential_mode True means code includes essential causalities and False means code does not include essential causalities
+    def create_constraints(self, essential_mode, essential_edges_array, conf_thres=0):
         nodes = self.graph.get_nodes()
         edges = self.graph.get_edges().values()
 
@@ -76,7 +77,13 @@ class trace2flows:
             total_sup = edge.get_support()
             direct_sup = edge.get_direct_support()
 
-            self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            if (essential_mode == True):
+                if str(edge) in essential_edges_array:
+                    self.solver.add(edge_z3var <= total_sup, edge_z3var > 0)
+                else:
+                    self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            else:
+                self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
 
             # if direct_sup == 0:
             #     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
@@ -90,7 +97,7 @@ class trace2flows:
 
     # Possibly need to make this function for monolithic, this is the dag version
     #@ conf_thres:  h-confidence threshold for an edge to be conisdered into the model
-    def create_constraints_relaxed(self, conf_thres=0):
+    def create_constraints_relaxed(self, essential_mode, essential_edges_array, conf_thres=0):
         nodes = self.graph.get_nodes()
         edges = self.graph.get_edges().values()
 
@@ -118,8 +125,17 @@ class trace2flows:
             total_sup = edge.get_support()
             direct_sup = edge.get_direct_support()
 
-            self.node_constraints.append(edge_z3var <= total_sup)
-            self.node_constraints.append(edge_z3var >= 0)
+            if (essential_mode == True):
+                # print("Test Test = ", essential_edges_array)
+                if str(edge) in essential_edges_array:
+                    self.node_constraints.append(edge_z3var <= total_sup)
+                    self.node_constraints.append(edge_z3var > 0)
+                else:
+                    self.node_constraints.append(edge_z3var <= total_sup)
+                    self.node_constraints.append(edge_z3var >= 0)
+            else:
+                self.node_constraints.append(edge_z3var <= total_sup)
+                self.node_constraints.append(edge_z3var >= 0)
             
             # self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
 
@@ -516,9 +532,9 @@ class trace2flows:
         return cmd, edge_list
 
 
-    def find_model_interactive(self):
+    def find_model_interactive(self, essential_mode=False, essential_edges_array=[]):
         #@ add CG constraints into the solver
-        self.create_constraints(0)
+        self.create_constraints(essential_mode, essential_edges_array, 0)
     
         cmd_list = ['exclude', 'out', 'include', 'in', 'print', 'p', 'quit', 'q']
 
@@ -630,8 +646,8 @@ class trace2flows:
 
     
     #@ Find a model with minimum number of edges using a contrain solver PULP
-    def find_minimum_model(self):
-        self.create_constraints(0)
+    def find_minimum_model(self, essential_mode=False, essential_edges_array=[]):
+        self.create_constraints(essential_mode, essential_edges_array, 0)
         
         status = self.pulp_solver.solve()
         print(pl.LpStatus[status])
@@ -653,11 +669,11 @@ class trace2flows:
 
 
     #@ find a model by incrementally considerring more edges ranked by their confidences.
-    def find_model_incremental(self):
+    def find_model_incremental(self, essential_mode=False, essential_edges_array=[]):
         step = 0.1
         conf_thres = 1
         while conf_thres > 0:
-            self.create_constraints(conf_thres)
+            self.create_constraints(essential_mode, essential_edges_array, conf_thres)
             if self.solver.check() == sat:
                 model = self.solver.model()
                 log('@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
@@ -673,9 +689,9 @@ class trace2flows:
 
 
     #@ find a model with reduced number of edges by experimentally turning off edges
-    def find_reduced_model(self):
+    def find_reduced_model(self, essential_mode=False, essential_edges_array=[]):
         #@ add CG constraints into the solver
-        self.create_constraints(0)
+        self.create_constraints(essential_mode, essential_edges_array, 0)
 
         model_table = {}
         edges = self.graph.get_edges().values()
@@ -721,11 +737,11 @@ class trace2flows:
 
 
     #@ find models with reduced number of edges by using the relaxed constraints
-    def find_reduced_model_relaxed(self):
+    def find_reduced_model_relaxed(self, essential_mode=False, essential_edges_array=[]):
         self.reset()        
 
         #@ add CG constraints into the solver
-        self.create_constraints_relaxed(0)
+        self.create_constraints_relaxed(essential_mode, essential_edges_array, 0)
 
         self.solver.add(self.node_constraints)
         self.solver.add(self.incoming_edge_constraints)
