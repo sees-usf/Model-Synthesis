@@ -48,8 +48,8 @@
 55 : gfx:membus:rd:resp
 56 : membus:gfx:wt:req
 57 : gfx:membus:wt:resp
-58 : audio:membus:wt:req
-59 : membus:audio:wt:resp
+58 : membus:audio:wt:req
+59 : audio:membus:wt:resp
 #
 25 : cache0:cpu0:wt:resp
 26 : cache0:cpu0:rd:resp
