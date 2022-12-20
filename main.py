@@ -97,17 +97,17 @@ if __name__ == '__main__':
     # trace_f = ['./traces/gem5_traces/snoop/addr_sliced/address_sliced.jbl']
 
     # Threads (SE) traces
-    def_f = './traces/gem5_traces/threads/definition/threads_def.msg'  
+    # def_f = './traces/gem5_traces/threads/definition/threads_def.msg'
     # threads unsliced
     # trace_f = ['./traces/gem5_traces/threads/unsliced/unsliced.txt']
     # threads packet id sliced
-    trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']   
+    # trace_f = ['./traces/gem5_traces/threads/packet_sliced/packet_sliced.jbl']
     # snoop memory address sliced
     # trace_f = ['./traces/gem5_traces/threads/addr_sliced/address_sliced.jbl']
 
 
     # For synthetic traces
-    # def_f = './traces/synthetic/large.msg'
+    def_f = './traces/synthetic/large.msg'
 
     # small traces
     # trace_f = ['./traces/synthetic/trace-small-5.txt']
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     # large traces
     # trace_f = ['./traces/synthetic/trace-large-5.txt']
     # trace_f = ['./traces/synthetic/trace-large-10.txt']
-    # trace_f = ['./traces/synthetic/trace-large-20.txt']
+    trace_f = ['./traces/synthetic/trace-large-20.txt']
 
     essential_mode = False
     essential_edges_array = []
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     graph.set_max_height(max_pat_len)
     graph.set_max_solutions(max_solutions)
 
-    graph.window = True
+    graph.window = False
     graph.window_size = 20
 
     if (graph.window and (graph.window <= 0)):
