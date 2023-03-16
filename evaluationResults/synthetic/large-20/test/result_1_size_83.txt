@@ -1,0 +1,32 @@
+
+Start Time =17:05:24
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+
+	Current Time =17:05:24
+	Trace number 0 : 
+	Total number of events is equal to 10900
+	Total number of unaccepted events is equal to 4702
+	Current Time =17:05:24
+
+	Total number of events = 10900
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.5686238532110092
+	The final answer (# of accepted events/total # of events) is : 0.5686238532110092
+
+End Time =17:05:24
+
+
+
+
+
+ FSM Size (edges in FSM) = 102
+ Size (edges causality graph) =82
+ FSM Size (nodes) =60
+
+
+
+
+
+
+

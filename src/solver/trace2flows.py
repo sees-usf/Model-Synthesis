@@ -22,6 +22,7 @@ class trace2flows:
         self.node_constraints = []
         self.incoming_edge_constraints = []
         self.outgoing_edge_constraints = []
+        self.together_constraints = []
 
         self.solutions = []
         self.is_monolithic = None
@@ -51,6 +52,11 @@ class trace2flows:
     def create_constraints(self, essential_mode, essential_edges_array, conf_thres=0):
         nodes = self.graph.get_nodes()
         edges = self.graph.get_edges().values()
+        ############################ Added By Bardia For Test ############################
+        # self.node_constraints = []
+        # self.incoming_edge_constraints = []
+        # self.outgoing_edge_constraints = []
+        ############################ Added By Bardia For Test ############################
 
         for node in nodes.values():
             ## create constraint for each node
@@ -69,7 +75,7 @@ class trace2flows:
             self.edge_z3var_list.append(edge_z3var)
 
             # ignore edge if its h-confidence is lower than threshold
-            if edge.get_fconf() != 1 and edge.get_bconf() != 1 and edge.get_hconf() < conf_thres:  
+            if edge.get_fconf() != 1 and edge.get_bconf() != 1 and edge.get_hconf() < conf_thres: 
                 self.solver.add(edge_z3var == 0)
                 continue
             
@@ -84,6 +90,149 @@ class trace2flows:
                     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
             else:
                 self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+
+            # if direct_sup == 0:
+            #     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            # else:
+            #     self.solver.add(Or(And(edge_z3var >= direct_sup, edge_z3var <= total_sup), edge_z3var == 0))
+            # src_node_sup = edge.get_source().get_support()
+            # self.solver.add(Implies(edge_z3var>0, edge_z3var >= (src_node_sup/5)))
+            log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(total_sup) + '\n', DEBUG)
+    ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    # Possibly need to make this function for monolithic, this is the dag version
+    #@ conf_thres:  h-confidence threshold for an edge to be conisdered into the model
+    # essential_mode True means code includes essential causalities and False means code does not include essential causalities
+    def create_constraints_bVersion(self, essential_mode, essential_edges_array, conf_thres=0):
+        nodes = self.graph.get_nodes()
+        edges = self.graph.get_edges().values()
+        ############################ Added By Bardia For Test ############################
+        self.node_constraints = []
+        self.incoming_edge_constraints = []
+        self.outgoing_edge_constraints = []
+        ############################ Added By Bardia For Test ############################
+
+        for node in nodes.values():
+            ## create constraint for each node
+            node_z3var = node.get_z3var()
+            node_support = node.get_support()
+            if node_support == 0: 
+                continue
+            # self.solver.add(node_z3var == node_support)
+            self.node_constraints.append(node_z3var == node_support)
+            log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
+            self.create_outgoing_edge_constraints_bVersion(node)
+            self.create_incoming_edge_constraints_bVersion(node)
+            
+        #@ adding constraints on edge support
+        for edge in edges:
+            edge_z3var = edge.get_z3var()
+            self.edge_z3var_list.append(edge_z3var)
+
+            # ignore edge if its h-confidence is lower than threshold
+            if edge.get_fconf() != 1 and edge.get_bconf() != 1 and edge.get_hconf() < conf_thres: 
+                self.node_constraints.append(edge_z3var == 0)
+                # self.solver.add(edge_z3var == 0)
+                continue
+            
+            #@ include edges such that their fconf or bconf is 1, or hconf is above threshold
+            total_sup = edge.get_support()
+            direct_sup = edge.get_direct_support()
+
+            if (essential_mode == True):
+                if str(edge) in essential_edges_array:
+                    self.node_constraints.append(edge_z3var <= total_sup)
+                    self.node_constraints.append(edge_z3var > 0)
+                    # self.solver.add(edge_z3var <= total_sup, edge_z3var > 0)
+                else:
+                    self.node_constraints.append(edge_z3var <= total_sup)
+                    self.node_constraints.append(edge_z3var >= 0)
+                    # self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            else:
+                self.node_constraints.append(edge_z3var <= total_sup)
+                self.node_constraints.append(edge_z3var >= 0)
+                # self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+
+            # if direct_sup == 0:
+            #     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            # else:
+            #     self.solver.add(Or(And(edge_z3var >= direct_sup, edge_z3var <= total_sup), edge_z3var == 0))
+            # src_node_sup = edge.get_source().get_support()
+            # self.solver.add(Implies(edge_z3var>0, edge_z3var >= (src_node_sup/5)))
+            log(str(0)+' <= '+str(edge_z3var)+ ' <= ' + str(total_sup) + '\n', DEBUG)
+    ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    # Possibly need to make this function for monolithic, this is the dag version
+    #@ conf_thres:  h-confidence threshold for an edge to be conisdered into the model
+    # essential_mode True means code includes essential causalities and False means code does not include essential causalities
+    def create_constraints_relaxed_bVersion(self, essential_mode, essential_edges_array, conf_thres=0):
+        nodes = self.graph.get_nodes()
+        edges = self.graph.get_edges().values()
+        ############################ Added By Bardia For Test ############################
+        self.node_constraints = []
+        self.incoming_edge_constraints = []
+        self.outgoing_edge_constraints = []
+        self.together_constraints = []
+        check_constraints = []
+        ############################ Added By Bardia For Test ############################
+
+        for node in nodes.values():
+            ## create constraint for each node
+            node_z3var = node.get_z3var()
+            node_support = node.get_support()
+            if node_support == 0: 
+                continue
+            # self.solver.add(node_z3var == node_support)
+            self.node_constraints.append(node_z3var == node_support)
+            # self.solver.add(node_z3var == node_support)
+            log(str(node_z3var) + ' == ' + str(node_support) + '\n', DEBUG)
+            outgoing_const = self.create_outgoing_edge_constraints_bVersion(node)
+            incoming_const = self.create_incoming_edge_constraints_bVersion(node)
+
+            check_constraints = []
+            check_constraints.append(node_z3var == node_support)
+            if incoming_const != None and outgoing_const != None:
+                # check_constraints.append(node_z3var == node_support)
+                check_constraints.append(incoming_const)
+                # check_constraints.append(outgoing_const)
+                # print ("This is it: ", check_constraints)
+            self.together_constraints.append(check_constraints)
+
+
+
+                # if self.solver.check(check_constraints) == sat:
+                #     # print ("##############################################################################################################################################")
+                #     self.solver.add(check_constraints)
+
+            
+        #@ adding constraints on edge support
+        for edge in edges:
+            edge_z3var = edge.get_z3var()
+            self.edge_z3var_list.append(edge_z3var)
+
+            # ignore edge if its h-confidence is lower than threshold
+            if edge.get_fconf() != 1 and edge.get_bconf() != 1 and edge.get_hconf() < conf_thres: 
+                self.node_constraints.append(edge_z3var == 0)
+                # self.solver.add(edge_z3var == 0)
+                continue
+            
+            #@ include edges such that their fconf or bconf is 1, or hconf is above threshold
+            total_sup = edge.get_support()
+            direct_sup = edge.get_direct_support()
+
+            if (essential_mode == True):
+                if str(edge) in essential_edges_array:
+                    self.node_constraints.append(edge_z3var <= total_sup)
+                    self.node_constraints.append(edge_z3var > 0)
+                    # self.solver.add(edge_z3var <= total_sup, edge_z3var > 0)
+                else:
+                    self.node_constraints.append(edge_z3var <= total_sup)
+                    self.node_constraints.append(edge_z3var >= 0)
+                    # self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
+            else:
+                self.node_constraints.append(edge_z3var <= total_sup)
+                self.node_constraints.append(edge_z3var >= 0)
+                # self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
 
             # if direct_sup == 0:
             #     self.solver.add(edge_z3var <= total_sup, edge_z3var >= 0)
@@ -207,6 +356,65 @@ class trace2flows:
 
     #@ adding constraints on node and its outgoing edges
     #@--------------------------------------------------
+    #@ constraints on outgoing edges of a node may cause the CSP to be UNSAT if 
+    #@ the node is the source of simultaneous multiple destnations, eg, a cache-write message  
+    #@ can trigger memory-write and cache-invalidate at the same time. 
+    def create_outgoing_edge_constraints_bVersion(self, node):
+        if self.graph.is_terminal(node) or node.get_support()==0:
+            return
+
+        node_z3var = node.get_z3var()
+        node_pulp_var = node.get_pulp_var()
+        pulp_var_edge_sum = 0
+        outgoing_edges = node.get_outgoing_edges()
+        node_edge_vars = []
+        strong_causality = False
+        total_sup = 0
+        for edge in outgoing_edges:
+            strong_causality = ((edge.get_fconf()==1))# and (edge.get_bconf()==1))
+            edge_support = edge.get_support()
+            if edge_support==0:
+                continue
+            total_sup += edge_support
+            edge_ranking = edge.get_ranking()
+            edge_z3var = edge.get_z3var()
+            # pulp_var_edge_sum += edge.get_pulp_var()
+            #@ only consider edges with ranking higher than the threshold
+            if True: #edge_ranking >= ranking_threshold:
+                node_edge_vars.append(edge_z3var)
+            # log(str(0)+' <= '+str(edge_int_var)+ ' <= ' + str(edge_support), DEBUG)
+
+        #self.pulp_solver += node_pulp_var == pulp_var_edge_sum
+            ### Create unique causality constraint for each edge
+            # all_other_edge_nil = None
+            # for other_edge in outgoing_edges:
+            #     if other_edge == edge: continue
+            #     all_other_edge_nil = (other_edge.get_z3var() == 0) if all_other_edge_nil is None else And(all_other_edge_nil, (other_edge.get_z3var() == 0))
+            # if all_other_edge_nil != None:
+            #     self.solver.add(Implies(all_other_edge_nil, (edge.get_z3var() == edge.get_support())))                
+
+        #@------------------------  
+        #@ generate constraints on outgoing edges of a node
+        sum_z3vars = None
+        concurrent_z3vars = None
+        s = ''
+        for edge_var in node_edge_vars:
+            sum_z3vars = edge_var if sum_z3vars is None else sum_z3vars + edge_var
+            s = str(edge_var) if sum_z3vars is None else s + ' + ' + str(edge_var) 
+        if sum_z3vars != None:
+            if strong_causality == True:
+                self.outgoing_edge_constraints.append(node_z3var == sum_z3vars)
+                return (node_z3var == sum_z3vars)
+                # self.solver.add(node_z3var == sum_z3vars)
+            else:
+                self.outgoing_edge_constraints.append(0 < sum_z3vars)
+                return (0 < sum_z3vars)
+                # self.solver.add(0 < sum_z3vars)
+            log(str(node.get_z3var()) + " <= " + str(s) + '\n', DEBUG)
+    ### '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+    #@ adding constraints on node and its outgoing edges
+    #@--------------------------------------------------
     #@ This encoding considers the case where a node is the source of simultaneous multiple destnations, 
     #@ eg, a cache-write message  
     #@ can trigger memory-write and cache-invalidate at the same time.      
@@ -229,7 +437,7 @@ class trace2flows:
             total_sup += edge_support
             edge_ranking = edge.get_ranking()
             edge_z3var = edge.get_z3var()
-            pulp_var_edge_sum += edge.get_pulp_var()
+            # pulp_var_edge_sum += edge.get_pulp_var()
             #@ only consider edges with ranking higher than the threshold
             if True: #edge_ranking >= ranking_threshold:
                 node_edge_vars.append(edge_z3var)
@@ -298,6 +506,39 @@ class trace2flows:
             log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
     ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
+    ### create constraints on incoming edges of node
+    def create_incoming_edge_constraints_bVersion(self, node):
+        if self.graph.is_initial(node) or node.get_support() == 0:
+            return
+
+        node_z3var = node.get_z3var()
+        node_pulp_var = node.get_pulp_var()
+        pulp_var_edge_sum = 0
+        incoming_edges = node.get_incoming_edges()
+        node_edge_vars = []
+        for edge in incoming_edges:
+            edge_support = edge.get_support()
+            if edge_support == 0:
+                continue
+            # pulp_var_edge_sum += edge.get_pulp_var()
+            edge_z3var = edge.get_z3var()
+            node_edge_vars.append(edge_z3var)
+
+        #self.pulp_solver += node_pulp_var == pulp_var_edge_sum
+
+        sum_z3vars = None
+        s = ''
+        for edge_var in node_edge_vars:
+            sum_z3vars = edge_var if sum_z3vars is None else sum_z3vars + edge_var
+            s = s + ' + ' + str(edge_var) if s != '' else str(edge_var)
+            
+        if sum_z3vars != None:
+            # self.solver.add(node_z3var == sum_z3vars)
+            self.incoming_edge_constraints.append(node_z3var == sum_z3vars)
+            log(str(node_z3var) + " == " + str(s) + '\n', DEBUG)
+            # print(str(node_z3var)," == ", sum_z3vars)
+        return (node_z3var == sum_z3vars)
+    ### ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     def create_unified_constraints(self):
         log(" unified node constraints ========", DEBUG) 
@@ -691,8 +932,141 @@ class trace2flows:
     #@ find a model with reduced number of edges by experimentally turning off edges
     def find_reduced_model(self, essential_mode=False, essential_edges_array=[]):
         #@ add CG constraints into the solver
+        self.reset()
         self.create_constraints(essential_mode, essential_edges_array, 0)
 
+        
+        model_table = {}
+        edges = self.graph.get_edges().values()
+        edge_z3var_list = []
+        for edge in edges:
+            edge_z3var_list.append(edge.get_z3var())
+
+        # print ("before")
+        reduced_model_size = 1000000
+        while self.solver.check() == sat:
+            # print ("after")
+            if len(model_table) > 200:
+                break
+            model = self.solver.model()
+            if self.z3model_signature(model) not in model_table:
+                model_table[self.z3model_signature(model)] = model
+                new_model_size = self.model_size(model, edge_z3var_list)
+                if new_model_size < reduced_model_size:
+                    reduced_model_size = new_model_size
+                print("Model No: ",len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
+                log('\n@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                # log(self.z3model2str(model), INFO)
+
+            #@--- start a new scope and recrusively find a reduce model
+            self.solver.push()
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                if model[edge_z3var]==0:
+                    self.solver.add(edge_z3var==0)
+            self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+            self.solver.pop()
+            #@--- end of the scope
+
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            new_constr = simplify(new_constr)
+            self.solver.add(new_constr) 
+            log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+            #@-------------------------------------
+        
+        print('Size of smallest model: ', reduced_model_size)
+        return model_table
+
+    #@ find a model with reduced number of edges by experimentally turning off edges
+    def find_reduced_model_bVersion(self, essential_mode=False, essential_edges_array=[]):
+        #@ add CG constraints into the solver
+        self.reset()
+        self.create_constraints_bVersion(essential_mode, essential_edges_array, 0)
+
+
+        # Added by Bardia 
+        print("Solver = ", len(self.solver.assertions()))
+        print("Node constraints = ", len(self.node_constraints))
+        self.solver.add(self.node_constraints)
+        print("Solver = ", len(self.solver.assertions()))
+
+        print("Incoming edges constraints = ", len(self.incoming_edge_constraints))
+        self.solver.add(self.incoming_edge_constraints)
+        print("Solver = ", len(self.solver.assertions()))
+
+        print("Outgoing edges constraints = ", len(self.outgoing_edge_constraints))
+        self.solver.add(self.outgoing_edge_constraints)
+        print("Solver = ", len(self.solver.assertions()))
+        # Added by Bardia
+        print(len(self.solver.assertions()))
+
+        
+        model_table = {}
+        edges = self.graph.get_edges().values()
+        edge_z3var_list = []
+        for edge in edges:
+            edge_z3var_list.append(edge.get_z3var())
+
+        # print ("before")
+        reduced_model_size = 1000000
+        while self.solver.check() == sat:
+            # print ("after")
+            if len(model_table) > 200:
+                break
+            model = self.solver.model()
+            if self.z3model_signature(model) not in model_table:
+                model_table[self.z3model_signature(model)] = model
+                new_model_size = self.model_size(model, edge_z3var_list)
+                if new_model_size < reduced_model_size:
+                    reduced_model_size = new_model_size
+                print("Model No: ",len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
+                log('\n@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                # log(self.z3model2str(model), INFO)
+
+            #@--- start a new scope and recrusively find a reduce model
+            self.solver.push()
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                if model[edge_z3var]==0:
+                    self.solver.add(edge_z3var==0)
+            self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+            self.solver.pop()
+            #@--- end of the scope
+
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            new_constr = simplify(new_constr)
+            self.solver.add(new_constr) 
+            log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+            #@-------------------------------------
+        
+        print('Size of smallest model: ', reduced_model_size)
+        return model_table
+
+    #@ find a model with reduced number of edges by experimentally turning off edges
+    def find_reduced_model_relaxed_bVersion(self, essential_mode=False, essential_edges_array=[]):
+        #@ add CG constraints into the solver
+        self.reset()
+        self.create_constraints_bVersion(essential_mode, essential_edges_array, 0)
+
+
+        # Added by Bardia to check
+        print("Solver = ", len(self.solver.assertions()))
+        print("Node constraints = ", len(self.node_constraints))
+        self.solver.add(self.node_constraints)
+        print("Solver = ", len(self.solver.assertions()))
+
+        print("Incoming edges constraints = ", len(self.incoming_edge_constraints))
+        self.solver.add(self.incoming_edge_constraints)
+        print("Solver = ", len(self.solver.assertions()))
+        # Added by Bardia to check
+        print(len(self.solver.assertions()))
+        
         model_table = {}
         edges = self.graph.get_edges().values()
         edge_z3var_list = []
@@ -735,16 +1109,136 @@ class trace2flows:
         print('Size of smallest model: ', reduced_model_size)
         return model_table
 
+    #@ find a model with reduced number of edges by experimentally turning off edges
+    def find_reduced_model_relaxed_bVersion_testedFailed(self, essential_mode=False, essential_edges_array=[]):
+        #@ add CG constraints into the solver
+        self.reset()
+        # self.create_constraints_bVersion(essential_mode, essential_edges_array, 0)
+        self.create_constraints_relaxed_bVersion(essential_mode, essential_edges_array, 0)
+
+        # Added by Bardia to check
+        # print("Solver = ", len(self.solver.assertions()))
+        print("Node constraints = ", len(self.node_constraints))
+        self.solver.add(self.node_constraints)
+        print("Solver = ", len(self.solver.assertions()))
+
+        # print("Incoming edges constraints = ", len(self.incoming_edge_constraints))
+        # self.solver.add(self.incoming_edge_constraints)
+        # print("Solver = ", len(self.solver.assertions()))
+
+        # print("Outgoing edges constraints = ", len(self.outgoing_edge_constraints))
+        # self.solver.add(self.outgoing_edge_constraints)
+        # print("Solver = ", len(self.solver.assertions()))
+
+        #################### Adding the node, incoming, and outgoing constraints all together and one by one by checking if each set makes the solver unsat ######################
+        some_constratints = []
+        print("Number of constraint sets in together constraint list = ", len(self.together_constraints))
+        for some_constr in self.together_constraints:
+            counter = 0
+            for each_const in some_constr:
+                counter += 1
+                some_constratints.append(each_const)
+            if (counter != 2 and counter != 1):
+                print ("There is something wrong!")
+                exit()
+            if self.solver.check(some_constratints) == unsat and counter == 3:
+                some_constratints.pop()
+                some_constratints.pop()
+                # some_constratints.pop()
+            elif self.solver.check(some_constratints) == unsat:
+                some_constratints.pop()
+
+        self.solver.add(some_constratints)
+        #################### Adding the node, incoming, and outgoing constraints all together and one by one by checking if each set makes the solver unsat ######### end ########
+
+        # Added by Bardia to check
+        print("Final number of constrants added to the solver = ", len(self.solver.assertions()))
+        # while (len(self.solver.assertions()) > 1):
+        # self.solver.reset()
+        # print(len(self.solver.assertions()))
+
+        ###################### Adding the incoming and outgoing constraints seperatly and one by one with checking if each one of them makes the solver unsat ######################
+        # iedge_constratints = []
+        # for iedge_constr in self.incoming_edge_constraints:
+        #     iedge_constratints.append(iedge_constr)
+        #     if self.solver.check(iedge_constratints) == unsat:
+        #         iedge_constratints.pop()
+        # self.solver.add(iedge_constratints)
+
+        oedge_constratints = []
+        for oedge_constr in self.outgoing_edge_constraints:
+            oedge_constratints.append(oedge_constr)
+            if self.solver.check(oedge_constratints) == unsat:
+                oedge_constratints.pop()
+        self.solver.add(oedge_constratints)
+        ###################### Adding the incoming and outgoing constraints seperatly and one by one with checking if each one of them makes the solver unsat ######### end ########
+        
+        model_table = {}
+        edges = self.graph.get_edges().values()
+        edge_z3var_list = []
+        for edge in edges:
+            edge_z3var_list.append(edge.get_z3var())
+
+        # print ("before")
+        reduced_model_size = 1000000
+        while self.solver.check() == sat:
+            # print ("after")
+            if len(model_table) > 200:
+                break
+            model = self.solver.model()
+            if self.z3model_signature(model) not in model_table:
+                model_table[self.z3model_signature(model)] = model
+                new_model_size = self.model_size(model, edge_z3var_list)
+                if new_model_size < reduced_model_size:
+                    reduced_model_size = new_model_size
+                print("Model No: ",len(model_table), ' ', self.z3model_signature(model), ' ', self.model_size(model, edge_z3var_list))
+                log('\n@%s:%d: print a model of consistent binary sequences\n' % (whoami(), line_numb()), INFO)
+                # log(self.z3model2str(model), INFO)
+
+            #@--- start a new scope and recrusively find a reduce model
+            self.solver.push()
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                if model[edge_z3var]==0:
+                    self.solver.add(edge_z3var==0)
+            self.reduce_model_recursive(model, edge_z3var_list, model_table, 0)
+            self.solver.pop()
+            #@--- end of the scope
+
+            new_constr = False
+            for edge_z3var in edge_z3var_list:
+                new_constr = Or(new_constr, And(model[edge_z3var] > 0, edge_z3var == 0))
+            # new_constr = constr if new_constr is None else Or(new_constr, constr)
+            new_constr = simplify(new_constr)
+            self.solver.add(new_constr) 
+            log('@%s:%d: next iteration\n' % (whoami(), line_numb()), INFO, False)
+            #@-------------------------------------
+        
+        print('Size of smallest model: ', reduced_model_size)
+        return model_table
 
     #@ find models with reduced number of edges by using the relaxed constraints
     def find_reduced_model_relaxed(self, essential_mode=False, essential_edges_array=[]):
-        self.reset()        
+        self.reset()     
+        print(len(self.solver.assertions()))
+        # exit()   
 
         #@ add CG constraints into the solver
         self.create_constraints_relaxed(essential_mode, essential_edges_array, 0)
 
         self.solver.add(self.node_constraints)
         self.solver.add(self.incoming_edge_constraints)
+        # iedge_constratints = []
+        # # check each outgoing edge constraints, and skip those that would make solver unsat
+        # for iedge_constr in self.incoming_edge_constraints:
+        #     iedge_constratints.append(iedge_constr)
+        #     if self.solver.check(iedge_constratints) == unsat:
+        #         iedge_constratints.pop()
+        #         # print("solver is unsat, pop")
+        #         # print(oedge_constr)
+
+        # self.solver.add(iedge_constratints)
+
         oedge_constratints = []
         # check each outgoing edge constraints, and skip those that would make solver unsat
         for oedge_constr in self.outgoing_edge_constraints:
@@ -815,7 +1309,7 @@ class trace2flows:
                 if self.solver.check() == sat:
                     redm = self.solver.model()
                     if self.z3model_signature(redm) not in model_table:
-                        print("Reduced: ",self.z3model_signature(redm), ' ', self.model_size(redm, edge_z3var_list))
+                        print("Reduced", len(model_table), ": " ,self.z3model_signature(redm), ' ', self.model_size(redm, edge_z3var_list))
                         model_table[self.z3model_signature(redm)] = redm
                         redm = self.reduce_model_recursive(redm, edge_z3var_list, model_table, level+1)
                 self.solver.pop()

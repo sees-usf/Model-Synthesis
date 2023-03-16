@@ -1,0 +1,740 @@
+
+Start Time =13:12:46
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:12:54
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735813
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771101
+	Final Acceptance rate for this trace file is equal to 0.5947855574211888	Final number of unaccepted events is equal to 16506914
+	Current Time =13:13:46
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873591656451971
+	The final answer (# of accepted events/total # of events) is : 0.6873591656451971
+
+End Time =13:13:46
+
+
+
+
+
+
+
+
+ FSM Size =112
+
+
+
+
+
+
+
+
+Start Time =13:13:46
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:13:54
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735810
+	Total number of unaccepted traces = 24
+	Total number of unfinished events = 3771101
+	Final Acceptance rate for this trace file is equal to 0.5947856310656827	Final number of unaccepted events is equal to 16506911
+	Current Time =13:14:46
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.687359239289691
+	The final answer (# of accepted events/total # of events) is : 0.687359239289691
+
+End Time =13:14:46
+
+
+
+
+
+
+
+
+ FSM Size =112
+
+
+
+
+
+
+
+
+Start Time =13:14:46
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:14:54
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735812
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771100
+	Final Acceptance rate for this trace file is equal to 0.5947856065175181	Final number of unaccepted events is equal to 16506912
+	Current Time =13:15:46
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873591901933617
+	The final answer (# of accepted events/total # of events) is : 0.6873591901933617
+
+End Time =13:15:46
+
+
+
+
+
+
+
+
+ FSM Size =113
+
+
+
+
+
+
+
+
+Start Time =13:15:46
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:15:53
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735812
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771100
+	Final Acceptance rate for this trace file is equal to 0.5947856065175181	Final number of unaccepted events is equal to 16506912
+	Current Time =13:16:46
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873591901933617
+	The final answer (# of accepted events/total # of events) is : 0.6873591901933617
+
+End Time =13:16:46
+
+
+
+
+
+
+
+
+ FSM Size =113
+
+
+
+
+
+
+
+
+Start Time =13:16:47
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:16:54
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735809
+	Total number of unaccepted traces = 24
+	Total number of unfinished events = 3771100
+	Final Acceptance rate for this trace file is equal to 0.5947856801620119	Final number of unaccepted events is equal to 16506909
+	Current Time =13:17:47
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873592638378556
+	The final answer (# of accepted events/total # of events) is : 0.6873592638378556
+
+End Time =13:17:47
+
+
+
+
+
+
+
+
+ FSM Size =113
+
+
+
+
+
+
+
+
+Start Time =13:17:47
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:17:55
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735812
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771100
+	Final Acceptance rate for this trace file is equal to 0.5947856065175181	Final number of unaccepted events is equal to 16506912
+	Current Time =13:18:47
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873591901933617
+	The final answer (# of accepted events/total # of events) is : 0.6873591901933617
+
+End Time =13:18:47
+
+
+
+
+
+
+
+
+ FSM Size =114
+
+
+
+
+
+
+
+
+Start Time =13:18:47
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:18:55
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735812
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771100
+	Final Acceptance rate for this trace file is equal to 0.5947856065175181	Final number of unaccepted events is equal to 16506912
+	Current Time =13:19:46
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873591901933617
+	The final answer (# of accepted events/total # of events) is : 0.6873591901933617
+
+End Time =13:19:46
+
+
+
+
+
+
+
+
+ FSM Size =114
+
+
+
+
+
+
+
+
+Start Time =13:19:46
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:19:54
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735396
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955485241975	Final number of unaccepted events is equal to 16506507
+	Current Time =13:20:46
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873694022298522
+	The final answer (# of accepted events/total # of events) is : 0.6873694022298522
+
+End Time =13:20:46
+
+
+
+
+
+
+
+
+ FSM Size =115
+
+
+
+
+
+
+
+
+Start Time =13:20:46
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:20:54
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735397
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955239760329	Final number of unaccepted events is equal to 16506508
+	Current Time =13:21:48
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873693776816875
+	The final answer (# of accepted events/total # of events) is : 0.6873693776816875
+
+End Time =13:21:48
+
+
+
+
+
+
+
+
+ FSM Size =115
+
+
+
+
+
+
+
+
+Start Time =13:21:48
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:21:56
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735396
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955485241975	Final number of unaccepted events is equal to 16506507
+	Current Time =13:22:49
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873694022298522
+	The final answer (# of accepted events/total # of events) is : 0.6873694022298522
+
+End Time =13:22:49
+
+
+
+
+
+
+
+
+ FSM Size =115
+
+
+
+
+
+
+
+
+Start Time =13:22:49
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:22:57
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735812
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3771100
+	Final Acceptance rate for this trace file is equal to 0.5947856065175181	Final number of unaccepted events is equal to 16506912
+	Current Time =13:23:50
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873591901933617
+	The final answer (# of accepted events/total # of events) is : 0.6873591901933617
+
+End Time =13:23:50
+
+
+
+
+
+
+
+
+ FSM Size =115
+
+
+
+
+
+
+
+
+Start Time =13:23:50
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:23:57
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735769
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771112
+	Final Acceptance rate for this trace file is equal to 0.594786367510622	Final number of unaccepted events is equal to 16506881
+	Current Time =13:24:49
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873602457644412
+	The final answer (# of accepted events/total # of events) is : 0.6873602457644412
+
+End Time =13:24:49
+
+
+
+
+
+
+
+
+ FSM Size =115
+
+
+
+
+
+
+
+
+Start Time =13:24:49
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:24:57
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12427423
+	Total number of unaccepted traces = 23
+	Total number of unfinished events = 3351165
+	Final Acceptance rate for this trace file is equal to 0.6126646239811561	Final number of unaccepted events is equal to 15778588
+	Current Time =13:25:49
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6949295741386853
+	The final answer (# of accepted events/total # of events) is : 0.6949295741386853
+
+End Time =13:25:49
+
+
+
+
+
+
+
+
+ FSM Size =116
+
+
+
+
+
+
+
+
+Start Time =13:25:49
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:25:57
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735396
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955485241975	Final number of unaccepted events is equal to 16506507
+	Current Time =13:26:50
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873694022298522
+	The final answer (# of accepted events/total # of events) is : 0.6873694022298522
+
+End Time =13:26:50
+
+
+
+
+
+
+
+
+ FSM Size =116
+
+
+
+
+
+
+
+
+Start Time =13:26:50
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:26:58
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735353
+	Total number of unaccepted traces = 21
+	Total number of unfinished events = 3771123
+	Final Acceptance rate for this trace file is equal to 0.5947963095173013	Final number of unaccepted events is equal to 16506476
+	Current Time =13:27:50
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873704578009318
+	The final answer (# of accepted events/total # of events) is : 0.6873704578009318
+
+End Time =13:27:50
+
+
+
+
+
+
+
+
+ FSM Size =116
+
+
+
+
+
+
+
+
+Start Time =13:27:50
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:27:58
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12427353
+	Total number of unaccepted traces = 24
+	Total number of unfinished events = 3351165
+	Final Acceptance rate for this trace file is equal to 0.6126663423526809	Final number of unaccepted events is equal to 15778518
+	Current Time =13:28:49
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6949312925102101
+	The final answer (# of accepted events/total # of events) is : 0.6949312925102101
+
+End Time =13:28:49
+
+
+
+
+
+
+
+
+ FSM Size =117
+
+
+
+
+
+
+
+
+Start Time =13:28:49
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:28:57
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735396
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955485241975	Final number of unaccepted events is equal to 16506507
+	Current Time =13:29:50
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873694022298522
+	The final answer (# of accepted events/total # of events) is : 0.6873694022298522
+
+End Time =13:29:50
+
+
+
+
+
+
+
+
+ FSM Size =117
+
+
+
+
+
+
+
+
+Start Time =13:29:50
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:29:58
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735396
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955485241975	Final number of unaccepted events is equal to 16506507
+	Current Time =13:30:50
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873694022298522
+	The final answer (# of accepted events/total # of events) is : 0.6873694022298522
+
+End Time =13:30:50
+
+
+
+
+
+
+
+
+ FSM Size =117
+
+
+
+
+
+
+
+
+Start Time =13:30:50
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:30:58
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735396
+	Total number of unaccepted traces = 22
+	Total number of unfinished events = 3771111
+	Final Acceptance rate for this trace file is equal to 0.5947955485241975	Final number of unaccepted events is equal to 16506507
+	Current Time =13:31:51
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873694022298522
+	The final answer (# of accepted events/total # of events) is : 0.6873694022298522
+
+End Time =13:31:51
+
+
+
+
+
+
+
+
+ FSM Size =117
+
+
+
+
+
+
+
+
+Start Time =13:31:51
+	------------------------------------------------------------------Creating the Finite State Machine------------------------------------------------------------------
+	Done creating the Finite State Machine!
+	----------------------------------------------------------------From now on we are testing the parser----------------------------------------------------------------
+
+	Current Time =13:31:58
+	Trace number 0 : 
+	Total number of events is equal to 40736243
+	Total number of unaccepted events is equal to 12735353
+	Total number of unaccepted traces = 21
+	Total number of unfinished events = 3771123
+	Final Acceptance rate for this trace file is equal to 0.5947963095173013	Final number of unaccepted events is equal to 16506476
+	Current Time =13:32:50
+
+	Total number of events = 40736243
+	Number of traces = 1
+	The final answer (ratios/total) is : 0.6873704578009318
+	The final answer (# of accepted events/total # of events) is : 0.6873704578009318
+
+End Time =13:32:50
+
+
+
+
+
+
+
+
+ FSM Size =117
+
+
+
+
+
+
+

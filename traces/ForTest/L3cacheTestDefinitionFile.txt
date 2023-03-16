@@ -1,0 +1,14 @@
+#
+1:cpu0:cache1:rd:req
+3:cpu1:cache1:rd:req
+#
+5:cache1:cache2:rd:req
+6:cache2:cache1:rd:resp
+7:cache2:cache3:rd:req
+8:cache3:cache2:rd:resp
+9:cache3:mem:rd:req
+10:mem:cache3:rd:resp
+#
+2:cache1:cpu0:rd:resp
+4:cache1:cpu1:rd:resp
+#

@@ -7,6 +7,8 @@ from src.filter_list import *
 from src.graph.edge import Edge
 from src.graph.node import Node
 from src.logging import *
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 # import pulp as pl
@@ -126,6 +128,7 @@ class Graph:
         # f.close()
 
     def generate_edges(self):
+        G = nx.DiGraph()
         for node_src in self.nodes.values():
             if self.is_terminal(node_src):  # skip if the source node is terminal
                 continue
@@ -133,15 +136,37 @@ class Graph:
                 if self.is_initial(node_dest) or node_src == node_dest:  # skip if the destination is initial
                     continue
 
+                # print("Src = ", node_src, "  dest = ", node_dest)
                 if self.causal(node_src, node_dest):
                     edge = Edge(self, node_src, node_dest)
                     node_src.add_edge(edge)
                     node_src.add_succ(node_dest)
                     self.add_edge(edge)
+                    # print("An Edge: ", node_src, "_", node_dest)
+                    G.add_edge(int(node_src.get_index()), int(node_dest.get_index()))
 
-            if not node_src.get_edges():
-                self.add_terminal_node(node_src)
-                log('Add new terminal node ' + str(node_src.get_index()) + '\n', DEBUG)
+        print("\nTotal number of edges in the graph = ", G.number_of_edges())
+
+        # plt.figure(figsize=(10, 8))
+        # pos = nx.circular_layout(G)
+        # # pos = nx.kamada_kawai_layout(G)
+        # # pos = nx.spectral_layout(G)
+        # # pos = nx.spring_layout(G, seed=1000)
+        # node_options = {"node_color": "blue", "node_size": 60}
+        # edge_options = {"width": .50, "alpha": .5, "edge_color": "black"}
+        # node_label_options = {"font_size": 15, "font_color": "blue", "verticalalignment": "bottom", "horizontalalignment":"left"}
+        # # nx.draw_networkx_nodes(G, pos, **node_options)
+        # # nx.draw_networkx_edges(G, pos, **edge_options)
+        # # nx.draw_networkx_labels(G, pos, **node_label_options)
+        # nx.draw(G, pos, with_labels=True)
+        # plt.show()
+        # # exit()
+
+            # Commented by Bardia for test
+            # if not node_src.get_edges():
+            #     self.add_terminal_node(node_src)
+            #     log('Add new terminal node ' + str(node_src.get_index()) + '\n', DEBUG)
+            # Commented by Bardia for test
 
             # for node_dest in self.nodes.values():
             #     if node_src == node_dest or self.is_root(node_dest):
@@ -158,6 +183,50 @@ class Graph:
             # if not node_src.get_edges():
             #     self.add_terminal_node(node_src)
             #     log('Add new terminal node '+str(node_src.get_index())+'\n', DEBUG)
+        ################################################################################################################
+        # myInitialNodes = []
+        # myTerminalNodes = []
+        # for aNode in G:
+        #     if (G.in_degree(aNode) == 0):
+        #         myInitialNodes.append(aNode)
+        #         # print("Initial node = ", aNode)
+        #     if (G.out_degree(aNode) == 0):
+        #         myTerminalNodes.append(aNode)
+        #         # print("Terminal node = ", aNode)
+        # maxN = 0
+        # print("Total number of edges in the graph = ", G.number_of_edges())
+        # print("Initial nodes:")
+        # for temp in myInitialNodes:
+        #     if(int(str(temp))>maxN):
+        #         maxN = int(str(temp))
+        #     print(temp)
+        # print("Terminal nodes:")
+        # for temp in myTerminalNodes:
+        #     # if(int(str(temp))>maxN):
+        #     #     maxN = int(str(temp))
+        #     print(temp)
+
+        # print("Starting nodes = ", myInitialNodes)
+        # print("Ending nodes = ", myTerminalNodes)
+        # exit()
+        # all_paths_sorted = [[] for x in range(maxN+1)]  # = []
+        # startAndEnds     = [[] for x in range(maxN+1)]
+        # for start_node in myInitialNodes:
+        #     print("Starting node = ", start_node)
+        #     for end_node in myTerminalNodes:
+        #         print("Ending node = ", end_node)
+        #         # counter = 0
+        #         for path in nx.all_simple_paths(G, source=start_node, target=end_node):
+        #             all_paths_sorted[start_node].append(path)
+        #             # counter += 1
+        #             # if counter%100 == 0:
+        #             #     print(".", end="")
+        #             # startAndEnds[start_node].append(end_node)
+        #         print("")
+        # for aPath in all_paths_sorted:
+        #     print(aPath)
+        # exit()
+        ############################################################################################################
 
     # read a list of trace files for mining
     def read_trace_file_list(self, trace_file_list):
@@ -316,10 +385,10 @@ class Graph:
         #    node.set_pulp_var(pl.LpVariable(node.get_symbol_index(), node.get_support(), node.get_support()))
 
         # @ iteratively finding initial and terminal messages from the input trace
-        # initial_msg_table = {}
+        # initial_msg_table  = {}
         # terminal_msg_table = {}
-        # while True:
-        #     new_initial_msg = self.find_initial_msg(node_table, initial_msg_table, terminal_msg_table)
+        #     new_initial_msg = self.find_ini
+        # while True:tial_msg(node_table, initial_msg_table, terminal_msg_table)
         #     new_terminal_msg = self.find_terminal_msg(node_table, initial_msg_table, terminal_msg_table)
         #     if not new_initial_msg and not new_terminal_msg:
         #         break
@@ -338,6 +407,7 @@ class Graph:
         # for t in terminals:
         #     print(t)
         # input()
+        # exit()
 
         # node = self.get_node('44')
         # self.add_terminal(node)
@@ -371,6 +441,7 @@ class Graph:
         #         self.find_edge_support2_0(key, list(causalty[key]), node_table)
         ########################### Rubel Added for faster reading ###################
 
+        # print("Length of edges vector = ", len(edges), " length of trace tokens = ", len(self.trace_tokens))
         for edge in edges:
             src_node = edge.get_source()
             dest_node = edge.get_destination()
@@ -485,6 +556,8 @@ class Graph:
             return 0
         src_idx_list = node_table[src_node]
         dest_idx_list = node_table[dest_node]
+        # print ("src node = ", src_node, ", dest node = ", dest_node, ", src list = ", src_idx_list, ", dest list = ", dest_idx_list)
+        # print("Node table size = ", len(node_table), " src index size = ", len(src_idx_list), " dest index size = ", len(dest_idx_list))
 
         src_head = 0
         dest_head = 0
@@ -500,11 +573,12 @@ class Graph:
                 # print(src_idx, dest_idx)
 
                 if src_idx > dest_idx:
+                    # print ("1 - src head = ", src_head, ", dest head = ", dest_head)
                     dest_head += 1
                     # print("dest_head", dest_head)
                     continue
-
                 if (src_idx + self.window_size) >= dest_idx:
+                    # print ("2 - src head = ", src_head, ", dest head = ", dest_head)
                     _ = (src_idx, dest_idx)
                     # print(_)
                     support.append(_)
@@ -658,14 +732,18 @@ class Graph:
     # @ if there are more message types than just 'req' or 'resp', this function needs to update
     def causal(self, msg_1, msg_2):
         if msg_1.get_destination() != msg_2.get_source():
+            # print("First If")
             return False
 
         if msg_1.get_source() == msg_2.get_destination():
             if msg_1.get_type().lower() == 'resp':
+                # print("Second If")
                 return False
             if msg_1.get_type().lower() == 'req':
+                # print("Third If")
                 return (msg_2.get_type().lower() == 'resp')
         elif msg_1.get_type().lower() == 'req':
+            # print("Forth If")
             return (msg_2.get_type().lower() != 'resp')
 
         return True
