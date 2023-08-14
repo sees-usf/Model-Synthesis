@@ -3,12 +3,11 @@ from copy import deepcopy
 from enum import Enum
 
 from nltk.tokenize import regexp_tokenize
-from src.filter_list import *
 from src.graph.edge import Edge
 from src.graph.node import Node
 from src.logging import *
 import networkx as nx
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 # import pulp as pl
@@ -51,6 +50,13 @@ class Graph:
         self.window = False
         self.window_size = 1000
 
+        self.totalBardiaCounter = 0
+        self.totalBardiaNotUsed = 0
+        self.edgesArrayForComputingSupport = []
+        self.bardiaEdgesArrayIds = []
+        self.bardiaEdgeArraySourceIds = []
+        self.bardiaEdgeArrayDestIds = []
+
     def read_message_file(self, msg_def_file_name):
         try:
             f = open(msg_def_file_name, 'r')
@@ -91,7 +97,7 @@ class Graph:
             origin = tokens[1]
             destination = tokens[2]
             command = tokens[3]
-            msg_type = tokens[4]
+            msg_type = "" # tokens[4]
             message = tokens  # (origin, destination)
 
             if not self.has_node(symbol_index):
@@ -146,6 +152,14 @@ class Graph:
                     G.add_edge(int(node_src.get_index()), int(node_dest.get_index()))
 
         print("\nTotal number of edges in the graph = ", G.number_of_edges())
+        self.edgesArrayForComputingSupport = self.get_edges().values()
+        self.bardiaEdgesArrayIds = []
+        for edge in self.edgesArrayForComputingSupport:
+            # print(edge)
+            self.bardiaEdgesArrayIds.append(edge.get_id())
+            self.bardiaEdgeArraySourceIds.append(edge.get_source())
+            self.bardiaEdgeArrayDestIds.append(edge.get_destination())
+        # print("\n4_5 = ", G.in_edges(5))
 
         # plt.figure(figsize=(10, 8))
         # pos = nx.circular_layout(G)
@@ -276,6 +290,9 @@ class Graph:
                 self.process_trace(file[i])
                 traces = traces + 1
 
+                # if traces == 2:
+                #     exit()
+
                 # if traces > 2800:
                 #     print(i, len(file[i]), file[i])
                 #     break
@@ -298,10 +315,12 @@ class Graph:
                 #     break
 
             trace_fp.close()
+        # exit()
 
     def process_trace(self, raw_trace):
         # @ Tables of messags from the trace
         node_table = {}
+        bardiaTrace_tokens = []
 
         # tokens = regexp_tokenize(self.original_trace, pattern=r'\s|[,:]', gaps=True)
         # tokens = raw_trace.split(' ')
@@ -319,7 +338,6 @@ class Graph:
         for token in tokens:
             if token == '-2':
                 break
-
             if token == '-1' or not self.has_node(token):
                 continue
             # # status report on reading input trace
@@ -336,6 +354,7 @@ class Graph:
                 idx_list = [pos_index]
                 node_table[node] = idx_list
             self.trace_tokens.append(token)
+            bardiaTrace_tokens.append(token)
 
             # print(token + " %d" % node.get_support())
 
@@ -416,7 +435,12 @@ class Graph:
 
         ## Compute edge support wrt the input trace
         print('\nBinary sequence information:')
-        edges = self.get_edges().values()
+        # edges = self.get_edges().values()
+        # bardiaEdgesArrayIds = []
+        # for edge in self.edgesArrayForComputingSupport:
+        #     bardiaEdgesArrayIds.append(edge.get_id())
+            # print(edge.get_id())
+            # print(type(edge))
 
         # print("nodes: ", self.get_nodes().values())
         # nodes = node_table.keys()
@@ -441,15 +465,76 @@ class Graph:
         #         self.find_edge_support2_0(key, list(causalty[key]), node_table)
         ########################### Rubel Added for faster reading ###################
 
+        bardiaCounter = 0
+        bardiaNotUsed = 0
+        bardiaEdges = []
+
+        # print(type(edges))
+        # testNode1 = Node(self, "0", "message", "command", "msg_type")
+        # testNode2 = Node(self, "9", "message", "command", "msg_type")
+        # testEdge = Edge(self, testNode1, testNode2)
+        # print(testEdge)
+        # if "0_9" in bardiaEdgesArrayIds:
+        #     print("Found!")
+        # else:
+        #     print("Not found :(")
+        # exit()
+
+        for node1 in node_table:
+            for node2 in node_table:
+                # for anEdge in self.edgesArrayForComputingSupport:
+                #     if str(anEdge.get_source()) == str(node1.get_index()) and str(anEdge.get_destination()) == str(node2.get_index()):
+                #         bardiaEdges.append(anEdge)
+                #         break
+
+                # # anEdge = str(node1)+"_"+str(node2) 
+                anEdge = Edge(self, node1, node2) 
+                # # bardiaEdgesArrayIds.append(anEdge)
+                # # print("test:", anEdge)
+                # test = self.edgesArrayForComputingSupport.get(anEdge.get_id())
+                # if test is not None:
+                #     bardiaEdges.append(test)
+                # print(anEdge.get_id())
+                if anEdge.get_id() in self.bardiaEdgesArrayIds:
+                # if anEdge.get_id() in self.edgesArrayForComputingSupport:
+                    bardiaEdges.append(self.edges[anEdge.get_id()])
+                # if anEdge.get_id() in self.bardiaEdgesArrayIds:
+                #     bardiaEdges.append(self.edgesArrayForComputingSupport[anEdge.get_id()])
+
+
+        # edges = bardiaEdges.values()
+        # print("Bardia Edges:")
+        # for test in bardiaEdges:
+        #     print(test)
+        # print("Bardia Edges Done!")
         # print("Length of edges vector = ", len(edges), " length of trace tokens = ", len(self.trace_tokens))
-        for edge in edges:
+        # for edge in self.edgesArrayForComputingSupport:
+        for edge in bardiaEdges:
+            # print(edge)
             src_node = edge.get_source()
             dest_node = edge.get_destination()
             if self.is_terminal(src_node) or self.is_initial(dest_node): continue
             # print(src_node, dest_node)
-            if str(src_node) not in self.trace_tokens: continue
+            # if str(src_node) not in self.trace_tokens: 
+            if str(src_node) not in bardiaTrace_tokens: 
+                bardiaNotUsed += 1
+                continue
             # causalty[str(src_node)].append(str(dest_node))
             self.find_edge_support(edge, node_table)
+            bardiaCounter += 1
+        self.totalBardiaCounter += bardiaCounter
+        self.totalBardiaNotUsed += bardiaNotUsed
+
+        if bardiaNotUsed != 0:
+            print("There must be something wrong!")
+            exit()
+        # print("Bardia Trace Token size =", len(bardiaTrace_tokens))
+        # print("Length of node table =", len(node_table))
+        print("Bardia Counter =", bardiaCounter)
+        print("Bardia NotUsed =", bardiaNotUsed)
+        # print("Total Bardia Counter =", self.totalBardiaCounter)
+        # print("Total Bardia NotUsed =", self.totalBardiaNotUsed)
+
 
         # for key in causalty:
         #     print(key,set(causalty[key]))
@@ -549,6 +634,9 @@ class Graph:
     ## for argument 'edge', find its support as a list of index pairs, such that
     ## each pair specifies positions of src/dest of the 'edge' in the trace
     def find_edge_support(self, edge, node_table):
+        # if len(node_table) > 100:
+        #     print("Length of node table =", len(node_table))
+        #     exit()
         src_node = edge.get_source()
         dest_node = edge.get_destination()
         # print(src_node, dest_node)

@@ -1,7 +1,5 @@
-networkx
-joblib
-nltk
-z3-solver
-multipledispatch
-matplotlib
-scipy
+pip install networkx
+pip install joblib
+pip install nltk
+pip install z3-solver
+pip install multipledispatch

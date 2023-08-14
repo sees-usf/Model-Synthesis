@@ -1,9 +1,6 @@
 import networkx as nx
-import matplotlib.pyplot as plt
-import numpy as np
 import sys
 import joblib
-import scipy as sp
 from datetime import datetime
 
 
