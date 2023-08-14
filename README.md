@@ -37,10 +37,24 @@ ex: "python main.py synthetic small-5 unsliced"
 ```
 all command line variables are listed in the table below:
 
-| <type_of_benchmark> | <size_or_model_of_benchmark> | <slicing_technique> |
-| ------------------- | ---------------------------- | ------------------- |
-| synthetic           | small-5                      | unsliced            |
-|                     | small-10                     | window_sliced       |
+| <type_of_benchmark> | <size_or_model_of_benchmark> | <slicing_technique>  |
+| ------------------- | ---------------------------- | -------------------- |
+| synthetic           | small-5                      | unsliced             |
+|                     | small-10                     | window_sliced        |
+|                     | small-20                     |                      |
+|                     | large-5                      |                      |
+|                     | large-10                     |                      |
+|                     | large-20                     |                      |
+|                     | multiple_traces              |                      |
+|                     | multiple_traces_large        |                      |
+|                     | multiple_traces_small        |                      |
+|                     | multiple_traces_mix          |                      |
+| ------------------- | ---------------------------- | -------------------- |
+| gem5                | full_system                  | unsliced             |
+|                     | threads                      | window_sliced        |
+|                     | snoop                        | architectural_sliced |
+|                     |                              | all_sliced           |
+
 
 ------------------------------------------------------------
 - synthetic - small-5               - unsliced             -
