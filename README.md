@@ -46,12 +46,12 @@ all command line variables are listed in the table below:
 |                     | large-10                     |                      |
 |                     | large-20                     |                      |
 |                     | multiple_traces              |                      |
-|                     | multiple_traces_large        |                      |
+|                     | multiple_traces_large        |                      | 
 |                     | multiple_traces_small        |                      |
 |                     | multiple_traces_mix          |                      |
 | ------------------- | ---------------------------- | -------------------- |
-| gem5                | full_system\nthreads         | unsliced             |
-|                     | threads                      | window_sliced        |
+| gem5                | full_system \n threads       | unsliced             |
+|                     | threadsTest                  | window_sliced        |
 |                     | snoop                        | architectural_sliced |
 |                     |                              | all_sliced           |
 
