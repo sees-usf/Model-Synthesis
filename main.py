@@ -126,7 +126,7 @@ if __name__ == '__main__':
             print ("Wrong type of Gem5 traces is chosen!")
             exit()
     elif sys.argv[1] == 'synthetic':
-        def_f = './benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/definition/newLarge.msg'
+        def_f = './benchmarks/synthetic_traces/definition/newLarge.msg'
 
         if sys.argv[3] == 'unsliced':
             graph.window = False
@@ -139,35 +139,35 @@ if __name__ == '__main__':
             exit()
 
         if sys.argv[2] == 'large-20':
-            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/large/trace-large-20.txt']
+            trace_f = ['./benchmarks/synthetic_traces/large/trace-large-20.txt']
             fileNamePrefix = "synthetic/large-20/" + str(sys.argv[3])
         elif sys.argv[2] == 'large-10':
-            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/large/trace-large-10.txt']
+            trace_f = ['./benchmarks/synthetic_traces/large/trace-large-10.txt']
             fileNamePrefix = "synthetic/large-10/" + str(sys.argv[3])
         elif sys.argv[2] == 'large-5':
-            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/large/trace-large-5.txt']
+            trace_f = ['./benchmarks/synthetic_traces/large/trace-large-5.txt']
             fileNamePrefix = "synthetic/large-5/" + str(sys.argv[3])
         elif sys.argv[2] == 'small-20':
-            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/small/trace-small-20.txt']
+            trace_f = ['./benchmarks/synthetic_traces/small/trace-small-20.txt']
             fileNamePrefix = "synthetic/small-20/" + str(sys.argv[3])
         elif sys.argv[2] == 'small-10':
-            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/small/trace-small-10.txt']
+            trace_f = ['./benchmarks/synthetic_traces/small/trace-small-10.txt']
             fileNamePrefix = "synthetic/small-10/" + str(sys.argv[3])
         elif sys.argv[2] == 'small-5':
-            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/small/trace-small-5.txt']
+            trace_f = ['./benchmarks/synthetic_traces/small/trace-small-5.txt']
             fileNamePrefix = "synthetic/small-5/" + str(sys.argv[3])
 
         elif sys.argv[2] == 'multiple_traces':
-            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/multipleTraces-synthetic.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/multi_trace/multipleTraces-synthetic.txt"]
             fileNamePrefix = "synthetic/multipleTraces/" + str(sys.argv[3])
         elif sys.argv[2] == 'multiple_traces_large':
-            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/multipleTraces-syntheticLarge.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/multi_trace/multipleTraces-syntheticLarge.txt"]
             fileNamePrefix = "synthetic/multipleTraces-large/" + str(sys.argv[3])
         elif sys.argv[2] == 'multiple_traces_small':
-            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/multipleTraces-syntheticSmall.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/multi_trace/multipleTraces-syntheticSmall.txt"]
             fileNamePrefix = "synthetic/multipleTraces-small/" + str(sys.argv[3])
         elif sys.argv[2] == 'multiple_traces_mix':
-            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/RubelMultiTrace.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/multi_trace/RubelMultiTrace.txt"]
             fileNamePrefix = "synthetic/multipleTraces-mix/" + str(sys.argv[3])
         else:
             print ("Wrong type of Synthetic traces is chosen!")
