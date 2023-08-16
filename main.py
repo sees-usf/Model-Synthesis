@@ -52,73 +52,73 @@ if __name__ == '__main__':
 
     if sys.argv[1] == 'gem5':
         if sys.argv[2] == 'full_system':
-            def_f = './bench_marks/gem5_traces/fs/definition/def-FS-RublePrintFormat.msg' 
+            def_f = './benchmarks/gem5_traces/fs/definition/def-FS-RublePrintFormat.msg' 
 
             if sys.argv[3] == 'unsliced':
-                trace_f = ['./bench_marks/gem5_traces/fs/unsliced/out1.txt','./bench_marks/gem5_traces/fs/unsliced/out2.txt','./bench_marks/gem5_traces/fs/unsliced/out3.txt'] 
+                trace_f = ['./benchmarks/gem5_traces/fs/unsliced/out1.txt','./benchmarks/gem5_traces/fs/unsliced/out2.txt','./benchmarks/gem5_traces/fs/unsliced/out3.txt'] 
                 fileNamePrefix = "gem5/fs/unsliced"
                 graph.window = False
                 graph.window_size = 12
             elif sys.argv[3] == 'window_sliced':
-                trace_f = ['./bench_marks/gem5_traces/fs/unsliced/out1.txt','./bench_marks/gem5_traces/fs/unsliced/out2.txt','./bench_marks/gem5_traces/fs/unsliced/out3.txt'] 
+                trace_f = ['./benchmarks/gem5_traces/fs/unsliced/out1.txt','./benchmarks/gem5_traces/fs/unsliced/out2.txt','./benchmarks/gem5_traces/fs/unsliced/out3.txt'] 
                 fileNamePrefix = "gem5/fs/window_sliced"
                 graph.window = True
                 graph.window_size = 12
             elif sys.srgv[3] == "architectural_sliced": 
-                trace_f = ['./bench_marks/gem5_traces/fs/packet_sliced/packet_sliced.jbl']
+                trace_f = ['./benchmarks/gem5_traces/fs/packet_sliced/packet_sliced.jbl']
                 fileNamePrefix = "gem5/fs/architectural_sliced"
                 graph.window = False
                 graph.window_size = 12
             elif sys.argv[3] == 'all_sliced':
-                trace_f = ['./bench_marks/gem5_traces/fs/packet_sliced/packet_sliced.jbl']
+                trace_f = ['./benchmarks/gem5_traces/fs/packet_sliced/packet_sliced.jbl']
                 fileNamePrefix = "gem5/fs/all_sliced"
                 graph.window = True
                 graph.window_size = 12
 
         elif sys.argv[2] == 'threads':
-            def_f = './bench_marks/gem5_traces/threads/definition/defThreads-RubelPrintFormat.msg' 
+            def_f = './benchmarks/gem5_traces/threads/definition/defThreads-RubelPrintFormat.msg' 
 
             if sys.argv[3] == 'unsliced':
-                trace_f = ['./bench_marks/gem5_traces/threads/unsliced/unsliced-RubelPrintFormat.jbl']
+                trace_f = ['./benchmarks/gem5_traces/threads/unsliced/unsliced-RubelPrintFormat.jbl']
                 fileNamePrefix = "gem5/threads/unsliced"
                 graph.window = False
                 graph.window_size = 12
             elif sys.argv[3] == 'window_sliced':
-                trace_f = ['./bench_marks/gem5_traces/threads/unsliced/unsliced-RubelPrintFormat.jbl']
+                trace_f = ['./benchmarks/gem5_traces/threads/unsliced/unsliced-RubelPrintFormat.jbl']
                 fileNamePrefix = "gem5/threads/window_sliced"
                 graph.window = True
                 graph.window_size = 12
             elif sys.srgv[3] == "architectural_sliced": 
-                trace_f = ['./bench_marks/gem5_traces/threads/architecturalSliced/totalSliced.jbl']
+                trace_f = ['./benchmarks/gem5_traces/threads/architecturalSliced/totalSliced.jbl']
                 fileNamePrefix = "gem5/threads/architectural_sliced"
                 graph.window = False
                 graph.window_size = 12
             elif sys.argv[3] == 'all_sliced':
-                trace_f = ['./bench_marks/gem5_traces/threads/architecturalSliced/totalSliced.jbl']
+                trace_f = ['./benchmarks/gem5_traces/threads/architecturalSliced/totalSliced.jbl']
                 fileNamePrefix = "gem5/threads/all_sliced"
                 graph.window = True
                 graph.window_size = 12
 
         elif sys.argv[2] == 'snoop':
-            def_f = './bench_marks/gem5_traces/snoop/definition/defSnoop-RubelPrintFormat.msg'
+            def_f = './benchmarks/gem5_traces/snoop/definition/defSnoop-RubelPrintFormat.msg'
 
             if sys.argv[3] == 'unsliced':
-                trace_f = ['./bench_marks/gem5_traces/snoop/unsliced/unsliced-RubelPrintFormat.jbl']
+                trace_f = ['./benchmarks/gem5_traces/snoop/unsliced/unsliced-RubelPrintFormat.jbl']
                 fileNamePrefix = "gem5/snoop/unsliced"
                 graph.window = False
                 graph.window_size = 12
             elif sys.argv[3] == 'window_sliced':
-                trace_f = ['./bench_marks/gem5_traces/snoop/unsliced/unsliced-RubelPrintFormat.jbl']
+                trace_f = ['./benchmarks/gem5_traces/snoop/unsliced/unsliced-RubelPrintFormat.jbl']
                 fileNamePrefix = "gem5/snoop/window_sliced"
                 graph.window = True
                 graph.window_size = 12
             elif sys.srgv[3] == "architectural_sliced": 
-                ttrace_f = ['./bench_marks/gem5_traces/snoop/architecturalSliced/totalSliced.jbl']
+                ttrace_f = ['./benchmarks/gem5_traces/snoop/architecturalSliced/totalSliced.jbl']
                 fileNamePrefix = "gem5/snoop/architectual_sliced"
                 graph.window = False
                 graph.window_size = 12
             elif sys.argv[3] == 'all_sliced':
-                ttrace_f = ['./bench_marks/gem5_traces/snoop/architecturalSliced/totalSliced.jbl']
+                ttrace_f = ['./benchmarks/gem5_traces/snoop/architecturalSliced/totalSliced.jbl']
                 fileNamePrefix = "gem5/snoop/all_sliced"
                 graph.window = True
                 graph.window_size = 12
@@ -126,7 +126,7 @@ if __name__ == '__main__':
             print ("Wrong type of Gem5 traces is chosen!")
             exit()
     elif sys.argv[1] == 'synthetic':
-        def_f = './bench_marks/synthetic/syntheticTraces-restrictedInterleaving/newLargeForRubelMultiTrace.msg'
+        def_f = './benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/definition/newLarge.msg'
 
         if sys.argv[3] == 'unsliced':
             graph.window = False
@@ -139,36 +139,35 @@ if __name__ == '__main__':
             exit()
 
         if sys.argv[2] == 'large-20':
-            trace_f = ['./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/trace-large-20.txt']
+            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/large/trace-large-20.txt']
             fileNamePrefix = "synthetic/large-20/" + str(sys.argv[3])
         elif sys.argv[2] == 'large-10':
-            trace_f = ['./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/trace-large-10.txt']
+            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/large/trace-large-10.txt']
             fileNamePrefix = "synthetic/large-10/" + str(sys.argv[3])
         elif sys.argv[2] == 'large-5':
-            trace_f = ['./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/trace-large-5.txt']
+            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/large/trace-large-5.txt']
             fileNamePrefix = "synthetic/large-5/" + str(sys.argv[3])
         elif sys.argv[2] == 'small-20':
-            trace_f = ['./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/trace-small-20.txt']
+            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/small/trace-small-20.txt']
             fileNamePrefix = "synthetic/small-20/" + str(sys.argv[3])
         elif sys.argv[2] == 'small-10':
-            trace_f = ['./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/trace-small-10.txt']
+            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/small/trace-small-10.txt']
             fileNamePrefix = "synthetic/small-10/" + str(sys.argv[3])
         elif sys.argv[2] == 'small-5':
-            trace_f = ['./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/trace-small-5.txt']
+            trace_f = ['./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/small/trace-small-5.txt']
             fileNamePrefix = "synthetic/small-5/" + str(sys.argv[3])
 
         elif sys.argv[2] == 'multiple_traces':
-            trace_f = ["./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/multipleTraces-synthetic.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/multipleTraces-synthetic.txt"]
             fileNamePrefix = "synthetic/multipleTraces/" + str(sys.argv[3])
         elif sys.argv[2] == 'multiple_traces_large':
-            trace_f = ["./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/multipleTraces-syntheticLarge.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/multipleTraces-syntheticLarge.txt"]
             fileNamePrefix = "synthetic/multipleTraces-large/" + str(sys.argv[3])
         elif sys.argv[2] == 'multiple_traces_small':
-            trace_f = ["./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/multipleTraces-syntheticSmall.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/multipleTraces-syntheticSmall.txt"]
             fileNamePrefix = "synthetic/multipleTraces-small/" + str(sys.argv[3])
         elif sys.argv[2] == 'multiple_traces_mix':
-            def_f = './bench_marks/synthetic/syntheticTraces-restrictedInterleaving/newLargeForRubelMultiTrace.msg'
-            trace_f = ["./bench_marks/synthetic/syntheticTraces-restrictedInterleaving/RubelMultiTrace.txt"]
+            trace_f = ["./benchmarks/synthetic_traces/syntheticTraces-restrictedInterleaving/multi_trace/RubelMultiTrace.txt"]
             fileNamePrefix = "synthetic/multipleTraces-mix/" + str(sys.argv[3])
         else:
             print ("Wrong type of Synthetic traces is chosen!")
