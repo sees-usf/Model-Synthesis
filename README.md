@@ -43,4 +43,3 @@ to start the program with some command line inputs such as:
 
 * The program then terminates, to re-run the program simply restart from the first step
 of the user manual.
-
