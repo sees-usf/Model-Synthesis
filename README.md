@@ -56,7 +56,7 @@ to start the program with some command line inputs such as:
 |                     | multiple_traces_small        |                      |
 |                     | multiple_traces_mix          |                      |
 | ------------------- | ---------------------------- | -------------------- |
-| gem5                | full_system \n threads       | unsliced             |
+| gem5                | full_system <br> threads       | unsliced             |
 |                     | threadsTest                  | window_sliced        |
 |                     | snoop                        | architectural_sliced |
 |                     |                              | all_sliced           |
