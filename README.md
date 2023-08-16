@@ -32,7 +32,7 @@ pip install multipledispatch
 to start the program with some command line inputs such as:
 
 
-| **<type_of_benchmark>** | **<size_or_model_of_benchmark>** | **<slicing_technique>**  |
+| **<type_of_benchmark>** | **<size_or_model_of_benchmark>** | **slicing_technique**  |
 | ------------------- | ---------------------------- | -------------------- |
 | synthetic           | small-5 <br> small-10 <br> small-20  <br> large-5 <br> large-10 <br> large-20 <br> multiple_traces <br> multiple_traces_large <br> multiple_traces_small <br> multiple_traces_mix | unsliced <br> window_sliced |
 | gem5                | full_system <br> threads <br> snoop  | unsliced <br> window_sliced <br> architectural_sliced <br> all_sliced |
