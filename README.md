@@ -31,25 +31,17 @@ pip install multipledispatch
 * The run script for this program is named "main.py" simply execute this script
 to start the program with some command line inputs such as:
 
-```
-python main.py <type_of_benchmark> <size_or_model_of_benchmark> <slicing_technique>
-ex: "python main.py synthetic small-5 unsliced"
-```
-all command line variables are listed in the table below:
-
-```start-multi-column
-ID: ExampleRegion1
-number of columns: 2
-largest column: left
-```
-
-Text displayed in column 1.
-
---- end-column ---
-
-Text displayed in column 2.
-
---- end-multi-column
+<div style="-webkit-column-count: 3; -moz-column-count: 3; column-count: 3; -webkit-column-rule: 1px dotted #e0e0e0; -moz-column-rule: 1px dotted #e0e0e0; column-rule: 1px dotted #e0e0e0;">
+    <div style="display: inline-block;">
+        <!-- first column's content -->
+    </div>
+    <div style="display: inline-block;">
+        <!-- second column's content -->
+    </div>
+    <div style="display: inline-block;">
+        <!-- third column's content -->
+    </div>
+</div>
 
 | <type_of_benchmark> | <size_or_model_of_benchmark> | <slicing_technique>  |
 | ------------------- | ---------------------------- | -------------------- |
