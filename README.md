@@ -37,6 +37,20 @@ ex: "python main.py synthetic small-5 unsliced"
 ```
 all command line variables are listed in the table below:
 
+```start-multi-column
+ID: ExampleRegion1
+number of columns: 2
+largest column: left
+```
+
+Text displayed in column 1.
+
+--- end-column ---
+
+Text displayed in column 2.
+
+--- end-multi-column
+
 | <type_of_benchmark> | <size_or_model_of_benchmark> | <slicing_technique>  |
 | ------------------- | ---------------------------- | -------------------- |
 | synthetic           | small-5                      | unsliced             |
