@@ -50,7 +50,7 @@ all command line variables are listed in the table below:
 |                     | multiple_traces_small        |                      |
 |                     | multiple_traces_mix          |                      |
 | ------------------- | ---------------------------- | -------------------- |
-| gem5                | full_system                  | unsliced             |
+| gem5                | full_system\nthreads         | unsliced             |
 |                     | threads                      | window_sliced        |
 |                     | snoop                        | architectural_sliced |
 |                     |                              | all_sliced           |
